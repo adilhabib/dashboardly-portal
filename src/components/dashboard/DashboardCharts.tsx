@@ -1,7 +1,7 @@
 
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { DonutChartsCollection } from '@/components/DonutCharts';
-import { AreaChartComponent, DoubleLineChart } from '@/components/AnalyticsChart';
+import { AreaChartComponent, DoubleLineChart } from '@/components/charts';
 
 interface DashboardChartsProps {
   orderData: Array<{ name: string; value: number }>;
