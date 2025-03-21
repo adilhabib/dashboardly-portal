@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,8 +10,6 @@ import DateFilter from '@/components/DateFilter';
 import { Separator } from '@/components/ui/separator';
 
 const fetchAnalyticsData = async () => {
-  // In a real application, we would fetch real data with proper date filtering
-  // For now, we'll return some dummy data
   const { data: orderData, error: orderError } = await supabase
     .from('orders')
     .select('*')
@@ -37,21 +34,18 @@ const fetchAnalyticsData = async () => {
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
   const totalFoods = foodData.length;
   
-  // Generate some dummy daily data
   const dailyRevenue = Array.from({ length: 30 }, (_, i) => ({
     date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     revenue: Math.random() * 1000 + 500,
     orders: Math.floor(Math.random() * 20) + 5,
   }));
   
-  // Generate some dummy category data
   const categories = ['Main Course', 'Appetizer', 'Dessert', 'Beverage', 'Sides'];
   const categoryData = categories.map(category => ({
     name: category,
     value: Math.floor(Math.random() * 1000) + 100,
   }));
   
-  // Generate some dummy status data
   const statusData = [
     { name: 'Completed', value: Math.floor(Math.random() * 70) + 30 },
     { name: 'Processing', value: Math.floor(Math.random() * 30) + 10 },
@@ -193,7 +187,10 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <div className="h-64">
-              <DonutCharts data={data.categoryData} colors={['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b']} />
+              <DonutCharts
+                data={data.categoryData}
+                colors={['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b']}
+              />
             </div>
             <Separator className="my-4" />
             <div className="grid grid-cols-2 gap-4">
@@ -220,7 +217,10 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <div className="h-64">
-              <DonutCharts data={data.statusData} colors={['#10b981', '#3b82f6', '#f59e0b', '#ef4444']} />
+              <DonutCharts
+                data={data.statusData}
+                colors={['#10b981', '#3b82f6', '#f59e0b', '#ef4444']}
+              />
             </div>
             <Separator className="my-4" />
             <div className="grid grid-cols-2 gap-4">

@@ -1,49 +1,67 @@
 
 import { FC } from 'react';
 import { Star } from 'lucide-react';
+import { ReviewCardProps } from '@/types/charts';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-interface ReviewCardProps {
-  name: string;
-  daysSince: number;
-  comment: string;
-  rating: number;
-  image: string;
-  foodImage: string;
-}
-
-const ReviewCard: FC<ReviewCardProps> = ({ name, daysSince, comment, rating, image, foodImage }) => {
-  const stars = Array(5).fill(0);
+const ReviewCard: FC<ReviewCardProps> = ({ 
+  customerName, 
+  rating, 
+  comment, 
+  date, 
+  foodName, 
+  replied 
+}) => {
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
   
   return (
-    <div className="reviews-card animate-fade-in">
-      <div className="flex-1">
-        <div className="flex items-center gap-3 mb-2">
-          <img src={image} alt={name} className="review-image" />
+    <Card>
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start">
           <div>
-            <h4 className="font-medium text-gray-800">{name}</h4>
-            <p className="text-xs text-gray-500">{daysSince} days ago</p>
+            <div className="flex items-center mb-2">
+              <h3 className="font-medium">{customerName}</h3>
+              <span className="text-gray-500 text-sm ml-2">{formatDate(date)}</span>
+            </div>
+            
+            <div className="flex items-center mb-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  size={16}
+                  className={star <= rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}
+                />
+              ))}
+            </div>
+            
+            <p className="text-gray-700 mb-2">{comment}</p>
+            
+            <div className="flex items-center justify-between">
+              <Badge variant="outline" className="text-xs">
+                {foodName}
+              </Badge>
+              
+              {replied ? (
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                  Replied
+                </Badge>
+              ) : (
+                <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+                  Awaiting Reply
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
-        
-        <p className="text-sm text-gray-600 mb-2">{comment}</p>
-        
-        <div className="review-rating">
-          {stars.map((_, index) => (
-            <Star 
-              key={index} 
-              size={16} 
-              fill={index < rating ? '#f59e0b' : 'none'} 
-              color={index < rating ? '#f59e0b' : '#d1d5db'} 
-            />
-          ))}
-          <span className="ml-2 text-sm font-medium">{rating.toFixed(1)}</span>
-        </div>
-      </div>
-      
-      <div className="w-24 h-24 overflow-hidden rounded-full">
-        <img src={foodImage} alt="Food" className="w-full h-full object-cover" />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
