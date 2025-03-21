@@ -9,6 +9,246 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      customer_details: {
+        Row: {
+          created_at: string
+          customer_id: string
+          delivery_instructions: string | null
+          dietary_restrictions: string | null
+          favorite_foods: string | null
+          id: string
+          preferences: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          delivery_instructions?: string | null
+          dietary_restrictions?: string | null
+          favorite_foods?: string | null
+          id?: string
+          preferences?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          delivery_instructions?: string | null
+          dietary_restrictions?: string | null
+          favorite_foods?: string | null
+          id?: string
+          preferences?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_details_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      food_details: {
+        Row: {
+          allergens: string | null
+          calories: number | null
+          created_at: string
+          food_id: string
+          id: string
+          ingredients: string | null
+          preparation_time: number | null
+          updated_at: string
+        }
+        Insert: {
+          allergens?: string | null
+          calories?: number | null
+          created_at?: string
+          food_id: string
+          id?: string
+          ingredients?: string | null
+          preparation_time?: number | null
+          updated_at?: string
+        }
+        Update: {
+          allergens?: string | null
+          calories?: number | null
+          created_at?: string
+          food_id?: string
+          id?: string
+          ingredients?: string | null
+          preparation_time?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_details_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: true
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      foods: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_available: boolean | null
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          name: string
+          price: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          food_id: string
+          id: string
+          order_id: string
+          price_per_item: number
+          quantity: number
+          special_instructions: string | null
+          total_price: number
+        }
+        Insert: {
+          created_at?: string
+          food_id: string
+          id?: string
+          order_id: string
+          price_per_item: number
+          quantity?: number
+          special_instructions?: string | null
+          total_price: number
+        }
+        Update: {
+          created_at?: string
+          food_id?: string
+          id?: string
+          order_id?: string
+          price_per_item?: number
+          quantity?: number
+          special_instructions?: string | null
+          total_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_id: string
+          delivery_address: string | null
+          id: string
+          payment_status: string | null
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          delivery_address?: string | null
+          id?: string
+          payment_status?: string | null
+          status?: string
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          delivery_address?: string | null
+          id?: string
+          payment_status?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

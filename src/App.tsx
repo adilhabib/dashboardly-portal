@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Foods from "./pages/Foods";
 
 const queryClient = new QueryClient();
 
@@ -73,7 +74,7 @@ const App = () => (
               path="/foods" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Foods />
                 </ProtectedRoute>
               } 
             />
