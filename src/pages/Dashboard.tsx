@@ -61,7 +61,7 @@ const Dashboard: React.FC = () => {
       id: 1,
       name: 'Jons Sena',
       daysSince: 2,
-      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text.',
+      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text.',
       rating: 4.5,
       image: 'https://randomuser.me/api/portraits/men/32.jpg',
       foodImage: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1760&q=80'
@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
       id: 2,
       name: 'Sofia',
       daysSince: 5,
-      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text.',
+      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text.',
       rating: 4.0,
       image: 'https://randomuser.me/api/portraits/women/44.jpg',
       foodImage: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1828&q=80'
@@ -79,7 +79,7 @@ const Dashboard: React.FC = () => {
       id: 3,
       name: 'Anandreans',
       daysSince: 2,
-      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text.',
+      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text.',
       rating: 4.5,
       image: 'https://randomuser.me/api/portraits/men/46.jpg',
       foodImage: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1760&q=80'
