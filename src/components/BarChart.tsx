@@ -12,15 +12,18 @@ const BarChart: FC<BarChartProps> = ({
   title,
   frequency
 }) => {
+  // Prevent re-rendering by safely ensuring the data is valid
+  const safeData = Array.isArray(data) ? data : [];
+  
   return (
     <div className="h-full">
       <div className="flex items-center justify-between mb-4">
         {title && <h3 className="text-lg font-semibold">{title}</h3>}
         {frequency && <div className="text-sm text-gray-500">Showing {frequency} data</div>}
       </div>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={250}>
         <RechartBarChart
-          data={data}
+          data={safeData}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" />

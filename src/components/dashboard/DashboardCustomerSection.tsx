@@ -1,5 +1,5 @@
 
-import { FC, useState } from 'react';
+import { FC, useState, useMemo } from 'react';
 import BarChart from '@/components/BarChart';
 import ReviewCard from '@/components/ReviewCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -18,19 +18,23 @@ const DashboardCustomerSection: FC<DashboardCustomerSectionProps> = ({
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [currentFrequency, setCurrentFrequency] = useState('weekly');
   
-  // Transform customerMapData for BarChart
-  const transformedCustomerMapData = ChartDataTransformer.transformDoubleLineToSingleValue(customerMapData);
+  // Transform customerMapData for BarChart - using useMemo to prevent recalculations
+  const transformedCustomerMapData = useMemo(() => {
+    return ChartDataTransformer.transformDoubleLineToSingleValue(customerMapData);
+  }, [customerMapData]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <BarChart 
-        title="Customer Map" 
-        data={transformedCustomerMapData}
-        valueKey="value"
-        categoryKey="name"
-        color="#4ade80"
-        frequency={currentFrequency}
-      />
+      <div className="chart-container h-[300px]">
+        <BarChart 
+          title="Customer Map" 
+          data={transformedCustomerMapData}
+          valueKey="value"
+          categoryKey="name"
+          color="#4ade80"
+          frequency={currentFrequency}
+        />
+      </div>
       
       <div className="chart-container">
         <div className="flex items-center justify-between mb-4">
