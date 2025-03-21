@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import BarChart from '@/components/BarChart';
 import { ArrowDown, ArrowUp, Wallet as WalletIcon, CreditCard, DollarSign, RefreshCw } from 'lucide-react';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 // Dummy financial data - in a real app this would come from the database
 const dummyTransactions = [
@@ -126,6 +128,8 @@ const Wallet = () => {
   
   return (
     <div className="container mx-auto px-4 py-6">
+      <PageBreadcrumb pageName="Financial Management" />
+      
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Financial Management</h1>
         <p className="text-gray-500">Track your restaurant's income, expenses, and financial performance</p>

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft } from 'lucide-react';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const fetchOrderDetail = async (orderId: string) => {
   const { data: order, error: orderError } = await supabase
@@ -73,6 +74,8 @@ const OrderDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <PageBreadcrumb pageName="Order Details" />
+      
       <div className="mb-6">
         <Link to="/order-list">
           <Button variant="ghost" className="flex items-center gap-2">

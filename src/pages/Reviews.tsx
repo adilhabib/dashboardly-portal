@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -5,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ReviewCard from '@/components/ReviewCard';
 import { Search } from 'lucide-react';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 // Dummy review data - in a real app this would come from the database
 const dummyReviews = [
@@ -103,6 +105,8 @@ const Reviews = () => {
   
   return (
     <div className="container mx-auto px-4 py-6">
+      <PageBreadcrumb pageName="Reviews" />
+
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Customer Reviews</h1>
         <p className="text-gray-500">Manage and respond to customer feedback</p>

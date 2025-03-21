@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const fetchOrders = async () => {
   const { data, error } = await supabase
@@ -68,6 +69,8 @@ const OrderList = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <PageBreadcrumb pageName="Order List" />
+      
       <Card className="shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl font-bold">Order List</CardTitle>
