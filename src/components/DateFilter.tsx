@@ -3,21 +3,13 @@ import { FC } from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { DateFilterProps } from '@/types/charts';
 
-const DateFilter: FC<DateFilterProps> = ({ dateRange, onChange }) => {
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-  
+const DateFilter: FC<DateFilterProps> = ({ startDate, endDate }) => {
   return (
     <div className="flex items-center bg-white rounded-lg border border-gray-100 shadow-sm p-3 animate-fade-in">
       <CalendarIcon size={18} className="text-gray-500 mr-2" />
       <div>
         <h4 className="text-sm font-medium text-gray-800">Filter Period</h4>
-        <p className="text-xs text-gray-500">{formatDate(dateRange.from)} - {formatDate(dateRange.to)}</p>
+        <p className="text-xs text-gray-500">{startDate} - {endDate}</p>
       </div>
       <div className="ml-2">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

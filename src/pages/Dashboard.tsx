@@ -1,13 +1,15 @@
+
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import StatsCard from '../components/StatsCard';
-import { DonutChartsCollection } from '../components/DonutCharts';
+import DonutCharts, { DonutChartsCollection } from '../components/DonutCharts';
 import { AreaChartComponent, DoubleLineChart } from '../components/AnalyticsChart';
-import BarChartComponent from '../components/BarChart';
+import BarChart from '../components/BarChart';
 import ReviewCard from '../components/ReviewCard';
 import DateFilter from '../components/DateFilter';
 import { ShoppingBag, Package, Receipt, DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChartDataTransformer } from '../utils/chartDataTransformer';
 
 const Dashboard: React.FC = () => {
   const [currentFrequency, setCurrentFrequency] = useState('weekly');
@@ -53,37 +55,44 @@ const Dashboard: React.FC = () => {
     { title: 'Total Revenue', percentage: 62, color: '#60a5fa' }
   ];
   
+  // Convert reviews to match the ReviewCardProps interface
   const reviews = [
     {
-      id: 1,
-      name: 'Jons Sena',
-      daysSince: 2,
-      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text.',
+      customerName: 'Jons Sena',
       rating: 4.5,
+      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text.',
+      date: new Date(),
+      foodName: 'Caesar Salad',
+      replied: false,
       image: 'https://randomuser.me/api/portraits/men/32.jpg',
       foodImage: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1760&q=80'
     },
     {
-      id: 2,
-      name: 'Sofia',
-      daysSince: 5,
-      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text.',
+      customerName: 'Sofia',
       rating: 4.0,
+      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text.',
+      date: new Date(),
+      foodName: 'Margherita Pizza',
+      replied: true,
       image: 'https://randomuser.me/api/portraits/women/44.jpg',
       foodImage: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1828&q=80'
     },
     {
-      id: 3,
-      name: 'Anandreans',
-      daysSince: 2,
-      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text.',
+      customerName: 'Anandreans',
       rating: 4.5,
+      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text.',
+      date: new Date(),
+      foodName: 'Fruit Bowl',
+      replied: false,
       image: 'https://randomuser.me/api/portraits/men/46.jpg',
       foodImage: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1760&q=80'
     }
   ];
   
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  
+  // Transform customerMapData for BarChart
+  const transformedCustomerMapData = ChartDataTransformer.transformDoubleLineToSingleValue(customerMapData);
   
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -113,6 +122,7 @@ const Dashboard: React.FC = () => {
               change={4.5}
               iconBgColor="bg-emerald-100"
               changeDirection="up"
+              trendText="increase"
             />
             
             <StatsCard 
@@ -122,6 +132,7 @@ const Dashboard: React.FC = () => {
               change={4.5}
               iconBgColor="bg-blue-100"
               changeDirection="up"
+              trendText="increase"
             />
             
             <StatsCard 
@@ -131,6 +142,7 @@ const Dashboard: React.FC = () => {
               change={25.5}
               iconBgColor="bg-red-100"
               changeDirection="down"
+              trendText="decrease"
             />
             
             <StatsCard 
@@ -140,6 +152,7 @@ const Dashboard: React.FC = () => {
               change={12.5}
               iconBgColor="bg-emerald-100"
               changeDirection="up"
+              trendText="increase"
             />
           </div>
           
@@ -153,9 +166,12 @@ const Dashboard: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <BarChartComponent 
+            <BarChart 
               title="Customer Map" 
-              data={customerMapData} 
+              data={transformedCustomerMapData}
+              valueKey="value"
+              categoryKey="name"
+              color="#4ade80"
               frequency={currentFrequency}
             />
             

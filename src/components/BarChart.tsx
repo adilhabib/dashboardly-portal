@@ -9,11 +9,15 @@ const BarChart: FC<BarChartProps> = ({
   valueKey, 
   categoryKey, 
   color,
-  title
+  title,
+  frequency
 }) => {
   return (
     <div className="h-full">
-      {title && <h3 className="text-lg font-semibold mb-4">{title}</h3>}
+      <div className="flex items-center justify-between mb-4">
+        {title && <h3 className="text-lg font-semibold">{title}</h3>}
+        {frequency && <div className="text-sm text-gray-500">Showing {frequency} data</div>}
+      </div>
       <ResponsiveContainer width="100%" height="100%">
         <RechartBarChart
           data={data}

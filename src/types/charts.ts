@@ -2,17 +2,21 @@
 // Interfaces for chart components
 
 export interface DateFilterProps {
-  dateRange: { from: Date; to: Date };
-  onChange: (dates: { from: Date; to: Date }) => void;
+  startDate: string;
+  endDate: string;
 }
 
 export interface StatsCardProps {
   title: string;
   value: string;
+  icon: React.ReactNode;
+  change: number;
+  iconBgColor: string;
+  changeDirection: string;
   description?: string;
   subtitle?: string;
-  trend: number;
-  trendText: string;
+  trend?: number;
+  trendText?: string;
 }
 
 export interface DonutChartProps {
@@ -27,15 +31,21 @@ export interface BarChartProps {
   categoryKey: string;
   color: string;
   title?: string;
+  frequency?: string;
 }
 
 export interface ReviewCardProps {
+  id?: number;
   customerName: string;
+  name?: string;
   rating: number;
   comment: string;
   date: Date;
+  daysSince?: number;
   foodName: string;
   replied: boolean;
+  image?: string;
+  foodImage?: string;
 }
 
 export interface AnalyticsChartProps {
@@ -44,4 +54,5 @@ export interface AnalyticsChartProps {
   yKey: string;
   color?: string;
   yFormatter?: (value: number) => string;
+  title?: string;
 }
