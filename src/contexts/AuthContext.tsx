@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,12 +9,12 @@ type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{
-    error: Error | null;
-    data: Session | null;
+    error: AuthError | null;
+    data: { session: Session | null; user: User | null } | null;
   }>;
   signUp: (email: string, password: string) => Promise<{
-    error: Error | null;
-    data: Session | null;
+    error: AuthError | null;
+    data: { session: Session | null; user: User | null } | null;
   }>;
   signOut: () => Promise<void>;
 };
