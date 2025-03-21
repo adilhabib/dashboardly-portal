@@ -78,7 +78,16 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
     if (isEditing && food) {
       updateMutation.mutate({ id: food.id, data: values });
     } else {
-      createMutation.mutate(values);
+      // Ensure required fields are present for creating a new food item
+      // The name field is already validated by zod, and price is coerced to a number
+      createMutation.mutate({
+        name: values.name,
+        description: values.description,
+        price: values.price,
+        image_url: values.image_url,
+        category: values.category,
+        is_available: values.is_available
+      });
     }
   };
 
