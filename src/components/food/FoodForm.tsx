@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { Food } from '@/types/food';
 import FoodFormFields from './FoodFormFields';
 
 // Form validation schema
@@ -37,7 +36,14 @@ const FoodForm: React.FC<FoodFormProps> = ({
 }) => {
   const form = useForm<FoodFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      name: defaultValues.name || '',
+      description: defaultValues.description || '',
+      price: defaultValues.price || 0,
+      image_url: defaultValues.image_url || '',
+      category: defaultValues.category || '',
+      is_available: defaultValues.is_available !== undefined ? defaultValues.is_available : true,
+    },
   });
 
   return (

@@ -5,18 +5,10 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-
-interface FormValues {
-  name: string;
-  description?: string | null;
-  price: number;
-  image_url?: string | null;
-  category?: string | null;
-  is_available: boolean;
-}
+import { FoodFormValues } from './FoodForm';
 
 interface FoodFormFieldsProps {
-  control: Control<FormValues>;
+  control: Control<FoodFormValues>;
 }
 
 const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control }) => {
