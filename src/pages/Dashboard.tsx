@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
@@ -8,12 +7,11 @@ import { AreaChartComponent, DoubleLineChart } from '../components/AnalyticsChar
 import BarChartComponent from '../components/BarChart';
 import ReviewCard from '../components/ReviewCard';
 import DateFilter from '../components/DateFilter';
-import { ShoppingBag, Package, ReceiptX, DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingBag, Package, Receipt, DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const [currentFrequency, setCurrentFrequency] = useState('weekly');
   
-  // Sample data for charts
   const orderData = [
     { name: 'Sunday', value: 65 },
     { name: 'Monday', value: 59 },
@@ -55,7 +53,6 @@ const Dashboard: React.FC = () => {
     { title: 'Total Revenue', percentage: 62, color: '#60a5fa' }
   ];
   
-  // Sample reviews data
   const reviews = [
     {
       id: 1,
@@ -108,7 +105,6 @@ const Dashboard: React.FC = () => {
             <DateFilter startDate="17 April 2023" endDate="24 May 2023" />
           </div>
           
-          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatsCard 
               title="Total Orders" 
@@ -131,7 +127,7 @@ const Dashboard: React.FC = () => {
             <StatsCard 
               title="Total Canceled" 
               value="65" 
-              icon={<ReceiptX size={24} className="text-red-500" />}
+              icon={<Receipt size={24} className="text-red-500" />}
               change={25.5}
               iconBgColor="bg-red-100"
               changeDirection="down"
@@ -147,18 +143,15 @@ const Dashboard: React.FC = () => {
             />
           </div>
           
-          {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <DonutChartsCollection data={donutChartsData} />
             <AreaChartComponent title="Chart Order" data={orderData} />
           </div>
           
-          {/* Revenue Chart */}
           <div className="mb-8">
             <DoubleLineChart title="Total Revenue" data={revenueData} />
           </div>
           
-          {/* Customer Map and Reviews */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <BarChartComponent 
               title="Customer Map" 
