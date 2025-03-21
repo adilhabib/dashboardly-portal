@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchFoods, deleteFood } from '@/services/foodService';
 import { Food } from '@/types/food';
@@ -8,11 +8,22 @@ import FoodModal from './FoodModal';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLocation } from 'react-router-dom';
 
 const FoodList: React.FC = () => {
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [foodToEdit, setFoodToEdit] = useState<Food | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Check if we should open the add modal from navigation state
+  useEffect(() => {
+    if (location.state?.openAddModal) {
+      handleAddFood();
+      // Clean up the state to prevent reopening on subsequent navigations
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const { data: foods, isLoading, isError } = useQuery({
     queryKey: ['foods'],

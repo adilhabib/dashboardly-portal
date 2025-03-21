@@ -1,6 +1,6 @@
 
 import { FC } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ListOrdered, 
@@ -11,11 +11,13 @@ import {
   Calendar, 
   MessageCircle, 
   Wallet,
-  Pizza
+  Pizza,
+  Plus
 } from 'lucide-react';
 
 const Sidebar: FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   
   const menuItems = [
     { path: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
@@ -31,6 +33,10 @@ const Sidebar: FC = () => {
     { path: '/chat', icon: <MessageCircle size={18} />, label: 'Chat' },
     { path: '/wallet', icon: <Wallet size={18} />, label: 'Wallet' },
   ];
+
+  const handleAddMenu = () => {
+    navigate('/foods', { state: { openAddModal: true } });
+  };
   
   return (
     <aside className="bg-white border-r w-[220px] h-screen flex flex-col p-5 fixed left-0 top-0 overflow-y-auto animate-slide-in-left">
@@ -60,8 +66,12 @@ const Sidebar: FC = () => {
           </svg>
         </div>
         <p className="text-xs text-gray-700 mb-2">Please organize your menu through button below!</p>
-        <button className="bg-white text-emerald-600 text-xs py-1 px-3 rounded border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors duration-200">
-          +Add Menu
+        <button 
+          onClick={handleAddMenu}
+          className="bg-white text-emerald-600 text-xs py-1 px-3 rounded border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors duration-200 flex items-center gap-1"
+        >
+          <Plus size={12} />
+          Add Menu
         </button>
       </div>
       
