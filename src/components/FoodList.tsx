@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchFoods, deleteFood } from '@/services/foodService';
@@ -9,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLocation } from 'react-router-dom';
+import PageBreadcrumb from './PageBreadcrumb';
 
 const FoodList: React.FC = () => {
   const location = useLocation();
@@ -16,11 +16,9 @@ const FoodList: React.FC = () => {
   const [foodToEdit, setFoodToEdit] = useState<Food | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Check if we should open the add modal from navigation state
   useEffect(() => {
     if (location.state?.openAddModal) {
       handleAddFood();
-      // Clean up the state to prevent reopening on subsequent navigations
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -73,6 +71,8 @@ const FoodList: React.FC = () => {
 
   return (
     <div className="container mx-auto py-6">
+      <PageBreadcrumb pageName="Food Menu" />
+      
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Food Menu</h1>
         <Button onClick={handleAddFood} className="flex items-center gap-1">

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import FoodList from '@/components/FoodList';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const Foods: React.FC = () => {
   return (

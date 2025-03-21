@@ -1,4 +1,3 @@
-
 import { FC } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -46,7 +45,15 @@ const Sidebar: FC = () => {
       <p className="text-xs text-gray-500 mb-6">Modern Admin Dashboard</p>
       
       <nav className="flex-1 space-y-1">
-        {menuItems.map((item) => (
+        <Link 
+          to="/"
+          className="sidebar-link flex items-center gap-2 p-2 rounded-md text-emerald-600 bg-emerald-50 font-medium mb-2"
+        >
+          <LayoutDashboard size={18} />
+          <span>Dashboard</span>
+        </Link>
+        
+        {menuItems.slice(1).map((item) => (
           <Link 
             key={item.path} 
             to={item.path}
