@@ -10,6 +10,16 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Foods from "./pages/Foods";
+import FoodDetail from "./pages/FoodDetail";
+import OrderList from "./pages/OrderList";
+import OrderDetail from "./pages/OrderDetail";
+import Customer from "./pages/Customer";
+import CustomerDetail from "./pages/CustomerDetail";
+import Analytics from "./pages/Analytics";
+import Reviews from "./pages/Reviews";
+import Calendar from "./pages/Calendar";
+import Chat from "./pages/Chat";
+import Wallet from "./pages/Wallet";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +44,7 @@ const App = () => (
               path="/order-list" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <OrderList />
                 </ProtectedRoute>
               } 
             />
@@ -42,7 +52,7 @@ const App = () => (
               path="/order-detail" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <OrderDetail />
                 </ProtectedRoute>
               } 
             />
@@ -50,7 +60,7 @@ const App = () => (
               path="/customer" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Customer />
                 </ProtectedRoute>
               } 
             />
@@ -58,7 +68,7 @@ const App = () => (
               path="/analytics" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Analytics />
                 </ProtectedRoute>
               } 
             />
@@ -66,7 +76,7 @@ const App = () => (
               path="/reviews" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Reviews />
                 </ProtectedRoute>
               } 
             />
@@ -82,7 +92,7 @@ const App = () => (
               path="/food-detail" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <FoodDetail />
                 </ProtectedRoute>
               } 
             />
@@ -90,7 +100,7 @@ const App = () => (
               path="/customer-detail" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <CustomerDetail />
                 </ProtectedRoute>
               } 
             />
@@ -98,7 +108,7 @@ const App = () => (
               path="/calendar" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Calendar />
                 </ProtectedRoute>
               } 
             />
@@ -106,7 +116,7 @@ const App = () => (
               path="/chat" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Chat />
                 </ProtectedRoute>
               } 
             />
@@ -114,7 +124,7 @@ const App = () => (
               path="/wallet" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Wallet />
                 </ProtectedRoute>
               } 
             />
