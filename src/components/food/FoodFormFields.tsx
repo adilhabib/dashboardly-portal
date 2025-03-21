@@ -1,0 +1,134 @@
+
+import React from 'react';
+import { Control } from 'react-hook-form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+
+interface FormValues {
+  name: string;
+  description?: string | null;
+  price: number;
+  image_url?: string | null;
+  category?: string | null;
+  is_available: boolean;
+}
+
+interface FoodFormFieldsProps {
+  control: Control<FormValues>;
+}
+
+const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control }) => {
+  return (
+    <>
+      <FormField
+        control={control}
+        name="name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Name</FormLabel>
+            <FormControl>
+              <Input placeholder="Food name" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Description (optional)" 
+                {...field} 
+                value={field.value || ''}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={control}
+          name="price"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Price ($)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Category (optional)" 
+                  {...field} 
+                  value={field.value || ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      
+      <FormField
+        control={control}
+        name="image_url"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Image URL</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Image URL (optional)" 
+                {...field} 
+                value={field.value || ''}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={control}
+        name="is_available"
+        render={({ field }) => (
+          <FormItem className="flex items-center justify-between space-y-0 p-4 border rounded-md">
+            <FormLabel>Available for order</FormLabel>
+            <FormControl>
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </>
+  );
+};
+
+export default FoodFormFields;
