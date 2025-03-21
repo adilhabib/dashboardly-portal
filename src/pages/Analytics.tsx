@@ -8,6 +8,7 @@ import DonutCharts from '@/components/DonutCharts';
 import StatsCard from '@/components/StatsCard';
 import DateFilter from '@/components/DateFilter';
 import { Separator } from '@/components/ui/separator';
+import { BarChart3, ShoppingCart, DollarSign, UtensilsCrossed } from 'lucide-react';
 
 const fetchAnalyticsData = async () => {
   const { data: orderData, error: orderError } = await supabase
@@ -110,6 +111,10 @@ const Analytics = () => {
           description="Total sales revenue"
           trend={7.2}
           trendText="from last period"
+          icon={<DollarSign className="h-6 w-6 text-white" />}
+          iconBgColor="bg-green-500"
+          changeDirection="up"
+          change={7.2}
         />
         <StatsCard
           title="Orders"
@@ -117,6 +122,10 @@ const Analytics = () => {
           description="Total number of orders"
           trend={-2.5}
           trendText="from last period"
+          icon={<ShoppingCart className="h-6 w-6 text-white" />}
+          iconBgColor="bg-blue-500"
+          changeDirection="down"
+          change={-2.5}
         />
         <StatsCard
           title="Average Order Value"
@@ -124,6 +133,10 @@ const Analytics = () => {
           description="Average value per order"
           trend={3.1}
           trendText="from last period"
+          icon={<BarChart3 className="h-6 w-6 text-white" />}
+          iconBgColor="bg-purple-500"
+          changeDirection="up"
+          change={3.1}
         />
         <StatsCard
           title="Menu Items"
@@ -131,6 +144,10 @@ const Analytics = () => {
           description="Active menu items"
           trend={0}
           trendText="unchanged"
+          icon={<UtensilsCrossed className="h-6 w-6 text-white" />}
+          iconBgColor="bg-amber-500"
+          changeDirection="up"
+          change={0}
         />
       </div>
       

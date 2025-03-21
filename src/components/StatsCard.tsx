@@ -1,10 +1,10 @@
 
 import { FC } from 'react';
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, BarChart3, TrendingDown, TrendingUp } from 'lucide-react';
 import { StatsCardProps } from '@/types/charts';
 import { Card, CardContent } from '@/components/ui/card';
 
-const StatsCard: FC<StatsCardProps> = ({ 
+const StatsCard: FC<Partial<StatsCardProps>> = ({ 
   title, 
   value, 
   description,
@@ -16,7 +16,16 @@ const StatsCard: FC<StatsCardProps> = ({
   trend,
   trendText
 }) => {
-  const isPositive = changeDirection === 'up';
+  const isPositive = changeDirection === 'up' || (trend !== undefined && trend >= 0);
+  const trendValue = change !== undefined ? change : trend;
+  
+  // Default icon if none provided
+  const defaultIcon = isPositive ? 
+    <TrendingUp className="h-6 w-6 text-white" /> : 
+    <TrendingDown className="h-6 w-6 text-white" />;
+  
+  // Default background color if none provided
+  const defaultBgColor = isPositive ? 'bg-green-500' : 'bg-red-500';
   
   return (
     <Card>
@@ -28,8 +37,8 @@ const StatsCard: FC<StatsCardProps> = ({
             {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
             {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
           </div>
-          <div className={`p-2 rounded-full ${iconBgColor}`}>
-            {icon}
+          <div className={`p-2 rounded-full ${iconBgColor || defaultBgColor}`}>
+            {icon || defaultIcon}
           </div>
         </div>
         
@@ -42,7 +51,7 @@ const StatsCard: FC<StatsCardProps> = ({
             )}
           </div>
           <span className={`text-xs font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {Math.abs(change || (trend || 0))}% {trendText || (isPositive ? 'increase' : 'decrease')}
+            {Math.abs(trendValue || 0)}% {trendText || (isPositive ? 'increase' : 'decrease')}
           </span>
         </div>
       </CardContent>
