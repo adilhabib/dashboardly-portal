@@ -27,11 +27,26 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
+// Define type for our profile data
+interface ProfileData {
+  id?: string;
+  username?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  avatar_url?: string;
+  bio?: string;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
+}
+
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -74,11 +89,11 @@ const Profile = () => {
         }
 
         // Combine data from both sources
-        const combinedData = {
+        const combinedData: ProfileData = {
           ...profileData,
           ...customerData,
           email: user.email,
-          // Ensure bio is defined even if it's not in the database yet
+          // Ensure bio is defined even if it's not in the database
           bio: profileData?.bio || "",
         };
 
