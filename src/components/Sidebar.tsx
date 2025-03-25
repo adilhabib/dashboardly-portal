@@ -78,7 +78,7 @@ const Sidebar: FC = () => {
       </div>
       
       <div className="mt-6 text-xs text-gray-500">
-        <p>Sedap Restaurant Admin Dashboard</p>
+        <p>VIRGINIA Restaurant Admin Dashboard</p>
         <p>© 2023 All Rights Reserved</p>
         <div className="flex items-center mt-1">
           <span>Made with </span>
