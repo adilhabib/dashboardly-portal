@@ -23,6 +23,7 @@ import Chat from "./pages/Chat";
 import Wallet from "./pages/Wallet";
 import Categories from "./pages/Categories";
 import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -145,6 +146,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Notifications />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 } 
               />

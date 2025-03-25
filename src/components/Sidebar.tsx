@@ -14,7 +14,8 @@ import {
   Pizza,
   Plus,
   Tag,
-  Bell
+  Bell,
+  UserCircle
 } from 'lucide-react';
 import { useNotifications } from '@/contexts/NotificationContext';
 
@@ -38,6 +39,7 @@ const Sidebar: FC = () => {
     { path: '/calendar', icon: <Calendar size={18} />, label: 'Calendar' },
     { path: '/chat', icon: <MessageCircle size={18} />, label: 'Chat' },
     { path: '/wallet', icon: <Wallet size={18} />, label: 'Wallet' },
+    { path: '/profile', icon: <UserCircle size={18} />, label: 'My Profile' },
   ];
 
   const handleAddMenu = () => {
