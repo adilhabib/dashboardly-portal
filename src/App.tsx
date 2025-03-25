@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,145 +24,145 @@ import Categories from "./pages/Categories";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 
-const queryClient = new QueryClient();
+// Remove this line as we're now creating the QueryClient in main.tsx
+// const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <NotificationProvider>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route 
-                path="/" 
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/order-list" 
-                element={
-                  <ProtectedRoute>
-                    <OrderList />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/order-detail" 
-                element={
-                  <ProtectedRoute>
-                    <OrderDetail />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/customer" 
-                element={
-                  <ProtectedRoute>
-                    <Customer />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/analytics" 
-                element={
-                  <ProtectedRoute>
-                    <Analytics />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/reviews" 
-                element={
-                  <ProtectedRoute>
-                    <Reviews />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/foods" 
-                element={
-                  <ProtectedRoute>
-                    <Foods />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/food-detail" 
-                element={
-                  <ProtectedRoute>
-                    <FoodDetail />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/categories" 
-                element={
-                  <ProtectedRoute>
-                    <Categories />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/customer-detail" 
-                element={
-                  <ProtectedRoute>
-                    <CustomerDetail />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/calendar" 
-                element={
-                  <ProtectedRoute>
-                    <Calendar />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/chat" 
-                element={
-                  <ProtectedRoute>
-                    <Chat />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/wallet" 
-                element={
-                  <ProtectedRoute>
-                    <Wallet />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/notifications" 
-                element={
-                  <ProtectedRoute>
-                    <Notifications />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </NotificationProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  // Remove the QueryClientProvider here as it's already in main.tsx
+  <TooltipProvider>
+    <Toaster />
+    <Sonner />
+    <BrowserRouter>
+      <AuthProvider>
+        <NotificationProvider>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/order-list" 
+              element={
+                <ProtectedRoute>
+                  <OrderList />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/order-detail" 
+              element={
+                <ProtectedRoute>
+                  <OrderDetail />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer" 
+              element={
+                <ProtectedRoute>
+                  <Customer />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/analytics" 
+              element={
+                <ProtectedRoute>
+                  <Analytics />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/reviews" 
+              element={
+                <ProtectedRoute>
+                  <Reviews />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/foods" 
+              element={
+                <ProtectedRoute>
+                  <Foods />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/food-detail" 
+              element={
+                <ProtectedRoute>
+                  <FoodDetail />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/categories" 
+              element={
+                <ProtectedRoute>
+                  <Categories />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer-detail" 
+              element={
+                <ProtectedRoute>
+                  <CustomerDetail />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/calendar" 
+              element={
+                <ProtectedRoute>
+                  <Calendar />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/chat" 
+              element={
+                <ProtectedRoute>
+                  <Chat />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/wallet" 
+              element={
+                <ProtectedRoute>
+                  <Wallet />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/notifications" 
+              element={
+                <ProtectedRoute>
+                  <Notifications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </NotificationProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </TooltipProvider>
 );
 
 export default App;
