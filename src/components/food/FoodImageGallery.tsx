@@ -19,7 +19,8 @@ import {
   Trash2, 
   Star, 
   Image as ImageIcon,
-  Loader2
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -45,7 +46,8 @@ const FoodImageGallery: React.FC<FoodImageGalleryProps> = ({ foodId }) => {
     isUploading,
     handleUpload,
     handleDelete,
-    handleSetPrimary
+    handleSetPrimary,
+    refetch
   } = useFoodImages(foodId);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -101,7 +103,16 @@ const FoodImageGallery: React.FC<FoodImageGalleryProps> = ({ foodId }) => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Food Images</h3>
-        <div>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Refresh
+          </Button>
           <input
             type="file"
             ref={fileInputRef}
