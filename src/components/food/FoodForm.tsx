@@ -25,6 +25,7 @@ interface FoodFormProps {
   onSubmit: (values: FoodFormValues) => void;
   onCancel: () => void;
   submitLabel: string;
+  foodId?: string | null;
 }
 
 const FoodForm: React.FC<FoodFormProps> = ({
@@ -33,6 +34,7 @@ const FoodForm: React.FC<FoodFormProps> = ({
   onSubmit,
   onCancel,
   submitLabel,
+  foodId = null,
 }) => {
   const form = useForm<FoodFormValues>({
     resolver: zodResolver(formSchema),
@@ -49,7 +51,7 @@ const FoodForm: React.FC<FoodFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FoodFormFields control={form.control} />
+        <FoodFormFields control={form.control} foodId={foodId} />
         
         <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="outline" onClick={onCancel}>

@@ -14,12 +14,15 @@ import {
 } from '@/components/ui/select';
 import { useCategories } from '@/hooks/useCategories';
 import { FoodFormValues } from './FoodForm';
+import FoodImageGallery from './FoodImageGallery';
+import { Separator } from "@/components/ui/separator";
 
 interface FoodFormFieldsProps {
   control: Control<FoodFormValues>;
+  foodId: string | null;
 }
 
-const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control }) => {
+const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control, foodId }) => {
   const { categories, isLoading } = useCategories();
 
   return (
@@ -113,7 +116,7 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control }) => {
         name="image_url"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Image URL</FormLabel>
+            <FormLabel>Main Image URL</FormLabel>
             <FormControl>
               <Input 
                 placeholder="Image URL (optional)" 
@@ -122,9 +125,18 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control }) => {
               />
             </FormControl>
             <FormMessage />
+            <p className="text-xs text-muted-foreground">
+              This field will be automatically updated when you set a main image in the gallery.
+            </p>
           </FormItem>
         )}
       />
+
+      <Separator className="my-4" />
+      
+      <FoodImageGallery foodId={foodId} />
+      
+      <Separator className="my-4" />
       
       <FormField
         control={control}

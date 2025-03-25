@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFood, updateFood } from '@/services/foodService';
 import { Food } from '@/types/food';
@@ -70,9 +70,16 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
     }
   };
 
+  // When a food is loaded for editing, invalidate its images query to refresh
+  useEffect(() => {
+    if (isOpen && isEditing && food) {
+      queryClient.invalidateQueries({ queryKey: ['foodImages', food.id] });
+    }
+  }, [isOpen, isEditing, food, queryClient]);
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Food Item' : 'Add New Food'}</DialogTitle>
         </DialogHeader>
@@ -83,6 +90,7 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
           onSubmit={onSubmit}
           onCancel={onClose}
           submitLabel={isEditing ? 'Update' : 'Create'}
+          foodId={food?.id || null}
         />
       </DialogContent>
     </Dialog>

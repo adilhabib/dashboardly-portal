@@ -13,19 +13,25 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          display_order: number | null
           id: string
+          is_active: boolean | null
           name: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          display_order?: number | null
           id?: string
+          is_active?: boolean | null
           name: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          display_order?: number | null
           id?: string
+          is_active?: boolean | null
           name?: string
         }
         Relationships: []
@@ -140,6 +146,44 @@ export type Database = {
             foreignKeyName: "food_details_food_id_fkey"
             columns: ["food_id"]
             isOneToOne: true
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      food_images: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          food_id: string
+          id: string
+          image_url: string
+          is_primary: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          food_id: string
+          id?: string
+          image_url: string
+          is_primary?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          food_id?: string
+          id?: string
+          image_url?: string
+          is_primary?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_images_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
             referencedRelation: "foods"
             referencedColumns: ["id"]
           },
