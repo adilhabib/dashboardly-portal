@@ -78,6 +78,8 @@ const Profile = () => {
           ...profileData,
           ...customerData,
           email: user.email,
+          // Ensure bio is defined even if it's not in the database yet
+          bio: profileData?.bio || "",
         };
 
         setProfileData(combinedData);
