@@ -7,7 +7,7 @@ import {
   addFoodImage, 
   deleteFoodImage,
   setPrimaryFoodImage
-} from '@/services/image';
+} from '@/services/imageService';
 import { toast } from 'sonner';
 
 interface FoodImage {
