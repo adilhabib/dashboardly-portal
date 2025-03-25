@@ -21,7 +21,7 @@ export interface AnalyticsData {
   }>;
 }
 
-export const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
+export const fetchAnalyticsData = async (dateRange?: { from: Date; to: Date }): Promise<AnalyticsData> => {
   const { data: orderData, error: orderError } = await supabase
     .from('orders')
     .select('*')
@@ -46,11 +46,31 @@ export const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
   const totalFoods = foodData.length;
   
-  const dailyRevenue = Array.from({ length: 30 }, (_, i) => ({
-    date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-    revenue: Math.random() * 1000 + 500,
-    orders: Math.floor(Math.random() * 20) + 5,
-  }));
+  // Generate daily revenue data based on the date range
+  let dailyRevenue;
+  
+  if (dateRange && dateRange.from && dateRange.to) {
+    const fromDate = dateRange.from;
+    const toDate = dateRange.to;
+    const dayDiff = Math.max(1, Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24)));
+    
+    dailyRevenue = Array.from({ length: dayDiff }, (_, i) => {
+      const date = new Date(fromDate);
+      date.setDate(fromDate.getDate() + i);
+      return {
+        date: date.toISOString().slice(0, 10),
+        revenue: Math.random() * 1000 + 500,
+        orders: Math.floor(Math.random() * 20) + 5,
+      };
+    });
+  } else {
+    // Default to 30 days if no date range provided
+    dailyRevenue = Array.from({ length: 30 }, (_, i) => ({
+      date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+      revenue: Math.random() * 1000 + 500,
+      orders: Math.floor(Math.random() * 20) + 5,
+    }));
+  }
   
   const categories = ['Main Course', 'Appetizer', 'Dessert', 'Beverage', 'Sides'];
   const categoryData = categories.map(category => ({

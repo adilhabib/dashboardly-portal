@@ -42,7 +42,7 @@ const DateFilter: FC<ExtendedDateFilterProps> = ({
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
+        <PopoverContent className="w-auto p-0 pointer-events-auto">
           <Calendar
             mode="range"
             selected={{
@@ -58,6 +58,7 @@ const DateFilter: FC<ExtendedDateFilterProps> = ({
               }
             }}
             initialFocus
+            className="p-3 pointer-events-auto"
           />
         </PopoverContent>
       </Popover>

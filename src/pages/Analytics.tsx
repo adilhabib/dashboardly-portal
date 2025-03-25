@@ -15,8 +15,8 @@ const Analytics = () => {
   });
   
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['analytics', dateRange],
-    queryFn: fetchAnalyticsData,
+    queryKey: ['analytics', dateRange.from.toISOString(), dateRange.to.toISOString()],
+    queryFn: () => fetchAnalyticsData(dateRange),
   });
   
   if (isLoading) {

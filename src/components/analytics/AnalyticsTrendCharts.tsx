@@ -32,7 +32,7 @@ const AnalyticsTrendCharts: FC<AnalyticsTrendChartsProps> = ({ dailyRevenue }) =
                 data={dailyRevenue}
                 xKey="date"
                 yKey="revenue"
-                yFormatter={(value) => `$${value}`}
+                yFormatter={(value) => `PKR ${value}`}
               />
             </div>
           </CardContent>

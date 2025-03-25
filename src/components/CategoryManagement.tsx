@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from '@/services/categoryService';
@@ -25,10 +24,6 @@ const CategoryManagement: React.FC = () => {
     queryKey: ['categories'],
     queryFn: fetchCategories,
     retry: 1,
-    onError: (err) => {
-      console.error('Error in categories query:', err);
-      toast.error('Failed to load categories');
-    }
   });
 
   const createMutation = useMutation({
