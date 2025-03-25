@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFood, updateFood } from '@/services/foodService';
 import { Food } from '@/types/food';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import FoodForm, { FoodFormValues } from './food/FoodForm';
 
@@ -29,7 +29,7 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
 
   const createMutation = useMutation({
     mutationFn: createFood,
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['foods'] });
       toast.success('Food item created successfully');
       onClose();
@@ -82,9 +82,6 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Food Item' : 'Add New Food'}</DialogTitle>
-          <DialogDescription>
-            {isEditing ? 'Update the details of this food item.' : 'Add details for the new food item.'}
-          </DialogDescription>
         </DialogHeader>
         
         <FoodForm

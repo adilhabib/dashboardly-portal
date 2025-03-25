@@ -11,14 +11,9 @@ export const uploadFoodImage = async (file: File): Promise<string | null> => {
     const fileName = `${uuidv4()}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    console.log('Uploading image to storage:', { fileName, filePath, bucket: BUCKET_NAME });
-
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+      .upload(filePath, file);
 
     if (error) {
       console.error('Error uploading image:', error);
@@ -30,7 +25,6 @@ export const uploadFoodImage = async (file: File): Promise<string | null> => {
       .from(BUCKET_NAME)
       .getPublicUrl(filePath);
 
-    console.log('Image uploaded successfully:', publicUrl);
     return publicUrl;
   } catch (error) {
     console.error('Error in uploadFoodImage:', error);
@@ -46,19 +40,13 @@ export const addFoodImage = async (
   displayOrder: number = 0
 ): Promise<any> => {
   try {
-    console.log('Adding image to food_images table:', { foodId, imageUrl, isPrimary });
-    
     // If this is the primary image, update existing primary images to non-primary
     if (isPrimary) {
-      const { error: updateError } = await supabase
+      await supabase
         .from('food_images')
         .update({ is_primary: false })
         .eq('food_id', foodId)
         .eq('is_primary', true);
-        
-      if (updateError) {
-        console.error('Error updating existing primary images:', updateError);
-      }
     }
 
     const { data, error } = await supabase
@@ -77,20 +65,6 @@ export const addFoodImage = async (
       throw error;
     }
 
-    console.log('Image added to food_images table:', data);
-    
-    // If this is the primary image, also update the main food record
-    if (isPrimary) {
-      const { error: foodUpdateError } = await supabase
-        .from('foods')
-        .update({ image_url: imageUrl })
-        .eq('id', foodId);
-        
-      if (foodUpdateError) {
-        console.error('Error updating food main image:', foodUpdateError);
-      }
-    }
-
     return data;
   } catch (error) {
     console.error('Error in addFoodImage:', error);
@@ -101,8 +75,6 @@ export const addFoodImage = async (
 // Get all images for a specific food item
 export const getFoodImages = async (foodId: string) => {
   try {
-    console.log('Fetching images for food:', foodId);
-    
     const { data, error } = await supabase
       .from('food_images')
       .select('*')
@@ -116,7 +88,6 @@ export const getFoodImages = async (foodId: string) => {
       throw error;
     }
 
-    console.log('Images fetched:', data?.length || 0);
     return data || [];
   } catch (error) {
     console.error('Error in getFoodImages:', error);
@@ -129,7 +100,6 @@ export const deleteFoodImage = async (imageUrl: string, imageId: string) => {
   try {
     // Extract filename from URL to delete from storage
     const fileName = imageUrl.split('/').pop() || '';
-    console.log('Deleting image from storage:', fileName);
     
     // Delete from storage
     const { error: storageError } = await supabase.storage
@@ -161,52 +131,21 @@ export const deleteFoodImage = async (imageUrl: string, imageId: string) => {
 // Set an image as the primary image
 export const setPrimaryFoodImage = async (foodId: string, imageId: string) => {
   try {
-    console.log('Setting primary image:', { foodId, imageId });
-    
-    // Get the image URL first
-    const { data: imageData, error: imageError } = await supabase
-      .from('food_images')
-      .select('image_url')
-      .eq('id', imageId)
-      .single();
-      
-    if (imageError) {
-      console.error('Error fetching image URL:', imageError);
-      throw imageError;
-    }
-    
     // First, set all images for this food to non-primary
-    const { error: updateAllError } = await supabase
+    await supabase
       .from('food_images')
       .update({ is_primary: false })
       .eq('food_id', foodId);
-      
-    if (updateAllError) {
-      console.error('Error resetting primary images:', updateAllError);
-      throw updateAllError;
-    }
     
     // Then set the selected image as primary
-    const { error: updateImageError } = await supabase
+    const { error } = await supabase
       .from('food_images')
       .update({ is_primary: true })
       .eq('id', imageId);
 
-    if (updateImageError) {
-      console.error('Error setting primary image:', updateImageError);
-      throw updateImageError;
-    }
-    
-    // Update the main food record with the new primary image URL
-    if (imageData?.image_url) {
-      const { error: foodUpdateError } = await supabase
-        .from('foods')
-        .update({ image_url: imageData.image_url })
-        .eq('id', foodId);
-        
-      if (foodUpdateError) {
-        console.error('Error updating food main image:', foodUpdateError);
-      }
+    if (error) {
+      console.error('Error setting primary image:', error);
+      throw error;
     }
 
     return true;

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   getFoodImages, 
@@ -28,13 +28,11 @@ export function useFoodImages(foodId: string | null) {
   const { 
     data: images, 
     isLoading, 
-    isError,
-    refetch
+    isError 
   } = useQuery({
     queryKey: ['foodImages', foodId],
-    queryFn: () => foodId ? getFoodImages(foodId) : Promise.resolve([]),
+    queryFn: () => getFoodImages(foodId as string),
     enabled: !!foodId, // Only run the query if foodId exists
-    staleTime: 1000 * 60, // 1 minute
   });
 
   // Upload image mutation
@@ -42,20 +40,13 @@ export function useFoodImages(foodId: string | null) {
     mutationFn: async (file: File) => {
       setIsUploading(true);
       try {
-        if (!foodId) {
-          throw new Error('Food ID is required to upload images');
-        }
-        
-        console.log('Starting image upload for food:', foodId);
         const imageUrl = await uploadFoodImage(file);
-        
-        if (!imageUrl) {
-          throw new Error('Failed to upload image');
+        if (!imageUrl || !foodId) {
+          throw new Error('Failed to upload image or invalid food ID');
         }
         
         // Determine if this is the first image (should be primary)
         const isPrimary = !images || images.length === 0;
-        console.log('Is this the primary image?', isPrimary);
         
         // Add the image to the database
         return await addFoodImage(foodId, imageUrl, isPrimary);
@@ -64,16 +55,12 @@ export function useFoodImages(foodId: string | null) {
       }
     },
     onSuccess: () => {
-      if (foodId) {
-        queryClient.invalidateQueries({ queryKey: ['foodImages', foodId] });
-        queryClient.invalidateQueries({ queryKey: ['foods'] });
-      }
+      queryClient.invalidateQueries({ queryKey: ['foodImages', foodId] });
       toast.success('Image uploaded successfully');
-      refetch();
     },
     onError: (error) => {
       console.error('Error uploading image:', error);
-      toast.error('Failed to upload image: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      toast.error('Failed to upload image');
     },
   });
 
@@ -83,12 +70,8 @@ export function useFoodImages(foodId: string | null) {
       return await deleteFoodImage(imageUrl, imageId);
     },
     onSuccess: () => {
-      if (foodId) {
-        queryClient.invalidateQueries({ queryKey: ['foodImages', foodId] });
-        queryClient.invalidateQueries({ queryKey: ['foods'] });
-      }
+      queryClient.invalidateQueries({ queryKey: ['foodImages', foodId] });
       toast.success('Image deleted successfully');
-      refetch();
     },
     onError: (error) => {
       console.error('Error deleting image:', error);
@@ -103,12 +86,8 @@ export function useFoodImages(foodId: string | null) {
       return await setPrimaryFoodImage(foodId, imageId);
     },
     onSuccess: () => {
-      if (foodId) {
-        queryClient.invalidateQueries({ queryKey: ['foodImages', foodId] });
-        queryClient.invalidateQueries({ queryKey: ['foods'] });
-      }
+      queryClient.invalidateQueries({ queryKey: ['foodImages', foodId] });
       toast.success('Primary image updated');
-      refetch();
     },
     onError: (error) => {
       console.error('Error setting primary image:', error);
@@ -140,7 +119,6 @@ export function useFoodImages(foodId: string | null) {
     isUploading,
     handleUpload,
     handleDelete,
-    handleSetPrimary,
-    refetch
+    handleSetPrimary
   };
 }
