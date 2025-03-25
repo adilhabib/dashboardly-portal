@@ -5,6 +5,14 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { useCategories } from '@/hooks/useCategories';
 import { FoodFormValues } from './FoodForm';
 
 interface FoodFormFieldsProps {
@@ -12,6 +20,8 @@ interface FoodFormFieldsProps {
 }
 
 const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control }) => {
+  const { categories, isLoading } = useCategories();
+
   return (
     <>
       <FormField
@@ -74,11 +84,23 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control }) => {
             <FormItem>
               <FormLabel>Category</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Category (optional)" 
-                  {...field} 
-                  value={field.value || ''}
-                />
+                <Select 
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
