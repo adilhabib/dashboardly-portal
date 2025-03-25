@@ -19,7 +19,7 @@ const AuthButton = () => {
 
   if (user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
@@ -51,10 +51,6 @@ const AuthButton = () => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="ghost" size="sm" onClick={signOut} className="flex items-center gap-2 md:flex">
-          <LogOut size={16} />
-          <span className="hidden md:inline">Sign Out</span>
-        </Button>
       </div>
     );
   }
