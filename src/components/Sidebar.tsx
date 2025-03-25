@@ -43,7 +43,7 @@ const Sidebar: FC = () => {
   return (
     <aside className="bg-white border-r w-[220px] h-screen flex flex-col p-5 fixed left-0 top-0 overflow-y-auto animate-slide-in-left">
       <div className="flex items-center mb-8">
-        <span className="text-2xl font-bold text-gray-800">Sedap<span className="text-emerald-500">.</span></span>
+        <span className="text-2xl font-bold text-gray-800">VIRGINIA<span className="text-emerald-500">.</span></span>
       </div>
       <p className="text-xs text-gray-500 mb-6">Modern Admin Dashboard</p>
       
