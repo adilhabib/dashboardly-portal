@@ -32,12 +32,15 @@ const Auth = () => {
   const checkIsAdmin = async (userId: string) => {
     try {
       setIsCheckingAdmin(true);
-      const { data, error } = await supabase.rpc('has_role', {
-        requested_role: 'admin'
-      });
+      // Use a more direct approach with custom query instead of RPC
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
 
-      if (error) throw error;
-      
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
       return !!data;
     } catch (error) {
       console.error('Error checking admin role:', error);
