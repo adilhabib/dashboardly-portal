@@ -1,12 +1,18 @@
 
-import { FC } from 'react';
+import { FC, Dispatch, SetStateAction } from 'react';
 import DateFilter from '@/components/DateFilter';
 
 interface DashboardHeaderProps {
   userName: string;
+  dateRange?: { from: Date; to: Date };
+  setDateRange?: Dispatch<SetStateAction<{ from: Date; to: Date }>>;
 }
 
-const DashboardHeader: FC<DashboardHeaderProps> = ({ userName }) => {
+const DashboardHeader: FC<DashboardHeaderProps> = ({ 
+  userName,
+  dateRange,
+  setDateRange
+}) => {
   return (
     <div className="flex items-center justify-between mb-8">
       <div>
@@ -14,7 +20,17 @@ const DashboardHeader: FC<DashboardHeaderProps> = ({ userName }) => {
         <p className="text-gray-500">Hi, {userName}. Welcome back to Virginia Admin!</p>
       </div>
       
-      <DateFilter startDate="17 April 2023" endDate="24 May 2023" />
+      {dateRange && setDateRange ? (
+        <DateFilter 
+          dateRange={dateRange} 
+          onChange={setDateRange} 
+        />
+      ) : (
+        <DateFilter 
+          startDate="17 April 2023" 
+          endDate="24 May 2023" 
+        />
+      )}
     </div>
   );
 };

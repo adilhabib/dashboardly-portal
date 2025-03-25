@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -15,6 +15,12 @@ import {
 } from '@/components/dashboard/DashboardData';
 
 const Dashboard: React.FC = () => {
+  // Add date range state
+  const [dateRange, setDateRange] = useState({
+    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    to: new Date(),
+  });
+  
   // Get data from our data service
   const orderData = getOrderData();
   const revenueData = getRevenueData();
@@ -33,7 +39,11 @@ const Dashboard: React.FC = () => {
         />
         
         <main className="p-6">
-          <DashboardHeader userName="Samantha" />
+          <DashboardHeader 
+            userName="Samantha" 
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+          />
           
           <DashboardStatsCards />
           
