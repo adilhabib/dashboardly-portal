@@ -127,6 +127,12 @@ const Profile = () => {
 
     setIsLoading(true);
     try {
+      console.log("Updating profiles table with:", {
+        id: user.id,
+        username: values.name,
+        bio: values.bio,
+      });
+      
       // Update or create profile in profiles table
       const { error: profileError } = await supabase
         .from('profiles')
@@ -134,10 +140,23 @@ const Profile = () => {
           id: user.id,
           username: values.name,
           bio: values.bio,
+        }, {
+          onConflict: 'id' // Specify which column to check for conflicts
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
+      }
 
+      console.log("Updating customers table with:", {
+        user_id: user.id,
+        name: values.name,
+        phone: values.phone,
+        address: values.address,
+        email: values.email,
+      });
+      
       // Update or create customer in customers table
       const { error: customerError } = await supabase
         .from('customers')
@@ -147,9 +166,14 @@ const Profile = () => {
           phone: values.phone,
           address: values.address,
           email: values.email,
+        }, {
+          onConflict: 'user_id' // Specify which column to check for conflicts
         });
 
-      if (customerError) throw customerError;
+      if (customerError) {
+        console.error("Customer update error:", customerError);
+        throw customerError;
+      }
 
       toast({
         title: "Profile updated",
