@@ -22,6 +22,7 @@ import Calendar from "./pages/Calendar";
 import Chat from "./pages/Chat";
 import Wallet from "./pages/Wallet";
 import Categories from "./pages/Categories";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -136,6 +137,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Wallet />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/notifications" 
+                element={
+                  <ProtectedRoute>
+                    <Notifications />
                   </ProtectedRoute>
                 } 
               />

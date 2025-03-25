@@ -13,12 +13,15 @@ import {
   Wallet,
   Pizza,
   Plus,
-  Tag
+  Tag,
+  Bell
 } from 'lucide-react';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 const Sidebar: FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { state: notificationState } = useNotifications();
   
   const menuItems = [
     { path: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
@@ -31,6 +34,7 @@ const Sidebar: FC = () => {
     { path: '/categories', icon: <Tag size={18} />, label: 'Categories' },
     { path: '/food-detail', icon: <FileText size={18} />, label: 'Food Detail' },
     { path: '/customer-detail', icon: <User size={18} />, label: 'Customer Detail' },
+    { path: '/notifications', icon: <Bell size={18} />, label: 'Notifications', badge: notificationState.unreadCount },
     { path: '/calendar', icon: <Calendar size={18} />, label: 'Calendar' },
     { path: '/chat', icon: <MessageCircle size={18} />, label: 'Chat' },
     { path: '/wallet', icon: <Wallet size={18} />, label: 'Wallet' },
@@ -56,6 +60,11 @@ const Sidebar: FC = () => {
           >
             {item.icon}
             <span>{item.label}</span>
+            {item.badge && item.badge > 0 && (
+              <span className="ml-auto bg-red-500 text-white text-xs rounded-full min-w-[16px] h-4 flex items-center justify-center">
+                {item.badge > 9 ? '9+' : item.badge}
+              </span>
+            )}
           </Link>
         ))}
       </nav>
