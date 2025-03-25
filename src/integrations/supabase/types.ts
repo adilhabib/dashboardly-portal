@@ -278,7 +278,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_order_items_table: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      create_orders_table: {
+        Args: {
+          table_name: string
+          table_schema: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

@@ -1,3 +1,4 @@
+
 import { FC } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -11,7 +12,8 @@ import {
   MessageCircle, 
   Wallet,
   Pizza,
-  Plus
+  Plus,
+  Tag
 } from 'lucide-react';
 
 const Sidebar: FC = () => {
@@ -26,6 +28,7 @@ const Sidebar: FC = () => {
     { path: '/analytics', icon: <BarChart2 size={18} />, label: 'Analytics' },
     { path: '/reviews', icon: <MessageSquare size={18} />, label: 'Reviews' },
     { path: '/foods', icon: <Pizza size={18} />, label: 'Foods' },
+    { path: '/categories', icon: <Tag size={18} />, label: 'Categories' },
     { path: '/food-detail', icon: <FileText size={18} />, label: 'Food Detail' },
     { path: '/customer-detail', icon: <User size={18} />, label: 'Customer Detail' },
     { path: '/calendar', icon: <Calendar size={18} />, label: 'Calendar' },
@@ -45,19 +48,11 @@ const Sidebar: FC = () => {
       <p className="text-xs text-gray-500 mb-6">Modern Admin Dashboard</p>
       
       <nav className="flex-1 space-y-1">
-        <Link 
-          to="/"
-          className="sidebar-link flex items-center gap-2 p-2 rounded-md text-emerald-600 bg-emerald-50 font-medium mb-2"
-        >
-          <LayoutDashboard size={18} />
-          <span>Dashboard</span>
-        </Link>
-        
-        {menuItems.slice(1).map((item) => (
+        {menuItems.map((item) => (
           <Link 
             key={item.path} 
             to={item.path}
-            className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}
+            className={`sidebar-link flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors ${location.pathname === item.path ? 'bg-emerald-50 text-emerald-600 font-medium' : ''}`}
           >
             {item.icon}
             <span>{item.label}</span>

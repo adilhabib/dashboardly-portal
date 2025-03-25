@@ -21,6 +21,7 @@ import Reviews from "./pages/Reviews";
 import Calendar from "./pages/Calendar";
 import Chat from "./pages/Chat";
 import Wallet from "./pages/Wallet";
+import Categories from "./pages/Categories";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +96,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <FoodDetail />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/categories" 
+                element={
+                  <ProtectedRoute>
+                    <Categories />
                   </ProtectedRoute>
                 } 
               />
