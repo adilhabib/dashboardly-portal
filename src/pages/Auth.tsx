@@ -34,7 +34,7 @@ const Auth = () => {
       setIsCheckingAdmin(true);
       // Use a more direct approach with custom query instead of RPC
       const { data, error } = await supabase
-        .from('user_roles')
+        .from('user_roles' as any)
         .select('role')
         .eq('user_id', userId)
         .eq('role', 'admin')
