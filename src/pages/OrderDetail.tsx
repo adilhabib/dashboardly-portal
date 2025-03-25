@@ -122,14 +122,14 @@ const OrderDetail = () => {
                           <div>
                             <p className="font-medium">{item.foods.name}</p>
                             <p className="text-sm text-gray-500">
-                              {item.quantity} × ${item.price_per_item.toFixed(2)}
+                              {item.quantity} × PKR {item.price_per_item.toFixed(2)}
                             </p>
                             {item.special_instructions && (
                               <p className="text-sm italic mt-1">"{item.special_instructions}"</p>
                             )}
                           </div>
                         </div>
-                        <p className="font-medium">${item.total_price.toFixed(2)}</p>
+                        <p className="font-medium">PKR {item.total_price.toFixed(2)}</p>
                       </div>
                     ))}
                   </div>
@@ -143,7 +143,7 @@ const OrderDetail = () => {
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-500">Total</p>
-                <p className="text-xl font-bold">${order.total_amount.toFixed(2)}</p>
+                <p className="text-xl font-bold">PKR {order.total_amount.toFixed(2)}</p>
               </div>
             </CardFooter>
           </Card>

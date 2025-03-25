@@ -110,9 +110,9 @@ const expensesData = [
 
 const Wallet = () => {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-PK', {
       style: 'currency',
-      currency: 'PKR',
+      currency: 'USD',
     }).format(amount);
   };
   

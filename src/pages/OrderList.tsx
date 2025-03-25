@@ -98,7 +98,7 @@ const OrderList = () => {
                       <div className="text-xs text-gray-500">{order.customers?.phone || 'No phone'}</div>
                     </TableCell>
                     <TableCell>{formatDate(order.created_at)}</TableCell>
-                    <TableCell>${order.total_amount.toFixed(2)}</TableCell>
+                    <TableCell>PKR {order.total_amount.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
                     </TableCell>

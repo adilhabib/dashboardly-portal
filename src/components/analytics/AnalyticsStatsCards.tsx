@@ -11,9 +11,9 @@ interface AnalyticsStatsCardsProps {
 }
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-PK', {
     style: 'currency',
-    currency: 'PKR',
+    currency: 'USD',
   }).format(value);
 };
 

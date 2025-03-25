@@ -36,7 +36,7 @@ const FoodCard: React.FC<FoodCardProps> = ({ food, onEdit, onDelete }) => {
               <CardDescription className="text-sm">{food.category}</CardDescription>
             )}
           </div>
-          <span className="text-lg font-semibold">${food.price.toFixed(2)}</span>
+          <span className="text-lg font-semibold">PKR {food.price.toFixed(2)}</span>
         </div>
       </CardHeader>
       
