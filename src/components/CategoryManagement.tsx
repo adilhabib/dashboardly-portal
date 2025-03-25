@@ -21,9 +21,14 @@ const CategoryManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
-  const { data: categories, isLoading, isError } = useQuery({
+  const { data: categories, isLoading, isError, error } = useQuery({
     queryKey: ['categories'],
     queryFn: fetchCategories,
+    retry: 1,
+    onError: (err) => {
+      console.error('Error in categories query:', err);
+      toast.error('Failed to load categories');
+    }
   });
 
   const createMutation = useMutation({
@@ -98,7 +103,14 @@ const CategoryManagement: React.FC = () => {
   }
 
   if (isError) {
-    return <div className="text-center py-10 text-red-500">Error loading categories</div>;
+    return (
+      <div className="text-center py-10">
+        <div className="text-red-500 mb-4">Error loading categories</div>
+        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['categories'] })}>
+          Try Again
+        </Button>
+      </div>
+    );
   }
 
   return (
