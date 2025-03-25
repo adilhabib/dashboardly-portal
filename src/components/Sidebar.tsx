@@ -45,7 +45,7 @@ const Sidebar: FC = () => {
       <div className="flex items-center mb-8">
         <span className="text-2xl font-bold text-gray-800">VIRGINIA<span className="text-emerald-500">.</span></span>
       </div>
-      <p className="text-xs text-gray-500 mb-6">Modern Admin Dashboard</p>
+      <p className="text-xs text-gray-500 mb-6">Virginia Admin Dashboard</p>
       
       <nav className="flex-1 space-y-1">
         {menuItems.map((item) => (
@@ -78,12 +78,12 @@ const Sidebar: FC = () => {
       </div>
       
       <div className="mt-6 text-xs text-gray-500">
-        <p>VIRGINIA Restaurant Admin Dashboard</p>
+        <p>Virginia Admin Dashboard</p>
         <p>© 2023 All Rights Reserved</p>
         <div className="flex items-center mt-1">
           <span>Made with </span>
           <span className="text-red-500 mx-1">♥</span>
-          <span> by PeterdrawD</span>
+          <span> by Virginia</span>
         </div>
       </div>
     </aside>
