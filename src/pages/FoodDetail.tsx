@@ -1,10 +1,10 @@
 
 import React, { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react"; 
+import { Button } from "@/components/ui/button";
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { useFoodDetail } from '@/hooks/useFoodDetail';
 import { 
@@ -17,10 +17,16 @@ import {
 
 const FoodDetail = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const foodId = searchParams.get('id');
   
   useEffect(() => {
     console.log('FoodDetail component rendered with foodId:', foodId);
+    
+    // If no foodId is provided, redirect to foods page
+    if (!foodId) {
+      console.log('No foodId provided, consider redirecting to foods page');
+    }
   }, [foodId]);
   
   const { 
@@ -58,6 +64,15 @@ const FoodDetail = () => {
           No food ID was provided. Please select a food item from the menu.
         </AlertDescription>
       </Alert>
+      
+      <div className="text-center py-6">
+        <Button 
+          onClick={() => navigate('/foods')}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Go to Food Menu
+        </Button>
+      </div>
     </div>;
   }
 
@@ -92,12 +107,19 @@ const FoodDetail = () => {
       </Alert>
       
       <div className="text-center py-10">
-        <button 
+        <Button 
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 mr-4"
         >
           Retry
-        </button>
+        </Button>
+        <Button 
+          onClick={() => navigate('/foods')}
+          variant="outline"
+          className="px-4 py-2 rounded-md"
+        >
+          Go to Food Menu
+        </Button>
       </div>
     </div>;
   }

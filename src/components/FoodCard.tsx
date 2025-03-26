@@ -1,9 +1,10 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Food } from "@/types/food";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye } from "lucide-react";
 
 interface FoodCardProps {
   food: Food;
@@ -50,6 +51,12 @@ const FoodCard: React.FC<FoodCardProps> = ({ food, onEdit, onDelete }) => {
       </CardContent>
       
       <CardFooter className="p-4 pt-0 flex justify-end gap-2">
+        <Link to={`/food-detail?id=${food.id}`}>
+          <Button size="sm" variant="outline">
+            <Eye size={16} className="mr-1" />
+            View
+          </Button>
+        </Link>
         <Button size="sm" variant="outline" onClick={() => onEdit(food)}>
           <Edit size={16} className="mr-1" />
           Edit
