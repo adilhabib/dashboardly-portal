@@ -19,6 +19,7 @@ export function useAdmin() {
 
       setIsLoading(true);
       try {
+        // Call the has_role function we just created
         const { data, error } = await supabase.rpc('has_role', {
           requested_role: 'admin'
         });

@@ -13,8 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('test@test.com'); // Pre-filled for testing
+  const [password, setPassword] = useState('123456789'); // Pre-filled for testing
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
   const [adminError, setAdminError] = useState('');
@@ -32,6 +32,7 @@ const Auth = () => {
   const checkIsAdmin = async (userId: string) => {
     try {
       setIsCheckingAdmin(true);
+      // Call the has_role function we just created
       const { data, error } = await supabase.rpc('has_role', {
         requested_role: 'admin'
       });
