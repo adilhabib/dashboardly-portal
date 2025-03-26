@@ -3,21 +3,35 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { FoodFormFields } from './FoodFormFields';
+import FoodImageGallery from './FoodImageGallery';
 import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
-import FoodFormFields from './FoodFormFields';
+import { Loader2 } from 'lucide-react';
 
-// Form validation schema
-const formSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  description: z.string().optional().nullable(),
-  price: z.coerce.number().min(0.01, 'Price must be greater than 0'),
-  image_url: z.string().optional().nullable(),
-  category: z.string().optional().nullable(),
+// Define the schema for food item validation
+const foodFormSchema = z.object({
+  name: z.string().min(2, {
+    message: 'Name must be at least 2 characters.',
+  }),
+  description: z.string().optional(),
+  price: z.coerce.number().min(0, {
+    message: 'Price must be a positive number.',
+  }),
+  image_url: z.string().optional(),
+  category: z.string().optional(),
   is_available: z.boolean().default(true),
 });
 
-export type FoodFormValues = z.infer<typeof formSchema>;
+// Type for the form values
+export type FoodFormValues = z.infer<typeof foodFormSchema>;
 
 interface FoodFormProps {
   defaultValues: FoodFormValues;
@@ -25,7 +39,7 @@ interface FoodFormProps {
   onSubmit: (values: FoodFormValues) => void;
   onCancel: () => void;
   submitLabel: string;
-  foodId?: string | null;
+  foodId: string | null;
 }
 
 const FoodForm: React.FC<FoodFormProps> = ({
@@ -34,34 +48,50 @@ const FoodForm: React.FC<FoodFormProps> = ({
   onSubmit,
   onCancel,
   submitLabel,
-  foodId = null,
+  foodId
 }) => {
+  // Initialize form with react-hook-form
   const form = useForm<FoodFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: defaultValues.name || '',
-      description: defaultValues.description || '',
-      price: defaultValues.price || 0,
-      image_url: defaultValues.image_url || '',
-      category: defaultValues.category || '',
-      is_available: defaultValues.is_available !== undefined ? defaultValues.is_available : true,
-    },
+    resolver: zodResolver(foodFormSchema),
+    defaultValues,
   });
+
+  const handleFormSubmit = (values: FoodFormValues) => {
+    onSubmit(values);
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FoodFormFields control={form.control} foodId={foodId} />
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+        <FoodFormFields form={form} />
+        
+        {foodId && (
+          <div className="mt-6 border-t pt-6">
+            <FoodImageGallery foodId={foodId} />
+          </div>
+        )}
         
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
           <Button 
             type="submit" 
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Saving...' : submitLabel}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              submitLabel
+            )}
           </Button>
         </div>
       </form>

@@ -40,16 +40,23 @@ export function useFoodImages(foodId: string | null) {
     mutationFn: async (file: File) => {
       setIsUploading(true);
       try {
+        console.log('Starting image upload for food ID:', foodId);
         const imageUrl = await uploadFoodImage(file);
+        console.log('Image upload result:', imageUrl);
+        
         if (!imageUrl || !foodId) {
           throw new Error('Failed to upload image or invalid food ID');
         }
         
         // Determine if this is the first image (should be primary)
         const isPrimary = !images || images.length === 0;
+        console.log('Is this a primary image?', isPrimary);
         
         // Add the image to the database
         return await addFoodImage(foodId, imageUrl, isPrimary);
+      } catch (error) {
+        console.error('Error in upload mutation:', error);
+        throw error;
       } finally {
         setIsUploading(false);
       }
@@ -101,7 +108,7 @@ export function useFoodImages(foodId: string | null) {
       return;
     }
     
-    uploadMutation.mutate(file);
+    await uploadMutation.mutateAsync(file);
   };
 
   const handleDelete = (imageUrl: string, imageId: string) => {

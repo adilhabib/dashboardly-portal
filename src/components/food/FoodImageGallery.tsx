@@ -51,6 +51,12 @@ const FoodImageGallery: React.FC<FoodImageGalleryProps> = ({ foodId }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageToDelete, setImageToDelete] = useState<{ url: string, id: string } | null>(null);
 
+  const triggerFileSelection = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevent any default form submission
+    e.stopPropagation(); // Stop event propagation
+    fileInputRef.current?.click();
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -110,10 +116,11 @@ const FoodImageGallery: React.FC<FoodImageGalleryProps> = ({ foodId }) => {
             className="hidden"
           />
           <Button 
-            onClick={() => fileInputRef.current?.click()}
+            onClick={triggerFileSelection}
             variant="outline"
             disabled={isUploading}
             className="flex items-center gap-2"
+            type="button"
           >
             {isUploading ? (
               <>
