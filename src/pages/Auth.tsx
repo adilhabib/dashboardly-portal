@@ -32,10 +32,10 @@ const Auth = () => {
   const checkIsAdmin = async (userId: string) => {
     try {
       setIsCheckingAdmin(true);
-      // Call the has_role function we just created
+      // Call the has_role function
       const { data, error } = await supabase.rpc('has_role', {
         requested_role: 'admin'
-      });
+      }) as { data: boolean | null, error: Error | null };
 
       if (error) throw error;
       
