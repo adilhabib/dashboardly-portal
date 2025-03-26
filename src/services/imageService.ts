@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
 
-const BUCKET_NAME = 'food_images';
+const BUCKET_NAME = 'Virginia-foods';
 
 // Upload an image to Supabase storage
 export const uploadFoodImage = async (file: File): Promise<string | null> => {
