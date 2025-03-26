@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Food, FoodDetail } from "@/types/food";
 
@@ -17,6 +16,8 @@ export const fetchFoods = async () => {
 };
 
 export const fetchFoodDetails = async (foodId: string) => {
+  console.log('fetchFoodDetails called for foodId:', foodId);
+  
   const { data, error } = await supabase
     .from('food_details')
     .select('*')
@@ -35,10 +36,13 @@ export const fetchFoodDetails = async (foodId: string) => {
     throw error;
   }
   
+  console.log('Food details fetched successfully:', data);
   return data as FoodDetail;
 };
 
 export const createFoodDetails = async (foodDetails: Omit<FoodDetail, 'id' | 'created_at' | 'updated_at'>) => {
+  console.log('Creating food details with data:', foodDetails);
+  
   const { data, error } = await supabase
     .from('food_details')
     .insert(foodDetails)
@@ -50,6 +54,7 @@ export const createFoodDetails = async (foodDetails: Omit<FoodDetail, 'id' | 'cr
     throw error;
   }
   
+  console.log('Food details created successfully:', data);
   return data as FoodDetail;
 };
 

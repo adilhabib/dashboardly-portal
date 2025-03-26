@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 
 // Function to fetch food data and its details
 const fetchFood = async (foodId: string): Promise<{ food: Food, details: FoodDetail | null }> => {
+  console.log(`Attempting to fetch food with ID: ${foodId}`);
+  
   try {
     // Fetch the food item
     const { data: food, error } = await supabase
@@ -15,17 +17,22 @@ const fetchFood = async (foodId: string): Promise<{ food: Food, details: FoodDet
       .eq('id', foodId)
       .single();
     
+    console.log('Food query response:', { food, error });
+    
     if (error) {
       console.error('Error fetching food:', error);
       throw new Error(`Failed to load food: ${error.message}`);
     }
     
     if (!food) {
+      console.error('Food item not found for ID:', foodId);
       throw new Error("Food item not found");
     }
     
     // Fetch the food details
+    console.log('Fetching food details for food ID:', foodId);
     const details = await fetchFoodDetails(foodId);
+    console.log('Food details response:', details);
     
     return { food, details };
   } catch (error) {
@@ -35,6 +42,7 @@ const fetchFood = async (foodId: string): Promise<{ food: Food, details: FoodDet
 };
 
 export const useFoodDetail = (foodId: string | null) => {
+  console.log('useFoodDetail hook called with foodId:', foodId);
   const queryClient = useQueryClient();
 
   // Query for fetching food data
@@ -42,18 +50,28 @@ export const useFoodDetail = (foodId: string | null) => {
     queryKey: ['food', foodId],
     queryFn: () => {
       if (!foodId) {
+        console.error('Food ID is required but was null or empty');
         throw new Error("Food ID is required");
       }
+      console.log('Executing query function for food ID:', foodId);
       return fetchFood(foodId);
     },
     enabled: !!foodId,
-    retry: 2,
+    retry: 1,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+  });
+
+  console.log('foodQuery state:', {
+    isLoading: foodQuery.isLoading,
+    isError: foodQuery.isError,
+    data: foodQuery.data,
+    error: foodQuery.error
   });
 
   // Mutation for creating food details
   const createDetailsMutation = useMutation({
     mutationFn: (foodId: string) => {
+      console.log('Creating food details for ID:', foodId);
       return createFoodDetails({
         food_id: foodId,
         calories: null,

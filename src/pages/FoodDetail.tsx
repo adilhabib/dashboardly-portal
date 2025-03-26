@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react"; // Changed from ExclamationTriangleIcon
+import { AlertTriangle } from "lucide-react"; 
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { useFoodDetail } from '@/hooks/useFoodDetail';
 import { 
@@ -19,6 +19,10 @@ const FoodDetail = () => {
   const [searchParams] = useSearchParams();
   const foodId = searchParams.get('id');
   
+  useEffect(() => {
+    console.log('FoodDetail component rendered with foodId:', foodId);
+  }, [foodId]);
+  
   const { 
     food, 
     details, 
@@ -28,6 +32,34 @@ const FoodDetail = () => {
     createDetails, 
     isCreatingDetails 
   } = useFoodDetail(foodId);
+
+  // Log the current state for debugging
+  useEffect(() => {
+    console.log('FoodDetail state:', { 
+      foodId, 
+      food, 
+      details, 
+      isLoading, 
+      isError, 
+      error: error instanceof Error ? error.message : error 
+    });
+  }, [foodId, food, details, isLoading, isError, error]);
+
+  // Handle case when no foodId is provided
+  if (!foodId) {
+    return <div className="container mx-auto px-4 py-6">
+      <PageBreadcrumb pageName="Food Details" />
+      <BackButton />
+      
+      <Alert variant="destructive" className="mb-6">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          No food ID was provided. Please select a food item from the menu.
+        </AlertDescription>
+      </Alert>
+    </div>;
+  }
 
   // Handle loading state
   if (isLoading) {
@@ -88,7 +120,10 @@ const FoodDetail = () => {
                 <FoodDetailsSection 
                   price={food.price}
                   details={details}
-                  onCreateDetails={() => foodId && createDetails(foodId)}
+                  onCreateDetails={() => {
+                    console.log('Creating details for foodId:', foodId);
+                    if (foodId) createDetails(foodId);
+                  }}
                   isCreatingDetails={isCreatingDetails}
                   foodId={foodId}
                 />
