@@ -16,8 +16,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
-  const [adminError, setAdminError] = useState('');
+  const [authError, setAuthError] = useState('');
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -25,30 +24,10 @@ const Auth = () => {
   // Redirect if user is already logged in
   useEffect(() => {
     if (user) {
+      console.log('User already logged in, redirecting to home');
       navigate('/');
     }
   }, [user, navigate]);
-
-  const checkIsAdmin = async (userId: string) => {
-    try {
-      setIsCheckingAdmin(true);
-      // Use a more direct approach with custom query instead of RPC
-      const { data, error } = await supabase
-        .from('user_roles' as any)
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
-      return !!data;
-    } catch (error) {
-      console.error('Error checking admin role:', error);
-      return false;
-    } finally {
-      setIsCheckingAdmin(false);
-    }
-  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,18 +41,24 @@ const Auth = () => {
     }
 
     setIsSubmitting(true);
-    setAdminError('');
+    setAuthError('');
     
     try {
+      console.log('Attempting to sign in with:', email);
       const { error, data } = await signIn(email, password);
+      
       if (error) throw error;
       
       toast({
         title: "Success",
         description: "Signed in successfully",
       });
+      
+      console.log('Sign in successful, navigating to home');
       navigate('/');
     } catch (error: any) {
+      console.error('Sign in error:', error);
+      setAuthError(error.message || "An unexpected error occurred");
       toast({
         title: "Error signing in",
         description: error.message || "An unexpected error occurred",
@@ -107,9 +92,9 @@ const Auth = () => {
             <TabsTrigger value="signin">Admin Sign In</TabsTrigger>
           </TabsList>
           <TabsContent value="signin">
-            {adminError && (
+            {authError && (
               <Alert variant="destructive" className="mb-4 mx-4">
-                <AlertDescription>{adminError}</AlertDescription>
+                <AlertDescription>{authError}</AlertDescription>
               </Alert>
             )}
             <form onSubmit={handleSignIn}>
@@ -136,8 +121,8 @@ const Auth = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full" disabled={isSubmitting || isCheckingAdmin}>
-                  {(isSubmitting || isCheckingAdmin) ? (
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Signing in...

@@ -19,16 +19,22 @@ export function useAdmin() {
 
       setIsLoading(true);
       try {
-        // Use a more direct approach with custom query instead of RPC
+        console.log('Checking admin role for user:', user.id);
+        
+        // Use a more reliable approach to query the user_roles table
         const { data, error } = await supabase
-          .from('user_roles' as any)
-          .select('role')
+          .from('user_roles')
+          .select('*')
           .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
+          .eq('role', 'admin');
 
-        if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
-        setIsAdmin(!!data);
+        if (error) throw error;
+        
+        // User is admin if we found at least one matching record
+        const hasAdminRole = data && data.length > 0;
+        console.log('Admin role check result:', hasAdminRole, data);
+        
+        setIsAdmin(hasAdminRole);
       } catch (err) {
         console.error('Error checking admin role:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
