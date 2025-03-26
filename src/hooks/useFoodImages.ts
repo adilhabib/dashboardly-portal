@@ -1,9 +1,9 @@
 
-import { useFoodImageQuery, FoodImage } from './useFoodImageQuery';
+import { useFoodImageQuery, type FoodImage } from './useFoodImageQuery';
 import { useImageUpload } from './useImageUpload';
 import { useImageManagement } from './useImageManagement';
 
-export { FoodImage };
+export type { FoodImage };
 
 export function useFoodImages(foodId: string | null) {
   const { images, isLoading, isError } = useFoodImageQuery(foodId);
