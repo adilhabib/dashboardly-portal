@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { AlertTriangle } from "lucide-react"; // Changed from ExclamationTriangleIcon
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { useFoodDetail } from '@/hooks/useFoodDetail';
 import { 
@@ -46,7 +46,7 @@ const FoodDetail = () => {
       <BackButton />
       
       <Alert variant="destructive" className="mb-6">
-        <ExclamationTriangleIcon className="h-4 w-4" />
+        <AlertTriangle className="h-4 w-4" /> {/* Changed from ExclamationTriangleIcon */}
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           {error instanceof Error 
