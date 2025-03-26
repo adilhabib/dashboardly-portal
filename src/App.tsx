@@ -1,10 +1,10 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
+import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -24,11 +24,7 @@ import Categories from "./pages/Categories";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 
-// Remove this line as we're now creating the QueryClient in main.tsx
-// const queryClient = new QueryClient();
-
 const App = () => (
-  // Remove the QueryClientProvider here as it's already in main.tsx
   <TooltipProvider>
     <Toaster />
     <Sonner />
@@ -37,6 +33,7 @@ const App = () => (
         <NotificationProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
             <Route 
               path="/" 
               element={
