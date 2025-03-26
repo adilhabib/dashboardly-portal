@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 // Function to fetch food data and its details
 const fetchFood = async (foodId: string): Promise<{ food: Food, details: FoodDetail | null }> => {
   try {
+    // Fetch the food item
     const { data: food, error } = await supabase
       .from('foods')
       .select('*')
@@ -16,9 +17,14 @@ const fetchFood = async (foodId: string): Promise<{ food: Food, details: FoodDet
     
     if (error) {
       console.error('Error fetching food:', error);
-      throw error;
+      throw new Error(`Failed to load food: ${error.message}`);
     }
     
+    if (!food) {
+      throw new Error("Food item not found");
+    }
+    
+    // Fetch the food details
     const details = await fetchFoodDetails(foodId);
     
     return { food, details };
@@ -41,7 +47,8 @@ export const useFoodDetail = (foodId: string | null) => {
       return fetchFood(foodId);
     },
     enabled: !!foodId,
-    retry: 1,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 
   // Mutation for creating food details

@@ -29,8 +29,11 @@ const FoodDetail = () => {
     isCreatingDetails 
   } = useFoodDetail(foodId);
 
+  // Handle loading state
   if (isLoading) {
     return <div className="container mx-auto px-4 py-10 text-center">
+      <PageBreadcrumb pageName="Food Details" />
+      <BackButton />
       <div className="animate-pulse flex flex-col items-center">
         <div className="h-8 w-64 bg-gray-200 rounded mb-4"></div>
         <div className="h-64 w-full max-w-2xl bg-gray-200 rounded mb-4"></div>
@@ -40,13 +43,14 @@ const FoodDetail = () => {
     </div>;
   }
 
+  // Handle error state
   if (isError || !food) {
     return <div className="container mx-auto px-4 py-6">
       <PageBreadcrumb pageName="Food Details" />
       <BackButton />
       
       <Alert variant="destructive" className="mb-6">
-        <AlertTriangle className="h-4 w-4" /> {/* Changed from ExclamationTriangleIcon */}
+        <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           {error instanceof Error 
