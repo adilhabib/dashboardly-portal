@@ -21,7 +21,7 @@ export function useAdmin() {
       try {
         console.log('Checking admin role for user:', user.id);
         
-        // Query the user_roles table directly
+        // Query the user_roles table directly with correct single() handling
         const { data, error } = await supabase
           .from('user_roles')
           .select('*')
