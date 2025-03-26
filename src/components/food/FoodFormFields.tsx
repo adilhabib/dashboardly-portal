@@ -135,6 +135,13 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
 
       <Separator className="my-4" />
       
+      {foodId && (
+        <>
+          <FoodImageGallery foodId={foodId} />
+          <Separator className="my-4" />
+        </>
+      )}
+      
       <FormField
         control={control}
         name="is_available"
