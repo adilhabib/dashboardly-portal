@@ -68,18 +68,6 @@ const Auth = () => {
       const { error, data } = await signIn(email, password);
       if (error) throw error;
       
-      // Check if user is an admin
-      const userId = data?.user?.id;
-      if (userId) {
-        const isAdmin = await checkIsAdmin(userId);
-        if (!isAdmin) {
-          // Sign out the user if they're not an admin
-          await supabase.auth.signOut();
-          setAdminError('This admin panel is restricted to administrators only.');
-          return;
-        }
-      }
-      
       toast({
         title: "Success",
         description: "Signed in successfully",
