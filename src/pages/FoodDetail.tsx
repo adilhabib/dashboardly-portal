@@ -1,15 +1,17 @@
 
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Edit, Clock, Utensils, AlertCircle } from 'lucide-react';
-import { fetchFoodDetails } from '@/services/foodService';
+import { ArrowLeft, Edit, Clock, Utensils, AlertCircle, Plus } from 'lucide-react';
+import { fetchFoodDetails, createFoodDetails } from '@/services/foodService';
 import { Food, FoodDetail as FoodDetailType } from '@/types/food';
+import { toast } from 'sonner';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const fetchFood = async (foodId: string): Promise<{ food: Food, details: FoodDetailType | null }> => {
   const { data: food, error } = await supabase
@@ -31,11 +33,32 @@ const fetchFood = async (foodId: string): Promise<{ food: Food, details: FoodDet
 const FoodDetail = () => {
   const [searchParams] = useSearchParams();
   const foodId = searchParams.get('id');
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['food', foodId],
     queryFn: () => fetchFood(foodId || ''),
     enabled: !!foodId,
+  });
+
+  const createDetailsMutation = useMutation({
+    mutationFn: (foodId: string) => {
+      return createFoodDetails({
+        food_id: foodId,
+        calories: null,
+        ingredients: null,
+        allergens: null,
+        preparation_time: null
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['food', foodId] });
+      toast.success('Food details created successfully');
+    },
+    onError: (error) => {
+      console.error('Error creating food details:', error);
+      toast.error('Failed to create food details');
+    }
   });
 
   if (isLoading) {
@@ -50,6 +73,8 @@ const FoodDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <PageBreadcrumb pageName="Food Details" />
+      
       <div className="mb-6">
         <Link to="/foods">
           <Button variant="ghost" className="flex items-center gap-2">
@@ -113,7 +138,7 @@ const FoodDetail = () => {
                         <span className="font-medium">PKR {food.price.toFixed(2)}</span>
                       </div>
                       
-                      {details?.preparation_time && (
+                      {details && details.preparation_time && (
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2 text-gray-500">
                             <Clock size={16} />
@@ -123,7 +148,7 @@ const FoodDetail = () => {
                         </div>
                       )}
                       
-                      {details?.calories && (
+                      {details && details.calories && (
                         <div className="flex justify-between items-center">
                           <span className="text-gray-500">Calories</span>
                           <span className="font-medium">{details.calories} kcal</span>
@@ -132,7 +157,7 @@ const FoodDetail = () => {
                     </div>
                   </div>
                   
-                  {details?.ingredients && (
+                  {details && details.ingredients ? (
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <Utensils size={18} className="text-gray-500" />
@@ -140,9 +165,17 @@ const FoodDetail = () => {
                       </div>
                       <p className="text-gray-700">{details.ingredients}</p>
                     </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Utensils size={18} className="text-gray-500" />
+                        <h3 className="text-lg font-medium">Ingredients</h3>
+                      </div>
+                      <p className="text-gray-500 italic">No ingredients information available</p>
+                    </div>
                   )}
                   
-                  {details?.allergens && (
+                  {details && details.allergens ? (
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <AlertCircle size={18} className="text-amber-500" />
@@ -150,9 +183,34 @@ const FoodDetail = () => {
                       </div>
                       <p className="text-gray-700">{details.allergens}</p>
                     </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle size={18} className="text-amber-500" />
+                        <h3 className="text-lg font-medium">Allergens</h3>
+                      </div>
+                      <p className="text-gray-500 italic">No allergens information available</p>
+                    </div>
                   )}
                 </div>
               </div>
+              
+              {!details && (
+                <div className="mt-6 p-4 bg-gray-50 rounded-md border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <p className="text-gray-600">No detailed information available for this food item</p>
+                    <Button 
+                      size="sm" 
+                      onClick={() => foodId && createDetailsMutation.mutate(foodId)}
+                      disabled={createDetailsMutation.isPending}
+                      className="flex items-center gap-1"
+                    >
+                      <Plus size={16} />
+                      {createDetailsMutation.isPending ? 'Creating...' : 'Create Details'}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

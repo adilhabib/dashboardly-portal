@@ -23,12 +23,50 @@ export const fetchFoodDetails = async (foodId: string) => {
     .eq('food_id', foodId)
     .single();
   
-  if (error && error.code !== 'PGRST116') { // PGRST116 is the "not found" error code
+  if (error) {
+    // Instead of throwing error for PGRST116 (not found), 
+    // just log it but return null to handle the case properly
+    if (error.code === 'PGRST116') {
+      console.log(`No food details found for food ID: ${foodId}`);
+      return null;
+    }
+    
     console.error('Error fetching food details:', error);
     throw error;
   }
   
-  return data as FoodDetail | null;
+  return data as FoodDetail;
+};
+
+export const createFoodDetails = async (foodDetails: Omit<FoodDetail, 'id' | 'created_at' | 'updated_at'>) => {
+  const { data, error } = await supabase
+    .from('food_details')
+    .insert(foodDetails)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating food details:', error);
+    throw error;
+  }
+  
+  return data as FoodDetail;
+};
+
+export const updateFoodDetails = async (id: string, foodDetails: Partial<Omit<FoodDetail, 'id' | 'created_at' | 'updated_at'>>) => {
+  const { data, error } = await supabase
+    .from('food_details')
+    .update(foodDetails)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating food details:', error);
+    throw error;
+  }
+  
+  return data as FoodDetail;
 };
 
 export const createFood = async (food: Omit<Food, 'id' | 'created_at' | 'updated_at'>) => {
