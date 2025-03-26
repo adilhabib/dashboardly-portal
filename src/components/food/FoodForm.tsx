@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { FoodFormFields } from './FoodFormFields';
+import FoodFormFields from './FoodFormFields';
 import FoodImageGallery from './FoodImageGallery';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -63,13 +63,7 @@ const FoodForm: React.FC<FoodFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <FoodFormFields form={form} />
-        
-        {foodId && (
-          <div className="mt-6 border-t pt-6">
-            <FoodImageGallery foodId={foodId} />
-          </div>
-        )}
+        <FoodFormFields form={form} foodId={foodId} />
         
         <div className="flex justify-end gap-2 pt-4">
           <Button 

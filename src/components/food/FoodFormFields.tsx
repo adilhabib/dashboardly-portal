@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Control } from 'react-hook-form';
+import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,12 +18,13 @@ import FoodImageGallery from './FoodImageGallery';
 import { Separator } from "@/components/ui/separator";
 
 interface FoodFormFieldsProps {
-  control: Control<FoodFormValues>;
+  form: UseFormReturn<FoodFormValues>;
   foodId: string | null;
 }
 
-const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control, foodId }) => {
+const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
   const { categories, isLoading } = useCategories();
+  const { control } = form;
 
   return (
     <>
@@ -132,10 +133,6 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ control, foodId }) => {
         )}
       />
 
-      <Separator className="my-4" />
-      
-      <FoodImageGallery foodId={foodId} />
-      
       <Separator className="my-4" />
       
       <FormField
