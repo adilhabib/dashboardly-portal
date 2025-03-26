@@ -18,7 +18,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   useEffect(() => {
     console.log('ProtectedRoute - Auth status:', {
-      user: user ? 'logged in' : 'not logged in',
+      user: user ? `logged in as ${user.email}` : 'not logged in',
+      userId: user?.id,
       authLoading,
       isAdmin,
       adminLoading,
@@ -28,9 +29,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <span className="ml-2">Loading...</span>
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+        <span className="text-lg">Loading authentication status...</span>
       </div>
     );
   }

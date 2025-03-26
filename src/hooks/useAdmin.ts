@@ -21,17 +21,22 @@ export function useAdmin() {
       try {
         console.log('Checking admin role for user:', user.id);
         
-        // Use a more reliable approach to query the user_roles table
+        // Query the user_roles table directly
         const { data, error } = await supabase
           .from('user_roles')
           .select('*')
           .eq('user_id', user.id)
-          .eq('role', 'admin');
+          .eq('role', 'admin')
+          .single();
 
-        if (error) throw error;
+        if (error && error.code !== 'PGRST116') {
+          // PGRST116 is "No rows returned" error, which we handle separately
+          console.error('Error in admin role query:', error);
+          throw error;
+        }
         
-        // User is admin if we found at least one matching record
-        const hasAdminRole = data && data.length > 0;
+        // User is admin if we found a matching record
+        const hasAdminRole = !!data;
         console.log('Admin role check result:', hasAdminRole, data);
         
         setIsAdmin(hasAdminRole);

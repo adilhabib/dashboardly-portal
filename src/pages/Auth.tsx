@@ -13,8 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('test@test.com'); // Pre-fill with admin email
+  const [password, setPassword] = useState('123456789'); // Pre-fill with admin password 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState('');
   const { signIn, signUp, user } = useAuth();
@@ -24,7 +24,7 @@ const Auth = () => {
   // Redirect if user is already logged in
   useEffect(() => {
     if (user) {
-      console.log('User already logged in, redirecting to home');
+      console.log('User already logged in, redirecting to home', user);
       navigate('/');
     }
   }, [user, navigate]);
@@ -118,6 +118,11 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+                </div>
+                <div className="text-sm text-gray-500">
+                  <p>Default admin credentials are pre-filled.</p>
+                  <p>Email: test@test.com</p>
+                  <p>Password: 123456789</p>
                 </div>
               </CardContent>
               <CardFooter>
