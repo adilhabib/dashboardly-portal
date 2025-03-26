@@ -7,20 +7,25 @@ import { toast } from 'sonner';
 
 // Function to fetch food data and its details
 const fetchFood = async (foodId: string): Promise<{ food: Food, details: FoodDetail | null }> => {
-  const { data: food, error } = await supabase
-    .from('foods')
-    .select('*')
-    .eq('id', foodId)
-    .single();
-  
-  if (error) {
-    console.error('Error fetching food:', error);
+  try {
+    const { data: food, error } = await supabase
+      .from('foods')
+      .select('*')
+      .eq('id', foodId)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching food:', error);
+      throw error;
+    }
+    
+    const details = await fetchFoodDetails(foodId);
+    
+    return { food, details };
+  } catch (error) {
+    console.error('Error in fetchFood:', error);
     throw error;
   }
-  
-  const details = await fetchFoodDetails(foodId);
-  
-  return { food, details };
 };
 
 export const useFoodDetail = (foodId: string | null) => {
@@ -29,8 +34,14 @@ export const useFoodDetail = (foodId: string | null) => {
   // Query for fetching food data
   const foodQuery = useQuery({
     queryKey: ['food', foodId],
-    queryFn: () => fetchFood(foodId || ''),
+    queryFn: () => {
+      if (!foodId) {
+        throw new Error("Food ID is required");
+      }
+      return fetchFood(foodId);
+    },
     enabled: !!foodId,
+    retry: 1,
   });
 
   // Mutation for creating food details
@@ -59,6 +70,7 @@ export const useFoodDetail = (foodId: string | null) => {
     details: foodQuery.data?.details,
     isLoading: foodQuery.isLoading,
     isError: foodQuery.isError,
+    error: foodQuery.error,
     createDetails: createDetailsMutation.mutate,
     isCreatingDetails: createDetailsMutation.isPending
   };

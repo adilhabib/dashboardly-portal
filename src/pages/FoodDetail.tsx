@@ -3,6 +3,8 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { useFoodDetail } from '@/hooks/useFoodDetail';
 import { 
@@ -22,16 +24,46 @@ const FoodDetail = () => {
     details, 
     isLoading, 
     isError, 
+    error,
     createDetails, 
     isCreatingDetails 
   } = useFoodDetail(foodId);
 
   if (isLoading) {
-    return <div className="text-center py-10">Loading food details...</div>;
+    return <div className="container mx-auto px-4 py-10 text-center">
+      <div className="animate-pulse flex flex-col items-center">
+        <div className="h-8 w-64 bg-gray-200 rounded mb-4"></div>
+        <div className="h-64 w-full max-w-2xl bg-gray-200 rounded mb-4"></div>
+        <div className="h-32 w-full max-w-2xl bg-gray-200 rounded"></div>
+      </div>
+      <p className="mt-4 text-gray-500">Loading food details...</p>
+    </div>;
   }
 
   if (isError || !food) {
-    return <div className="text-center py-10 text-red-500">Error loading food details</div>;
+    return <div className="container mx-auto px-4 py-6">
+      <PageBreadcrumb pageName="Food Details" />
+      <BackButton />
+      
+      <Alert variant="destructive" className="mb-6">
+        <ExclamationTriangleIcon className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          {error instanceof Error 
+            ? error.message 
+            : "Unable to load food details. Please try again later."}
+        </AlertDescription>
+      </Alert>
+      
+      <div className="text-center py-10">
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Retry
+        </button>
+      </div>
+    </div>;
   }
 
   return (
