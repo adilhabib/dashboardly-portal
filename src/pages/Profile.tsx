@@ -33,13 +33,12 @@ interface ProfileData {
   username?: string;
   name?: string;
   email?: string;
-  phone?: string;
+  phone_number?: string;
   address?: string;
   avatar_url?: string;
   bio?: string;
   created_at?: string;
   updated_at?: string;
-  phone_number?: string; // Add this to match database schema
 }
 
 const Profile = () => {
@@ -81,7 +80,7 @@ const Profile = () => {
         const { data: customerData, error: customerError } = await supabase
           .from('customer')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('id', user.id)
           .single();
 
         if (customerError && customerError.code !== 'PGSQL_ERROR_NODATA') {
@@ -150,7 +149,7 @@ const Profile = () => {
       }
 
       console.log("Updating customer table with:", {
-        user_id: user.id,
+        id: user.id,
         name: values.name,
         phone_number: values.phone,
         address: values.address,
@@ -161,13 +160,13 @@ const Profile = () => {
       const { error: customerError } = await supabase
         .from('customer')
         .upsert({
-          user_id: user.id,
+          id: user.id,
           name: values.name,
           phone_number: values.phone,
           address: values.address,
           email: values.email,
         }, {
-          onConflict: 'user_id' // Specify which column to check for conflicts
+          onConflict: 'id' // Specify which column to check for conflicts
         });
 
       if (customerError) {
