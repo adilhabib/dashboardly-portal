@@ -9,15 +9,27 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Mail, Phone, MapPin } from 'lucide-react';
 
 const fetchCustomerDetail = async (customerId: string) => {
-  const { data, error } = await supabase
-    .from('customers')
-    .select(`*, customer_details(*)`)
+  // Fetch the main customer data
+  const { data: customer, error: customerError } = await supabase
+    .from('customer')
+    .select('*')
     .eq('id', customerId)
     .single();
   
-  if (error) {
-    console.error('Error fetching customer details:', error);
-    throw error;
+  if (customerError) {
+    console.error('Error fetching customer details:', customerError);
+    throw customerError;
+  }
+
+  // Fetch customer details separately if they exist
+  const { data: customerDetails, error: detailsError } = await supabase
+    .from('customer_details')
+    .select('*')
+    .eq('customer_id', customerId)
+    .single();
+
+  if (detailsError && detailsError.code !== 'PGSQL_ERROR_NODATA') {
+    console.error('Error fetching customer details:', detailsError);
   }
 
   // Fetch orders for this customer
@@ -32,7 +44,7 @@ const fetchCustomerDetail = async (customerId: string) => {
     throw ordersError;
   }
   
-  return { customer: data, orders };
+  return { customer, customerDetails, orders };
 };
 
 const CustomerDetail = () => {
@@ -53,7 +65,7 @@ const CustomerDetail = () => {
     return <div className="text-center py-10 text-red-500">Error loading customer details</div>;
   }
 
-  const { customer, orders } = data;
+  const { customer, customerDetails, orders } = data;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -89,10 +101,10 @@ const CustomerDetail = () => {
                         <span>{customer.email}</span>
                       </div>
                     )}
-                    {customer.phone && (
+                    {customer.phone_number && (
                       <div className="flex items-center gap-2 mt-2">
                         <Phone size={16} className="text-gray-400" />
-                        <span>{customer.phone}</span>
+                        <span>{customer.phone_number}</span>
                       </div>
                     )}
                   </div>
@@ -109,31 +121,31 @@ const CustomerDetail = () => {
                 </div>
                 
                 <div className="space-y-4">
-                  {customer.customer_details?.dietary_restrictions && (
+                  {customerDetails?.dietary_restrictions && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Dietary Restrictions</h3>
-                      <p className="mt-1">{customer.customer_details.dietary_restrictions}</p>
+                      <p className="mt-1">{customerDetails.dietary_restrictions}</p>
                     </div>
                   )}
                   
-                  {customer.customer_details?.preferences && (
+                  {customerDetails?.preferences && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Preferences</h3>
-                      <p className="mt-1">{customer.customer_details.preferences}</p>
+                      <p className="mt-1">{customerDetails.preferences}</p>
                     </div>
                   )}
                   
-                  {customer.customer_details?.favorite_foods && (
+                  {customerDetails?.favorite_foods && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Favorite Foods</h3>
-                      <p className="mt-1">{customer.customer_details.favorite_foods}</p>
+                      <p className="mt-1">{customerDetails.favorite_foods}</p>
                     </div>
                   )}
                   
-                  {customer.customer_details?.delivery_instructions && (
+                  {customerDetails?.delivery_instructions && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Delivery Instructions</h3>
-                      <p className="mt-1">{customer.customer_details.delivery_instructions}</p>
+                      <p className="mt-1">{customerDetails.delivery_instructions}</p>
                     </div>
                   )}
                 </div>

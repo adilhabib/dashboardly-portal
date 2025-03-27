@@ -11,12 +11,10 @@ import { ArrowLeft } from 'lucide-react';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const fetchOrderDetail = async (orderId: string) => {
+  // Fetch order data
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .select(`
-      *,
-      customers(*, customer_details(*))
-    `)
+    .select('*')
     .eq('id', orderId)
     .single();
   
@@ -25,6 +23,29 @@ const fetchOrderDetail = async (orderId: string) => {
     throw orderError;
   }
 
+  // Fetch customer data
+  const { data: customer, error: customerError } = await supabase
+    .from('customer')
+    .select('*')
+    .eq('id', order.customer_id)
+    .single();
+
+  if (customerError && customerError.code !== 'PGSQL_ERROR_NODATA') {
+    console.error('Error fetching customer details:', customerError);
+  }
+
+  // Fetch customer details if they exist
+  const { data: customerDetails, error: detailsError } = await supabase
+    .from('customer_details')
+    .select('*')
+    .eq('customer_id', order.customer_id)
+    .single();
+
+  if (detailsError && detailsError.code !== 'PGSQL_ERROR_NODATA') {
+    console.error('Error fetching customer details:', detailsError);
+  }
+
+  // Fetch order items
   const { data: orderItems, error: itemsError } = await supabase
     .from('order_items')
     .select(`
@@ -38,7 +59,7 @@ const fetchOrderDetail = async (orderId: string) => {
     throw itemsError;
   }
 
-  return { order, orderItems };
+  return { order, customer, customerDetails, orderItems };
 };
 
 const OrderDetail = () => {
@@ -70,7 +91,7 @@ const OrderDetail = () => {
     return <div className="text-center py-10 text-red-500">Error loading order details</div>;
   }
 
-  const { order, orderItems } = data;
+  const { order, customer, customerDetails, orderItems } = data;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -157,33 +178,33 @@ const OrderDetail = () => {
             <CardContent className="space-y-4">
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Name</h4>
-                <p>{order.customers?.name || 'N/A'}</p>
+                <p>{customer?.name || 'N/A'}</p>
               </div>
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Contact</h4>
-                <p>{order.customers?.phone || 'No phone'}</p>
-                <p className="text-sm">{order.customers?.email || 'No email'}</p>
+                <p>{customer?.phone_number || 'No phone'}</p>
+                <p className="text-sm">{customer?.email || 'No email'}</p>
               </div>
               <Separator />
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Delivery Address</h4>
-                <p>{order.delivery_address || order.customers?.address || 'No address provided'}</p>
+                <p>{order.delivery_address || customer?.address || 'No address provided'}</p>
               </div>
-              {order.customers?.customer_details?.dietary_restrictions && (
+              {customerDetails?.dietary_restrictions && (
                 <>
                   <Separator />
                   <div>
                     <h4 className="text-sm font-medium text-gray-500">Dietary Restrictions</h4>
-                    <p>{order.customers.customer_details.dietary_restrictions}</p>
+                    <p>{customerDetails.dietary_restrictions}</p>
                   </div>
                 </>
               )}
-              {order.customers?.customer_details?.delivery_instructions && (
+              {customerDetails?.delivery_instructions && (
                 <>
                   <Separator />
                   <div>
                     <h4 className="text-sm font-medium text-gray-500">Delivery Instructions</h4>
-                    <p>{order.customers.customer_details.delivery_instructions}</p>
+                    <p>{customerDetails.delivery_instructions}</p>
                   </div>
                 </>
               )}
