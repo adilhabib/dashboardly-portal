@@ -8,16 +8,43 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Mail, Phone, MapPin } from 'lucide-react';
 
-const fetchCustomerDetail = async (customerId: string) => {
-  const { data, error } = await supabase
+// Define types for customer and order data
+interface CustomerType {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  created_at: string;
+  updated_at: string;
+  user_id?: string | null;
+}
+
+interface OrderType {
+  id: string;
+  customer_id: string;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  payment_status?: string | null;
+}
+
+interface FetchResult {
+  customer: CustomerType;
+  orders: OrderType[];
+}
+
+const fetchCustomerDetail = async (customerId: string): Promise<FetchResult> => {
+  // Fetch the customer without joining customer_details
+  const { data: customer, error: customerError } = await supabase
     .from('customers')
-    .select(`*, customer_details(*)`)
+    .select('*')
     .eq('id', customerId)
     .single();
   
-  if (error) {
-    console.error('Error fetching customer details:', error);
-    throw error;
+  if (customerError) {
+    console.error('Error fetching customer details:', customerError);
+    throw customerError;
   }
 
   // Fetch orders for this customer
@@ -32,7 +59,7 @@ const fetchCustomerDetail = async (customerId: string) => {
     throw ordersError;
   }
   
-  return { customer: data, orders };
+  return { customer, orders: orders || [] };
 };
 
 const CustomerDetail = () => {
@@ -107,36 +134,6 @@ const CustomerDetail = () => {
                     </div>
                   )}
                 </div>
-                
-                <div className="space-y-4">
-                  {customer.customer_details?.dietary_restrictions && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Dietary Restrictions</h3>
-                      <p className="mt-1">{customer.customer_details.dietary_restrictions}</p>
-                    </div>
-                  )}
-                  
-                  {customer.customer_details?.preferences && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Preferences</h3>
-                      <p className="mt-1">{customer.customer_details.preferences}</p>
-                    </div>
-                  )}
-                  
-                  {customer.customer_details?.favorite_foods && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Favorite Foods</h3>
-                      <p className="mt-1">{customer.customer_details.favorite_foods}</p>
-                    </div>
-                  )}
-                  
-                  {customer.customer_details?.delivery_instructions && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Delivery Instructions</h3>
-                      <p className="mt-1">{customer.customer_details.delivery_instructions}</p>
-                    </div>
-                  )}
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -148,7 +145,7 @@ const CustomerDetail = () => {
             <CardContent>
               {orders && orders.length > 0 ? (
                 <div className="space-y-4">
-                  {orders.map((order: any) => (
+                  {orders.map((order: OrderType) => (
                     <div key={order.id} className="flex justify-between items-center border-b pb-4">
                       <div>
                         <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
@@ -190,7 +187,7 @@ const CustomerDetail = () => {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Total Spent</h3>
                   <p className="text-2xl font-bold mt-1">
-                    ${orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0).toFixed(2) || '0.00'}
+                    ${orders?.reduce((sum: number, order: OrderType) => sum + Number(order.total_amount), 0).toFixed(2) || '0.00'}
                   </p>
                 </div>
                 <Separator />

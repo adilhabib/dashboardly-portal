@@ -11,7 +11,19 @@ import { Eye, Search, UserPlus, Loader2 } from 'lucide-react';
 import { AddCustomerModal } from '@/components/customer/AddCustomerModal';
 import { useAuth } from '@/contexts/AuthContext';
 
-const fetchCustomers = async (userId: string | undefined) => {
+// Define proper types to avoid excessive type instantiation
+interface CustomerType {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  created_at: string;
+  updated_at: string;
+  user_id?: string | null;
+}
+
+const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[]> => {
   if (!userId) {
     console.log('No user ID provided for fetchCustomers');
     return [];
@@ -19,9 +31,10 @@ const fetchCustomers = async (userId: string | undefined) => {
   
   console.log('Fetching customers for user ID:', userId);
   
+  // Modified query to only select from customers table without attempting to join with customer_details
   const { data, error } = await supabase
     .from('customers')
-    .select('*, customer_details(*)')
+    .select('*')
     .order('name');
   
   if (error) {
@@ -29,7 +42,7 @@ const fetchCustomers = async (userId: string | undefined) => {
     throw error;
   }
   
-  return data;
+  return data || [];
 };
 
 const Customer = () => {
@@ -38,7 +51,7 @@ const Customer = () => {
   const { user } = useAuth();
   
   const { 
-    data: customer, 
+    data: customers, 
     isLoading, 
     isError, 
     refetch 
@@ -48,7 +61,7 @@ const Customer = () => {
     enabled: !!user,
   });
 
-  const filteredCustomers = customer?.filter(customer => 
+  const filteredCustomers = customers?.filter(customer => 
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (customer.phone && customer.phone.includes(searchTerm))

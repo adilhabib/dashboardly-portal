@@ -69,14 +69,14 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
       console.log('Adding customer with user_id:', user.id);
       
       // Insert new customer into the database
+      // Updated to use 'customers' table instead of 'customer'
       const { data, error } = await supabase
-        .from('customer')
+        .from('customers')
         .insert([
           {
-            id: crypto.randomUUID(), // Add required id field
             name: values.name,
-            email: values.email || '',  // Change null to empty string
-            phone_number: values.phone || '',
+            email: values.email || null,
+            phone: values.phone || null,
             address: values.address || null,
             user_id: user.id // Associate the customer with the current user
           },
@@ -89,7 +89,7 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
       }
       
       // Invalidate and refetch the customers query
-      queryClient.invalidateQueries({ queryKey: ['customer'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
       
       toast.success('Customer added successfully');
       form.reset();
