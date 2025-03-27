@@ -11,12 +11,12 @@ import { ArrowLeft } from 'lucide-react';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const fetchOrderDetail = async (orderId: string) => {
+  console.log('Fetching order details for ID:', orderId);
+  
+  // Fetch order data
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .select(`
-      *,
-      customers(*, customer_details(*))
-    `)
+    .select('*')
     .eq('id', orderId)
     .single();
   
@@ -25,6 +25,44 @@ const fetchOrderDetail = async (orderId: string) => {
     throw orderError;
   }
 
+  console.log('Fetched order:', order);
+
+  // Fetch customer data separately
+  let customer = null;
+  if (order.customer_id) {
+    const { data: customerData, error: customerError } = await supabase
+      .from('customer')
+      .select('*')
+      .eq('id', order.customer_id)
+      .single();
+    
+    if (customerError) {
+      console.error('Error fetching customer details:', customerError);
+      // Don't throw, we'll continue without customer data
+    } else {
+      customer = customerData;
+      console.log('Fetched customer:', customer);
+    }
+  }
+
+  // Fetch customer details if we have a customer
+  let customerDetails = null;
+  if (customer) {
+    const { data: detailsData, error: detailsError } = await supabase
+      .from('customer_details')
+      .select('*')
+      .eq('customer_id', customer.id)
+      .maybeSingle();
+    
+    if (detailsError) {
+      console.error('Error fetching customer details:', detailsError);
+    } else if (detailsData) {
+      customerDetails = detailsData;
+      console.log('Fetched customer details:', customerDetails);
+    }
+  }
+
+  // Fetch order items
   const { data: orderItems, error: itemsError } = await supabase
     .from('order_items')
     .select(`
@@ -38,7 +76,9 @@ const fetchOrderDetail = async (orderId: string) => {
     throw itemsError;
   }
 
-  return { order, orderItems };
+  console.log('Fetched order items:', orderItems);
+
+  return { order, customer, customerDetails, orderItems };
 };
 
 const OrderDetail = () => {
@@ -70,7 +110,7 @@ const OrderDetail = () => {
     return <div className="text-center py-10 text-red-500">Error loading order details</div>;
   }
 
-  const { order, orderItems } = data;
+  const { order, customer, customerDetails, orderItems } = data;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -157,33 +197,33 @@ const OrderDetail = () => {
             <CardContent className="space-y-4">
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Name</h4>
-                <p>{order.customers?.name || 'N/A'}</p>
+                <p>{customer?.name || 'N/A'}</p>
               </div>
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Contact</h4>
-                <p>{order.customers?.phone || 'No phone'}</p>
-                <p className="text-sm">{order.customers?.email || 'No email'}</p>
+                <p>{customer?.phone_number || 'No phone'}</p>
+                <p className="text-sm">{customer?.email || 'No email'}</p>
               </div>
               <Separator />
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Delivery Address</h4>
-                <p>{order.delivery_address || order.customers?.address || 'No address provided'}</p>
+                <p>{order.delivery_address || customer?.address || 'No address provided'}</p>
               </div>
-              {order.customers?.customer_details?.dietary_restrictions && (
+              {customerDetails?.dietary_restrictions && (
                 <>
                   <Separator />
                   <div>
                     <h4 className="text-sm font-medium text-gray-500">Dietary Restrictions</h4>
-                    <p>{order.customers.customer_details.dietary_restrictions}</p>
+                    <p>{customerDetails.dietary_restrictions}</p>
                   </div>
                 </>
               )}
-              {order.customers?.customer_details?.delivery_instructions && (
+              {customerDetails?.delivery_instructions && (
                 <>
                   <Separator />
                   <div>
                     <h4 className="text-sm font-medium text-gray-500">Delivery Instructions</h4>
-                    <p>{order.customers.customer_details.delivery_instructions}</p>
+                    <p>{customerDetails.delivery_instructions}</p>
                   </div>
                 </>
               )}

@@ -61,17 +61,15 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
     try {
       console.log('Submitting customer data:', values);
       
-      // Insert new customer into the database
+      // Insert new customer into the database - fix the insert structure
       const { data, error } = await supabase
         .from('customer')
-        .insert([
-          {
-            name: values.name,
-            email: values.email || null,
-            phone_number: values.phone || null,
-            address: values.address || null,
-          },
-        ])
+        .insert({
+          name: values.name,
+          email: values.email || null,
+          phone_number: values.phone || null,
+          address: values.address || null,
+        })
         .select();
       
       if (error) {
