@@ -30,7 +30,7 @@ interface OrderType {
   created_at: string;
   payment_status?: string | null;
   delivery_address?: string | null;
-  customers?: CustomerType;
+  customers?: CustomerType | null;
 }
 
 interface OrderItemType {
@@ -53,22 +53,32 @@ interface OrderItemType {
 interface OrderDetailResult {
   order: OrderType;
   orderItems: OrderItemType[];
+  customer?: CustomerType | null;
 }
 
 const fetchOrderDetail = async (orderId: string): Promise<OrderDetailResult> => {
-  // Fetch the order with customer details
+  // Fetch the order
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .select(`
-      *,
-      customers(*)
-    `)
+    .select('*')
     .eq('id', orderId)
     .single();
   
   if (orderError) {
     console.error('Error fetching order details:', orderError);
     throw orderError;
+  }
+  
+  // Fetch customer separately
+  const { data: customer, error: customerError } = await supabase
+    .from('customers')
+    .select('*')
+    .eq('id', order.customer_id)
+    .single();
+  
+  if (customerError) {
+    console.error('Error fetching customer details:', customerError);
+    // Continue without customer data instead of throwing
   }
 
   // Fetch order items for this order
@@ -85,7 +95,11 @@ const fetchOrderDetail = async (orderId: string): Promise<OrderDetailResult> => 
     throw itemsError;
   }
   
-  return { order, orderItems: orderItems || [] };
+  return { 
+    order: { ...order, customers: customer || null },
+    orderItems: orderItems || [],
+    customer: customer || null
+  };
 };
 
 const OrderDetail = () => {
@@ -117,7 +131,7 @@ const OrderDetail = () => {
     return <div className="text-center py-10 text-red-500">Error loading order details</div>;
   }
 
-  const { order, orderItems } = data;
+  const { order, orderItems, customer } = data;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -204,17 +218,17 @@ const OrderDetail = () => {
             <CardContent className="space-y-4">
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Name</h4>
-                <p>{order.customers?.name || 'N/A'}</p>
+                <p>{customer?.name || 'N/A'}</p>
               </div>
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Contact</h4>
-                <p>{order.customers?.phone || 'No phone'}</p>
-                <p className="text-sm">{order.customers?.email || 'No email'}</p>
+                <p>{customer?.phone || 'No phone'}</p>
+                <p className="text-sm">{customer?.email || 'No email'}</p>
               </div>
               <Separator />
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Delivery Address</h4>
-                <p>{order.delivery_address || order.customers?.address || 'No address provided'}</p>
+                <p>{order.delivery_address || customer?.address || 'No address provided'}</p>
               </div>
             </CardContent>
           </Card>
