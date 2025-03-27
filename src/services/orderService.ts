@@ -92,16 +92,17 @@ export const fetchOrderDetail = async (orderId: string) => {
       image_url: null
     };
     
-    // Safely handle foods with proper null checking
+    // Safely handle foods with proper null checking - fix for TS18047
     const formattedFoods: FoodItem = 
-      item.foods && 
+      (item.foods !== null && 
+      item.foods !== undefined && 
       typeof item.foods === 'object' && 
-      item.foods !== null && 
-      !('code' in item.foods) // Check if it's not an error object
+      // Make sure it's not an error object from Supabase
+      !('code' in (item.foods as object)))
         ? {
-            id: (item.foods as any).id ?? defaultFoodItem.id,
-            name: (item.foods as any).name ?? defaultFoodItem.name,
-            image_url: (item.foods as any).image_url ?? defaultFoodItem.image_url
+            id: ((item.foods as any).id ?? defaultFoodItem.id),
+            name: ((item.foods as any).name ?? defaultFoodItem.name),
+            image_url: ((item.foods as any).image_url ?? defaultFoodItem.image_url)
           }
         : defaultFoodItem;
     
