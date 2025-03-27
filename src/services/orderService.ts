@@ -79,21 +79,34 @@ export const fetchOrderDetail = async (orderId: string) => {
       special_instructions = customizations.special_instructions || null;
     }
     
-    // Ensure foods is properly handled, even if it's null or an error object
-    const hasValidFoods = item.foods && 
-                  typeof item.foods === 'object' && 
-                  item.foods !== null && 
-                  !('error' in (item.foods || {}));
+    // Handle foods properly, ensuring it matches our interface
+    let formattedFoods = null;
     
-    const foods = hasValidFoods
-      ? item.foods 
-      : { id: '', name: 'Unknown item', image_url: null };
+    // Check if foods exists and is not an error object
+    if (item.foods && 
+        typeof item.foods === 'object' && 
+        item.foods !== null && 
+        !('error' in (item.foods || {}))) {
+      // Create a properly typed foods object
+      formattedFoods = {
+        id: item.foods.id || '',
+        name: item.foods.name || 'Unknown item',
+        image_url: item.foods.image_url || null
+      };
+    } else {
+      // Provide default foods object if missing or has error
+      formattedFoods = {
+        id: '',
+        name: 'Unknown item',
+        image_url: null
+      };
+    }
     
     return {
       ...item,
-      foods,
+      foods: formattedFoods,
       special_instructions,
-      unit_price: item.unit_price // Ensure unit_price is used
+      unit_price: item.unit_price
     };
   });
 
