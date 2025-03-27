@@ -43,11 +43,11 @@ export type Database = {
           created_at: string
           email: string
           favorite_products: string[] | null
+          id: string
           loyalty_points: number | null
           name: string
           phone_number: string | null
           updated_at: string | null
-          user_id: string
         }
         Insert: {
           address?: string | null
@@ -55,11 +55,11 @@ export type Database = {
           created_at?: string
           email: string
           favorite_products?: string[] | null
+          id: string
           loyalty_points?: number | null
           name: string
           phone_number?: string | null
           updated_at?: string | null
-          user_id: string
         }
         Update: {
           address?: string | null
@@ -67,11 +67,11 @@ export type Database = {
           created_at?: string
           email?: string
           favorite_products?: string[] | null
+          id?: string
           loyalty_points?: number | null
           name?: string
           phone_number?: string | null
           updated_at?: string | null
-          user_id?: string
         }
         Relationships: []
       }

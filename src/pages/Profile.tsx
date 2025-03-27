@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -77,9 +76,9 @@ const Profile = () => {
           throw profileError;
         }
 
-        // Check if user exists in customers table
+        // Check if user exists in customer table
         const { data: customerData, error: customerError } = await supabase
-          .from('customers')
+          .from('customer')
           .select('*')
           .eq('user_id', user.id)
           .single();
@@ -103,7 +102,7 @@ const Profile = () => {
         form.reset({
           name: combinedData?.name || "",
           email: user.email || "",
-          phone: combinedData?.phone || "",
+          phone: combinedData?.phone_number || "",
           address: combinedData?.address || "",
           bio: combinedData?.bio || "",
         });
@@ -149,21 +148,21 @@ const Profile = () => {
         throw profileError;
       }
 
-      console.log("Updating customers table with:", {
+      console.log("Updating customer table with:", {
         user_id: user.id,
         name: values.name,
-        phone: values.phone,
+        phone_number: values.phone,
         address: values.address,
         email: values.email,
       });
       
-      // Update or create customer in customers table
+      // Update or create customer in customer table
       const { error: customerError } = await supabase
-        .from('customers')
+        .from('customer')
         .upsert({
           user_id: user.id,
           name: values.name,
-          phone: values.phone,
+          phone_number: values.phone,
           address: values.address,
           email: values.email,
         }, {
