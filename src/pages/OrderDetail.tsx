@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
@@ -9,93 +10,19 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft } from 'lucide-react';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string | null;
-  phone_number: string | null;
-  address: string | null;
-  avatar: string | null;
-  created_at: string;
-  updated_at: string | null;
-}
-
-interface CustomerDetails {
-  id: string;
-  customer_id: string;
-  dietary_restrictions: string | null;
-  delivery_instructions: string | null;
-  favorite_foods: string | null;
-  preferences: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Order {
-  id: string;
-  customer_id: string;
-  status: string;
-  payment_status: string | null;
-  total_amount: number;
-  created_at: string;
-  updated_at: string;
-  delivery_address: string | null;
-}
-
-interface OrderItem {
-  id: string;
-  order_id: string;
-  food_id: string;
-  quantity: number;
-  price_per_item: number;
-  total_price: number;
-  special_instructions: string | null;
-  created_at: string;
-  foods: {
-    id: string;
-    name: string;
-    price: number;
-    image_url: string | null;
-  };
-}
-
-interface OrderDetailData {
-  order: Order;
-  customer: Customer | null;
-  customerDetails: CustomerDetails | null;
-  orderItems: OrderItem[];
-}
-
-const fetchOrderDetail = async (orderId: string): Promise<OrderDetailData> => {
+const fetchOrderDetail = async (orderId: string) => {
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .select('*')
+    .select(`
+      *,
+      customers(*, customer_details(*))
+    `)
     .eq('id', orderId)
     .single();
   
   if (orderError) {
     console.error('Error fetching order details:', orderError);
     throw orderError;
-  }
-
-  const { data: customer, error: customerError } = await supabase
-    .from('customer')
-    .select('*')
-    .eq('id', order.customer_id)
-    .single();
-
-  if (customerError && customerError.code !== 'PGSQL_ERROR_NODATA') {
-    console.error('Error fetching customer details:', customerError);
-  }
-
-  const { data: customerDetails, error: detailsError } = await supabase
-    .from('customer_details')
-    .select('*')
-    .eq('customer_id', order.customer_id)
-    .single();
-
-  if (detailsError && detailsError.code !== 'PGSQL_ERROR_NODATA') {
-    console.error('Error fetching customer details:', detailsError);
   }
 
   const { data: orderItems, error: itemsError } = await supabase
@@ -111,12 +38,7 @@ const fetchOrderDetail = async (orderId: string): Promise<OrderDetailData> => {
     throw itemsError;
   }
 
-  return { 
-    order, 
-    customer: customer || null, 
-    customerDetails: customerDetails || null, 
-    orderItems: orderItems || [] 
-  };
+  return { order, orderItems };
 };
 
 const OrderDetail = () => {
@@ -148,7 +70,7 @@ const OrderDetail = () => {
     return <div className="text-center py-10 text-red-500">Error loading order details</div>;
   }
 
-  const { order, customer, customerDetails, orderItems } = data;
+  const { order, orderItems } = data;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -235,33 +157,33 @@ const OrderDetail = () => {
             <CardContent className="space-y-4">
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Name</h4>
-                <p>{customer?.name || 'N/A'}</p>
+                <p>{order.customers?.name || 'N/A'}</p>
               </div>
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Contact</h4>
-                <p>{customer?.phone_number || 'No phone'}</p>
-                <p className="text-sm">{customer?.email || 'No email'}</p>
+                <p>{order.customers?.phone || 'No phone'}</p>
+                <p className="text-sm">{order.customers?.email || 'No email'}</p>
               </div>
               <Separator />
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Delivery Address</h4>
-                <p>{order.delivery_address || customer?.address || 'No address provided'}</p>
+                <p>{order.delivery_address || order.customers?.address || 'No address provided'}</p>
               </div>
-              {customerDetails?.dietary_restrictions && (
+              {order.customers?.customer_details?.dietary_restrictions && (
                 <>
                   <Separator />
                   <div>
                     <h4 className="text-sm font-medium text-gray-500">Dietary Restrictions</h4>
-                    <p>{customerDetails.dietary_restrictions}</p>
+                    <p>{order.customers.customer_details.dietary_restrictions}</p>
                   </div>
                 </>
               )}
-              {customerDetails?.delivery_instructions && (
+              {order.customers?.customer_details?.delivery_instructions && (
                 <>
                   <Separator />
                   <div>
                     <h4 className="text-sm font-medium text-gray-500">Delivery Instructions</h4>
-                    <p>{customerDetails.delivery_instructions}</p>
+                    <p>{order.customers.customer_details.delivery_instructions}</p>
                   </div>
                 </>
               )}

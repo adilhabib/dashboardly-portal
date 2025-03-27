@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -26,18 +27,19 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-// Define explicit types for profile data to avoid deep type instantiation
+// Define type for our profile data
 interface ProfileData {
   id?: string;
   username?: string;
   name?: string;
   email?: string;
-  phone_number?: string;
+  phone?: string;
   address?: string;
   avatar_url?: string;
   bio?: string;
   created_at?: string;
   updated_at?: string;
+  user_id?: string;
 }
 
 const Profile = () => {
@@ -75,9 +77,9 @@ const Profile = () => {
           throw profileError;
         }
 
-        // Check if user exists in customer table
+        // Check if user exists in customers table
         const { data: customerData, error: customerError } = await supabase
-          .from('customer')
+          .from('customers')
           .select('*')
           .eq('user_id', user.id)
           .single();
@@ -89,7 +91,7 @@ const Profile = () => {
         // Combine data from both sources
         const combinedData: ProfileData = {
           ...profileData,
-          ...(customerData || {}),
+          ...customerData,
           email: user.email,
           // Ensure bio is defined even if it's not in the database
           bio: profileData?.bio || "",
@@ -101,7 +103,7 @@ const Profile = () => {
         form.reset({
           name: combinedData?.name || "",
           email: user.email || "",
-          phone: combinedData?.phone_number || "",
+          phone: combinedData?.phone || "",
           address: combinedData?.address || "",
           bio: combinedData?.bio || "",
         });
@@ -147,46 +149,30 @@ const Profile = () => {
         throw profileError;
       }
 
-      // Check if the customer already exists
-      const { data: existingCustomer } = await supabase
-        .from('customer')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      console.log("Updating customers table with:", {
+        user_id: user.id,
+        name: values.name,
+        phone: values.phone,
+        address: values.address,
+        email: values.email,
+      });
       
-      if (existingCustomer) {
-        // Update existing customer
-        const { error: customerError } = await supabase
-          .from('customer')
-          .update({
-            name: values.name,
-            phone_number: values.phone,
-            address: values.address,
-            email: values.email,
-          })
-          .eq('user_id', user.id);
+      // Update or create customer in customers table
+      const { error: customerError } = await supabase
+        .from('customers')
+        .upsert({
+          user_id: user.id,
+          name: values.name,
+          phone: values.phone,
+          address: values.address,
+          email: values.email,
+        }, {
+          onConflict: 'user_id' // Specify which column to check for conflicts
+        });
 
-        if (customerError) {
-          console.error("Customer update error:", customerError);
-          throw customerError;
-        }
-      } else {
-        // Create new customer with a generated UUID for id
-        const { error: customerError } = await supabase
-          .from('customer')
-          .insert({
-            id: crypto.randomUUID(),
-            user_id: user.id,
-            name: values.name,
-            phone_number: values.phone,
-            address: values.address,
-            email: values.email,
-          });
-
-        if (customerError) {
-          console.error("Customer creation error:", customerError);
-          throw customerError;
-        }
+      if (customerError) {
+        console.error("Customer update error:", customerError);
+        throw customerError;
       }
 
       toast({

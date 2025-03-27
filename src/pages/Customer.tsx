@@ -11,18 +11,7 @@ import { Eye, Search, UserPlus, Loader2 } from 'lucide-react';
 import { AddCustomerModal } from '@/components/customer/AddCustomerModal';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Define an explicit type for the customer to avoid deep type instantiation issues
-type CustomerType = {
-  id: string;
-  name: string;
-  email: string | null;
-  phone_number: string | null;
-  address: string | null;
-  created_at: string;
-}
-
-// Explicitly define the return type of the fetchCustomers function
-const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[]> => {
+const fetchCustomers = async (userId: string | undefined) => {
   if (!userId) {
     console.log('No user ID provided for fetchCustomers');
     return [];
@@ -31,9 +20,8 @@ const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[
   console.log('Fetching customers for user ID:', userId);
   
   const { data, error } = await supabase
-    .from('customer')
-    .select('*')
-    .eq('user_id', userId)
+    .from('customers')
+    .select('*, customer_details(*)')
     .order('name');
   
   if (error) {
@@ -41,7 +29,7 @@ const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[
     throw error;
   }
   
-  return data as CustomerType[];
+  return data;
 };
 
 const Customer = () => {
@@ -50,7 +38,7 @@ const Customer = () => {
   const { user } = useAuth();
   
   const { 
-    data: customers, 
+    data: customer, 
     isLoading, 
     isError, 
     refetch 
@@ -60,10 +48,10 @@ const Customer = () => {
     enabled: !!user,
   });
 
-  const filteredCustomers = customers?.filter(customer => 
+  const filteredCustomers = customer?.filter(customer => 
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (customer.phone_number && customer.phone_number.includes(searchTerm))
+    (customer.phone && customer.phone.includes(searchTerm))
   );
 
   const handleOpenAddModal = () => {
@@ -119,6 +107,7 @@ const Customer = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Address</TableHead>
+                  <TableHead>Orders</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -130,14 +119,18 @@ const Customer = () => {
                       {customer.email && (
                         <div className="text-sm">{customer.email}</div>
                       )}
-                      {customer.phone_number && (
-                        <div className="text-sm text-gray-500">{customer.phone_number}</div>
+                      {customer.phone && (
+                        <div className="text-sm text-gray-500">{customer.phone}</div>
                       )}
                     </TableCell>
                     <TableCell>
                       <div className="text-sm truncate max-w-[200px]">
                         {customer.address || 'No address'}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {/* We would fetch this in a real app */}
+                      <div className="text-sm">0 orders</div>
                     </TableCell>
                     <TableCell>
                       <Link to={`/customer-detail?id=${customer.id}`}>

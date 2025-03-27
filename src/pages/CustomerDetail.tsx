@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
@@ -7,57 +8,19 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Mail, Phone, MapPin } from 'lucide-react';
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string | null;
-  phone_number: string | null;
-  address: string | null;
-  created_at: string;
-  updated_at: string | null;
-}
-
-interface CustomerDetails {
-  id: string;
-  customer_id: string;
-  dietary_restrictions: string | null;
-  delivery_instructions: string | null;
-  favorite_foods: string | null;
-  preferences: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Order {
-  id: string;
-  customer_id: string;
-  total_amount: number;
-  status: string;
-  created_at: string;
-}
-
 const fetchCustomerDetail = async (customerId: string) => {
-  const { data: customer, error: customerError } = await supabase
-    .from('customer')
-    .select('*')
+  const { data, error } = await supabase
+    .from('customers')
+    .select(`*, customer_details(*)`)
     .eq('id', customerId)
     .single();
   
-  if (customerError) {
-    console.error('Error fetching customer details:', customerError);
-    throw customerError;
+  if (error) {
+    console.error('Error fetching customer details:', error);
+    throw error;
   }
 
-  const { data: customerDetails, error: detailsError } = await supabase
-    .from('customer_details')
-    .select('*')
-    .eq('customer_id', customerId)
-    .single();
-
-  if (detailsError && detailsError.code !== 'PGSQL_ERROR_NODATA') {
-    console.error('Error fetching customer details:', detailsError);
-  }
-
+  // Fetch orders for this customer
   const { data: orders, error: ordersError } = await supabase
     .from('orders')
     .select('*')
@@ -69,11 +32,7 @@ const fetchCustomerDetail = async (customerId: string) => {
     throw ordersError;
   }
   
-  return { 
-    customer, 
-    customerDetails: customerDetails || null, 
-    orders: orders || [] 
-  };
+  return { customer: data, orders };
 };
 
 const CustomerDetail = () => {
@@ -94,7 +53,7 @@ const CustomerDetail = () => {
     return <div className="text-center py-10 text-red-500">Error loading customer details</div>;
   }
 
-  const { customer, customerDetails, orders } = data;
+  const { customer, orders } = data;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -130,10 +89,10 @@ const CustomerDetail = () => {
                         <span>{customer.email}</span>
                       </div>
                     )}
-                    {customer.phone_number && (
+                    {customer.phone && (
                       <div className="flex items-center gap-2 mt-2">
                         <Phone size={16} className="text-gray-400" />
-                        <span>{customer.phone_number}</span>
+                        <span>{customer.phone}</span>
                       </div>
                     )}
                   </div>
@@ -150,31 +109,31 @@ const CustomerDetail = () => {
                 </div>
                 
                 <div className="space-y-4">
-                  {customerDetails?.dietary_restrictions && (
+                  {customer.customer_details?.dietary_restrictions && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Dietary Restrictions</h3>
-                      <p className="mt-1">{customerDetails.dietary_restrictions}</p>
+                      <p className="mt-1">{customer.customer_details.dietary_restrictions}</p>
                     </div>
                   )}
                   
-                  {customerDetails?.preferences && (
+                  {customer.customer_details?.preferences && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Preferences</h3>
-                      <p className="mt-1">{customerDetails.preferences}</p>
+                      <p className="mt-1">{customer.customer_details.preferences}</p>
                     </div>
                   )}
                   
-                  {customerDetails?.favorite_foods && (
+                  {customer.customer_details?.favorite_foods && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Favorite Foods</h3>
-                      <p className="mt-1">{customerDetails.favorite_foods}</p>
+                      <p className="mt-1">{customer.customer_details.favorite_foods}</p>
                     </div>
                   )}
                   
-                  {customerDetails?.delivery_instructions && (
+                  {customer.customer_details?.delivery_instructions && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Delivery Instructions</h3>
-                      <p className="mt-1">{customerDetails.delivery_instructions}</p>
+                      <p className="mt-1">{customer.customer_details.delivery_instructions}</p>
                     </div>
                   )}
                 </div>
