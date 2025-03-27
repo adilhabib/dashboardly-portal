@@ -11,20 +11,40 @@ import { Link } from 'react-router-dom';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const fetchOrders = async () => {
-  const { data, error } = await supabase
+  // Modified query to avoid using the relationship between orders and customer
+  const { data: orders, error: ordersError } = await supabase
     .from('orders')
-    .select(`
-      *,
-      customer(name, phone_number)
-    `)
+    .select('*')
     .order('created_at', { ascending: false });
   
-  if (error) {
-    console.error('Error fetching orders:', error);
-    throw error;
+  if (ordersError) {
+    console.error('Error fetching orders:', ordersError);
+    throw ordersError;
   }
   
-  return data;
+  // For each order, fetch the customer data separately
+  const ordersWithCustomers = await Promise.all(
+    orders.map(async (order) => {
+      if (order.customer_id) {
+        const { data: customer, error: customerError } = await supabase
+          .from('customer')
+          .select('name, phone_number')
+          .eq('id', order.customer_id)
+          .maybeSingle();
+        
+        if (customerError) {
+          console.error('Error fetching customer for order:', customerError);
+          return { ...order, customer: null };
+        }
+        
+        return { ...order, customer };
+      }
+      
+      return { ...order, customer: null };
+    })
+  );
+  
+  return ordersWithCustomers;
 };
 
 const OrderList = () => {

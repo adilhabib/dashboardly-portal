@@ -226,44 +226,72 @@ export type Database = {
       order_items: {
         Row: {
           created_at: string
-          food_id: string | null
+          customizations: Json | null
           id: string
-          order_id: string | null
-          price_per_item: number
+          order_id: string
+          product_data: Json
+          product_id: string
           quantity: number
-          special_instructions: string | null
           total_price: number
+          unit_price: number
         }
         Insert: {
           created_at?: string
-          food_id?: string | null
+          customizations?: Json | null
           id?: string
-          order_id?: string | null
-          price_per_item: number
-          quantity?: number
-          special_instructions?: string | null
+          order_id: string
+          product_data: Json
+          product_id: string
+          quantity: number
           total_price: number
+          unit_price: number
         }
         Update: {
           created_at?: string
-          food_id?: string | null
+          customizations?: Json | null
           id?: string
-          order_id?: string | null
-          price_per_item?: number
+          order_id?: string
+          product_data?: Json
+          product_id?: string
           quantity?: number
-          special_instructions?: string | null
           total_price?: number
+          unit_price?: number
         }
         Relationships: [
           {
-            foreignKeyName: "order_items_food_id_fkey"
-            columns: ["food_id"]
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: "foods"
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      order_status_updates: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          order_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          order_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          order_id?: string
+          status?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "order_items_order_id_fkey"
+            foreignKeyName: "order_status_updates_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -274,43 +302,71 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
-          customer_id: string | null
-          delivery_address: string | null
+          customer_id: string
+          delivery_address: Json | null
+          delivery_fee: number | null
+          discount: number | null
+          driver_details: Json | null
+          driver_id: string | null
+          estimated_delivery_time: string | null
           id: string
-          payment_status: string | null
+          order_type: string
+          payment_method: string
+          payment_status: string
+          promo_code: string | null
+          promo_details: Json | null
+          special_instructions: string | null
           status: string
-          total_amount: number
+          subtotal: number
+          tax: number
+          total: number
           updated_at: string
         }
         Insert: {
           created_at?: string
-          customer_id?: string | null
-          delivery_address?: string | null
+          customer_id: string
+          delivery_address?: Json | null
+          delivery_fee?: number | null
+          discount?: number | null
+          driver_details?: Json | null
+          driver_id?: string | null
+          estimated_delivery_time?: string | null
           id?: string
-          payment_status?: string | null
-          status?: string
-          total_amount?: number
+          order_type: string
+          payment_method: string
+          payment_status: string
+          promo_code?: string | null
+          promo_details?: Json | null
+          special_instructions?: string | null
+          status: string
+          subtotal: number
+          tax: number
+          total: number
           updated_at?: string
         }
         Update: {
           created_at?: string
-          customer_id?: string | null
-          delivery_address?: string | null
+          customer_id?: string
+          delivery_address?: Json | null
+          delivery_fee?: number | null
+          discount?: number | null
+          driver_details?: Json | null
+          driver_id?: string | null
+          estimated_delivery_time?: string | null
           id?: string
-          payment_status?: string | null
+          order_type?: string
+          payment_method?: string
+          payment_status?: string
+          promo_code?: string | null
+          promo_details?: Json | null
+          special_instructions?: string | null
           status?: string
-          total_amount?: number
+          subtotal?: number
+          tax?: number
+          total?: number
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "orders_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customer"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
