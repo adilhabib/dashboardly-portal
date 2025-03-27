@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
@@ -32,7 +33,7 @@ const fetchOrderDetail = async (orderId: string) => {
     const { data: customerData, error: customerError } = await supabase
       .from('customer')
       .select('*')
-      .eq('user_id', order.customer_id)
+      .eq('id', order.customer_id)
       .single();
     
     if (customerError) {
@@ -50,7 +51,7 @@ const fetchOrderDetail = async (orderId: string) => {
     const { data: detailsData, error: detailsError } = await supabase
       .from('customer_details')
       .select('*')
-      .eq('customer_id', customer.user_id)
+      .eq('customer_id', customer.id)
       .maybeSingle();
     
     if (detailsError) {

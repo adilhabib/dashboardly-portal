@@ -15,7 +15,7 @@ const fetchCustomerDetail = async (customerId: string) => {
   const { data: customer, error: customerError } = await supabase
     .from('customer')
     .select('*')
-    .eq('user_id', customerId)
+    .eq('id', customerId)
     .single();
   
   if (customerError) {

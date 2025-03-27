@@ -61,19 +61,18 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
     try {
       console.log('Submitting customer data:', values);
       
-      // Generate a random UUID for user_id since this is not tied to auth
-      // In a real app with authentication, you would use auth.uid()
-      const randomUserId = crypto.randomUUID();
+      // Generate a random UUID for id since this is not tied to auth
+      const randomId = crypto.randomUUID();
       
-      // Insert new customer into the database with the required user_id field
+      // Insert new customer into the database
       const { data, error } = await supabase
         .from('customer')
         .insert({
+          id: randomId, // Use id as the primary key
           name: values.name,
           email: values.email || null,
           phone_number: values.phone || null,
           address: values.address || null,
-          user_id: randomUserId // Add the required user_id field
         })
         .select();
       

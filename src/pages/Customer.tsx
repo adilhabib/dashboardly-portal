@@ -100,7 +100,7 @@ const Customer = () => {
               </TableHeader>
               <TableBody>
                 {filteredCustomers.map((customer) => (
-                  <TableRow key={customer.user_id}>
+                  <TableRow key={customer.id}>
                     <TableCell className="font-medium">{customer.name}</TableCell>
                     <TableCell>
                       {customer.email && (
@@ -120,7 +120,7 @@ const Customer = () => {
                       <div className="text-sm">0 orders</div>
                     </TableCell>
                     <TableCell>
-                      <Link to={`/customer-detail?id=${customer.user_id}`}>
+                      <Link to={`/customer-detail?id=${customer.id}`}>
                         <Button variant="ghost" size="icon">
                           <Eye size={16} />
                         </Button>

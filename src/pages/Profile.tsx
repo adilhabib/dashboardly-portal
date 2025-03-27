@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -38,7 +39,7 @@ interface ProfileData {
   bio?: string;
   created_at?: string;
   updated_at?: string;
-  user_id?: string;
+  phone_number?: string; // Add this to match database schema
 }
 
 const Profile = () => {
