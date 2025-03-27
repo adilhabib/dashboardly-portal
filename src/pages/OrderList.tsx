@@ -12,6 +12,8 @@ import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { toast } from '@/hooks/use-toast';
 
 const fetchOrders = async () => {
+  console.log('Fetching orders...');
+  
   // Modified query to avoid using the relationship between orders and customer
   const { data: orders, error: ordersError } = await supabase
     .from('orders')
@@ -22,6 +24,9 @@ const fetchOrders = async () => {
     console.error('Error fetching orders:', ordersError);
     throw ordersError;
   }
+  
+  console.log('Orders fetched:', orders ? orders.length : 0, 'records found');
+  console.log('Sample order data:', orders && orders.length > 0 ? orders[0] : 'No orders found');
   
   // For each order, fetch the customer data separately
   const ordersWithCustomers = await Promise.all(
@@ -45,16 +50,25 @@ const fetchOrders = async () => {
     })
   );
   
+  console.log('Orders with customers:', ordersWithCustomers.length);
   return ordersWithCustomers;
 };
 
 const OrderList = () => {
   const queryClient = useQueryClient();
   
-  const { data: orders, isLoading, isError } = useQuery({
+  const { data: orders, isLoading, isError, error } = useQuery({
     queryKey: ['orders'],
     queryFn: fetchOrders,
   });
+
+  // Log actual data and any errors
+  useEffect(() => {
+    console.log('Orders data in component:', orders);
+    if (isError) {
+      console.error('Error in useQuery:', error);
+    }
+  }, [orders, isError, error]);
 
   // Subscribe to real-time changes in the orders table
   useEffect(() => {
@@ -88,6 +102,8 @@ const OrderList = () => {
           queryClient.invalidateQueries({ queryKey: ['orders'] });
         })
       .subscribe();
+
+    console.log('Subscribed to real-time updates for orders table');
 
     // Cleanup subscription when component unmounts
     return () => {
@@ -126,7 +142,12 @@ const OrderList = () => {
   }
 
   if (isError) {
-    return <div className="text-center py-10 text-red-500">Error loading orders</div>;
+    return (
+      <div className="text-center py-10 text-red-500">
+        <p>Error loading orders</p>
+        <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error'}</p>
+      </div>
+    );
   }
 
   return (
@@ -181,6 +202,24 @@ const OrderList = () => {
           ) : (
             <div className="text-center py-10 bg-gray-50 rounded-lg">
               <p className="text-gray-500">No orders available</p>
+              <p className="text-sm text-gray-400 mt-2">
+                You don't have any orders in your database yet. Try adding some orders to see them here.
+              </p>
+              <div className="mt-4">
+                <Button
+                  variant="outline" 
+                  onClick={() => {
+                    // Manually trigger a refetch
+                    queryClient.invalidateQueries({ queryKey: ['orders'] });
+                    toast({
+                      title: "Refreshing orders",
+                      description: "Checking for new orders..."
+                    });
+                  }}
+                >
+                  Refresh Orders
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
