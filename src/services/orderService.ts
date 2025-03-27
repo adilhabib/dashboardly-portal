@@ -80,10 +80,12 @@ export const fetchOrderDetail = async (orderId: string) => {
     }
     
     // Ensure foods is properly handled, even if it's null or an error object
-    const foods = item.foods && 
+    const hasValidFoods = item.foods && 
                   typeof item.foods === 'object' && 
                   item.foods !== null && 
-                  !('error' in item.foods) 
+                  !('error' in (item.foods || {}));
+    
+    const foods = hasValidFoods
       ? item.foods 
       : { id: '', name: 'Unknown item', image_url: null };
     
