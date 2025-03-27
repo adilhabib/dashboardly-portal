@@ -11,9 +11,10 @@ import { Eye, Search, UserPlus, Loader2 } from 'lucide-react';
 import { AddCustomerModal } from '@/components/customer/AddCustomerModal';
 
 const fetchCustomers = async () => {
+  console.log('Fetching customers from the customer table');
   const { data, error } = await supabase
-    .from('customers')
-    .select('*, customer_details(*)')
+    .from('customer')
+    .select('*')
     .order('name');
   
   if (error) {
@@ -21,6 +22,7 @@ const fetchCustomers = async () => {
     throw error;
   }
   
+  console.log('Fetched customers:', data);
   return data;
 };
 
@@ -36,7 +38,7 @@ const Customer = () => {
   const filteredCustomers = customers?.filter(customer => 
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (customer.phone && customer.phone.includes(searchTerm))
+    (customer.phone_number && customer.phone_number.includes(searchTerm))
   );
 
   const handleOpenAddModal = () => {
@@ -104,8 +106,8 @@ const Customer = () => {
                       {customer.email && (
                         <div className="text-sm">{customer.email}</div>
                       )}
-                      {customer.phone && (
-                        <div className="text-sm text-gray-500">{customer.phone}</div>
+                      {customer.phone_number && (
+                        <div className="text-sm text-gray-500">{customer.phone_number}</div>
                       )}
                     </TableCell>
                     <TableCell>

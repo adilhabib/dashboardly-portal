@@ -59,22 +59,27 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
 
   const onSubmit = async (values: FormValues) => {
     try {
+      console.log('Submitting customer data:', values);
+      
       // Insert new customer into the database
       const { data, error } = await supabase
-        .from('customers')
+        .from('customer')
         .insert([
           {
             name: values.name,
             email: values.email || null,
-            phone: values.phone || null,
+            phone_number: values.phone || null,
             address: values.address || null,
           },
         ])
         .select();
       
       if (error) {
+        console.error('Error adding customer:', error);
         throw error;
       }
+      
+      console.log('Customer added successfully:', data);
       
       // Invalidate and refetch the customers query
       queryClient.invalidateQueries({ queryKey: ['customers'] });

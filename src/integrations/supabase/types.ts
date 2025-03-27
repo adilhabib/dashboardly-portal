@@ -106,47 +106,6 @@ export type Database = {
           preferences?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "customer_details_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: true
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      customers: {
-        Row: {
-          address: string | null
-          created_at: string
-          email: string | null
-          id: string
-          name: string
-          phone: string | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          address?: string | null
-          created_at?: string
-          email?: string | null
-          id?: string
-          name: string
-          phone?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          address?: string | null
-          created_at?: string
-          email?: string | null
-          id?: string
-          name?: string
-          phone?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
         Relationships: []
       }
       food_details: {
@@ -375,15 +334,7 @@ export type Database = {
           total_amount?: number
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "orders_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
