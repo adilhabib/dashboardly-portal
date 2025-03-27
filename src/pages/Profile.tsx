@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -27,7 +26,7 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-// Define type for our profile data
+// Define explicit types for profile data to avoid deep type instantiation
 interface ProfileData {
   id?: string;
   username?: string;
@@ -39,7 +38,6 @@ interface ProfileData {
   bio?: string;
   created_at?: string;
   updated_at?: string;
-  user_id?: string;
 }
 
 const Profile = () => {
@@ -91,7 +89,7 @@ const Profile = () => {
         // Combine data from both sources
         const combinedData: ProfileData = {
           ...profileData,
-          ...customerData,
+          ...(customerData || {}),
           email: user.email,
           // Ensure bio is defined even if it's not in the database
           bio: profileData?.bio || "",
@@ -149,30 +147,46 @@ const Profile = () => {
         throw profileError;
       }
 
-      console.log("Updating customer table with:", {
-        user_id: user.id,
-        name: values.name,
-        phone_number: values.phone,
-        address: values.address,
-        email: values.email,
-      });
-      
-      // Update or create customer in customer table
-      const { error: customerError } = await supabase
+      // Check if the customer already exists
+      const { data: existingCustomer } = await supabase
         .from('customer')
-        .upsert({
-          user_id: user.id,
-          name: values.name,
-          phone_number: values.phone,
-          address: values.address,
-          email: values.email,
-        }, {
-          onConflict: 'user_id' // Specify which column to check for conflicts
-        });
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (existingCustomer) {
+        // Update existing customer
+        const { error: customerError } = await supabase
+          .from('customer')
+          .update({
+            name: values.name,
+            phone_number: values.phone,
+            address: values.address,
+            email: values.email,
+          })
+          .eq('user_id', user.id);
 
-      if (customerError) {
-        console.error("Customer update error:", customerError);
-        throw customerError;
+        if (customerError) {
+          console.error("Customer update error:", customerError);
+          throw customerError;
+        }
+      } else {
+        // Create new customer with a generated UUID for id
+        const { error: customerError } = await supabase
+          .from('customer')
+          .insert({
+            id: crypto.randomUUID(),
+            user_id: user.id,
+            name: values.name,
+            phone_number: values.phone,
+            address: values.address,
+            email: values.email,
+          });
+
+        if (customerError) {
+          console.error("Customer creation error:", customerError);
+          throw customerError;
+        }
       }
 
       toast({

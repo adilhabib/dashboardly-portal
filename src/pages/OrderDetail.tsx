@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
@@ -10,8 +9,64 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft } from 'lucide-react';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 
-const fetchOrderDetail = async (orderId: string) => {
-  // Fetch order data
+interface Customer {
+  id: string;
+  name: string;
+  email: string | null;
+  phone_number: string | null;
+  address: string | null;
+  avatar: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+interface CustomerDetails {
+  id: string;
+  customer_id: string;
+  dietary_restrictions: string | null;
+  delivery_instructions: string | null;
+  favorite_foods: string | null;
+  preferences: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Order {
+  id: string;
+  customer_id: string;
+  status: string;
+  payment_status: string | null;
+  total_amount: number;
+  created_at: string;
+  updated_at: string;
+  delivery_address: string | null;
+}
+
+interface OrderItem {
+  id: string;
+  order_id: string;
+  food_id: string;
+  quantity: number;
+  price_per_item: number;
+  total_price: number;
+  special_instructions: string | null;
+  created_at: string;
+  foods: {
+    id: string;
+    name: string;
+    price: number;
+    image_url: string | null;
+  };
+}
+
+interface OrderDetailData {
+  order: Order;
+  customer: Customer | null;
+  customerDetails: CustomerDetails | null;
+  orderItems: OrderItem[];
+}
+
+const fetchOrderDetail = async (orderId: string): Promise<OrderDetailData> => {
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .select('*')
@@ -23,7 +78,6 @@ const fetchOrderDetail = async (orderId: string) => {
     throw orderError;
   }
 
-  // Fetch customer data
   const { data: customer, error: customerError } = await supabase
     .from('customer')
     .select('*')
@@ -34,7 +88,6 @@ const fetchOrderDetail = async (orderId: string) => {
     console.error('Error fetching customer details:', customerError);
   }
 
-  // Fetch customer details if they exist
   const { data: customerDetails, error: detailsError } = await supabase
     .from('customer_details')
     .select('*')
@@ -45,7 +98,6 @@ const fetchOrderDetail = async (orderId: string) => {
     console.error('Error fetching customer details:', detailsError);
   }
 
-  // Fetch order items
   const { data: orderItems, error: itemsError } = await supabase
     .from('order_items')
     .select(`
@@ -59,7 +111,12 @@ const fetchOrderDetail = async (orderId: string) => {
     throw itemsError;
   }
 
-  return { order, customer, customerDetails, orderItems };
+  return { 
+    order, 
+    customer: customer || null, 
+    customerDetails: customerDetails || null, 
+    orderItems: orderItems || [] 
+  };
 };
 
 const OrderDetail = () => {

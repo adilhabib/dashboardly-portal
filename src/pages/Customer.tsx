@@ -11,6 +11,16 @@ import { Eye, Search, UserPlus, Loader2 } from 'lucide-react';
 import { AddCustomerModal } from '@/components/customer/AddCustomerModal';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Define an explicit type for the customer to avoid deep type instantiation issues
+type CustomerType = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone_number: string | null;
+  address: string | null;
+  created_at: string;
+}
+
 const fetchCustomers = async (userId: string | undefined) => {
   if (!userId) {
     console.log('No user ID provided for fetchCustomers');
@@ -19,7 +29,6 @@ const fetchCustomers = async (userId: string | undefined) => {
   
   console.log('Fetching customers for user ID:', userId);
   
-  // Use the correct table name 'customer' instead of 'customers'
   const { data, error } = await supabase
     .from('customer')
     .select('*')
@@ -31,7 +40,7 @@ const fetchCustomers = async (userId: string | undefined) => {
     throw error;
   }
   
-  return data;
+  return data as CustomerType[];
 };
 
 const Customer = () => {

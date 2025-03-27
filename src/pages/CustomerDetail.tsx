@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
@@ -8,8 +7,36 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Mail, Phone, MapPin } from 'lucide-react';
 
+interface Customer {
+  id: string;
+  name: string;
+  email: string | null;
+  phone_number: string | null;
+  address: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+interface CustomerDetails {
+  id: string;
+  customer_id: string;
+  dietary_restrictions: string | null;
+  delivery_instructions: string | null;
+  favorite_foods: string | null;
+  preferences: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Order {
+  id: string;
+  customer_id: string;
+  total_amount: number;
+  status: string;
+  created_at: string;
+}
+
 const fetchCustomerDetail = async (customerId: string) => {
-  // Fetch the main customer data
   const { data: customer, error: customerError } = await supabase
     .from('customer')
     .select('*')
@@ -21,7 +48,6 @@ const fetchCustomerDetail = async (customerId: string) => {
     throw customerError;
   }
 
-  // Fetch customer details separately if they exist
   const { data: customerDetails, error: detailsError } = await supabase
     .from('customer_details')
     .select('*')
@@ -32,7 +58,6 @@ const fetchCustomerDetail = async (customerId: string) => {
     console.error('Error fetching customer details:', detailsError);
   }
 
-  // Fetch orders for this customer
   const { data: orders, error: ordersError } = await supabase
     .from('orders')
     .select('*')
@@ -44,7 +69,11 @@ const fetchCustomerDetail = async (customerId: string) => {
     throw ordersError;
   }
   
-  return { customer, customerDetails, orders };
+  return { 
+    customer, 
+    customerDetails: customerDetails || null, 
+    orders: orders || [] 
+  };
 };
 
 const CustomerDetail = () => {
