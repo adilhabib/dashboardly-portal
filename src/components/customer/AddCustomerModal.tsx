@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
 
 import {
   Dialog,
@@ -45,7 +44,6 @@ interface AddCustomerModalProps {
 
 export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -61,13 +59,6 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      if (!user) {
-        toast.error('You must be logged in to add customers');
-        return;
-      }
-
-      console.log('Adding customer with user_id:', user.id);
-      
       // Insert new customer into the database
       const { data, error } = await supabase
         .from('customers')
@@ -77,17 +68,13 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
             email: values.email || null,
             phone: values.phone || null,
             address: values.address || null,
-            user_id: user.id // Associate the customer with the current user
           },
         ])
         .select();
       
       if (error) {
-        console.error('Error adding customer:', error);
         throw error;
       }
-      
-      console.log('Customer added successfully:', data);
       
       // Invalidate and refetch the customers query
       queryClient.invalidateQueries({ queryKey: ['customers'] });

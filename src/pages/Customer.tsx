@@ -9,34 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, Search, UserPlus, Loader2 } from 'lucide-react';
 import { AddCustomerModal } from '@/components/customer/AddCustomerModal';
-import { useAuth } from '@/contexts/AuthContext';
 
-// Define proper types to avoid excessive type instantiation
-interface CustomerType {
-  id: string;
-  name: string;
-  email?: string | null;
-  phone?: string | null;
-  address?: string | null;
-  created_at: string;
-  updated_at: string;
-  user_id?: string | null;
-}
-
-const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[]> => {
-  if (!userId) {
-    console.log('No user ID provided for fetchCustomers');
-    return [];
-  }
-  
-  console.log('Fetching customers for user ID:', userId);
-  
-  // Explicitly log the query being executed to debug
-  console.log('Executing query: supabase.from("customers").select("*").order("name")');
-  
+const fetchCustomers = async () => {
   const { data, error } = await supabase
     .from('customers')
-    .select('*')
+    .select('*, customer_details(*)')
     .order('name');
   
   if (error) {
@@ -44,24 +21,16 @@ const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[
     throw error;
   }
   
-  console.log('Fetched customers data:', data);
-  return data || [];
+  return data;
 };
 
 const Customer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const { user } = useAuth();
   
-  const { 
-    data: customers, 
-    isLoading, 
-    isError, 
-    refetch 
-  } = useQuery({
-    queryKey: ['customers', user?.id],
-    queryFn: () => fetchCustomers(user?.id),
-    enabled: !!user,
+  const { data: customers, isLoading, isError, refetch } = useQuery({
+    queryKey: ['customers'],
+    queryFn: fetchCustomers,
   });
 
   const filteredCustomers = customers?.filter(customer => 
