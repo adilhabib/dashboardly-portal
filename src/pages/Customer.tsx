@@ -19,9 +19,11 @@ const fetchCustomers = async (userId: string | undefined) => {
   
   console.log('Fetching customers for user ID:', userId);
   
+  // Use the correct table name 'customer' instead of 'customers'
   const { data, error } = await supabase
-    .from('customers')
-    .select('*, customer_details(*)')
+    .from('customer')
+    .select('*')
+    .eq('user_id', userId)
     .order('name');
   
   if (error) {
@@ -38,7 +40,7 @@ const Customer = () => {
   const { user } = useAuth();
   
   const { 
-    data: customer, 
+    data: customers, 
     isLoading, 
     isError, 
     refetch 
@@ -48,10 +50,10 @@ const Customer = () => {
     enabled: !!user,
   });
 
-  const filteredCustomers = customer?.filter(customer => 
+  const filteredCustomers = customers?.filter(customer => 
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (customer.phone && customer.phone.includes(searchTerm))
+    (customer.phone_number && customer.phone_number.includes(searchTerm))
   );
 
   const handleOpenAddModal = () => {
@@ -107,7 +109,6 @@ const Customer = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Address</TableHead>
-                  <TableHead>Orders</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -119,18 +120,14 @@ const Customer = () => {
                       {customer.email && (
                         <div className="text-sm">{customer.email}</div>
                       )}
-                      {customer.phone && (
-                        <div className="text-sm text-gray-500">{customer.phone}</div>
+                      {customer.phone_number && (
+                        <div className="text-sm text-gray-500">{customer.phone_number}</div>
                       )}
                     </TableCell>
                     <TableCell>
                       <div className="text-sm truncate max-w-[200px]">
                         {customer.address || 'No address'}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {/* We would fetch this in a real app */}
-                      <div className="text-sm">0 orders</div>
                     </TableCell>
                     <TableCell>
                       <Link to={`/customer-detail?id=${customer.id}`}>
