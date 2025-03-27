@@ -74,7 +74,9 @@ export const fetchOrderDetail = async (orderId: string) => {
     // Extract special instructions from customizations if it exists
     let special_instructions = null;
     if (item.customizations && typeof item.customizations === 'object') {
-      special_instructions = item.customizations.special_instructions || null;
+      // Safely access special_instructions with proper type checking
+      const customizations = item.customizations as Record<string, any>;
+      special_instructions = customizations.special_instructions || null;
     }
     
     return {
