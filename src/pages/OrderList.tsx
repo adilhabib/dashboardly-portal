@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
+import { toast } from '@/hooks/use-toast';
 
 const fetchOrders = async () => {
   // Modified query to avoid using the relationship between orders and customer
@@ -48,10 +49,51 @@ const fetchOrders = async () => {
 };
 
 const OrderList = () => {
+  const queryClient = useQueryClient();
+  
   const { data: orders, isLoading, isError } = useQuery({
     queryKey: ['orders'],
     queryFn: fetchOrders,
   });
+
+  // Subscribe to real-time changes in the orders table
+  useEffect(() => {
+    // Enable real-time for the orders table
+    const channel = supabase
+      .channel('public:orders')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'orders' }, 
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          
+          // Show toast notification based on the event type
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: 'New Order Received',
+              description: `Order #${payload.new.id.slice(0, 8)} has been placed.`,
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            toast({
+              title: 'Order Updated',
+              description: `Order #${payload.new.id.slice(0, 8)} has been updated to "${payload.new.status}".`,
+            });
+          } else if (payload.eventType === 'DELETE') {
+            toast({
+              title: 'Order Deleted',
+              description: `Order #${payload.old.id.slice(0, 8)} has been removed.`,
+            });
+          }
+          
+          // Invalidate and refetch orders
+          queryClient.invalidateQueries({ queryKey: ['orders'] });
+        })
+      .subscribe();
+
+    // Cleanup subscription when component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {

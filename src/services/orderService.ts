@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 // Define an interface for the foods object to help with type safety
@@ -84,18 +85,25 @@ export const fetchOrderDetail = async (orderId: string) => {
       special_instructions = customizations.special_instructions || null;
     }
     
+    // Default food item structure if foods is null or invalid
+    const defaultFoodItem: FoodItem = {
+      id: '',
+      name: 'Unknown item',
+      image_url: null
+    };
+    
     // Safely handle foods with proper null checking
-    const formattedFoods: FoodItem = item.foods && typeof item.foods === 'object' && item.foods !== null
-      ? {
-          id: (item.foods as any).id ?? '',
-          name: (item.foods as any).name ?? 'Unknown item',
-          image_url: (item.foods as any).image_url ?? null
-        }
-      : {
-          id: '',
-          name: 'Unknown item',
-          image_url: null
-        };
+    const formattedFoods: FoodItem = 
+      item.foods && 
+      typeof item.foods === 'object' && 
+      item.foods !== null && 
+      !('code' in item.foods) // Check if it's not an error object
+        ? {
+            id: (item.foods as any).id ?? defaultFoodItem.id,
+            name: (item.foods as any).name ?? defaultFoodItem.name,
+            image_url: (item.foods as any).image_url ?? defaultFoodItem.image_url
+          }
+        : defaultFoodItem;
     
     return {
       ...item,
