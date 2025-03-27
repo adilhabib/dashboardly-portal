@@ -2,7 +2,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
@@ -30,6 +29,13 @@ const OrderDetail = () => {
 
   const { order, customer, customerDetails, orderItems } = data;
 
+  // Convert delivery_address to string if it's a JSON object
+  const deliveryAddressString = order.delivery_address ? 
+    (typeof order.delivery_address === 'string' ? 
+      order.delivery_address : 
+      JSON.stringify(order.delivery_address)) : 
+    undefined;
+
   return (
     <div className="container mx-auto px-4 py-6">
       <PageBreadcrumb pageName="Order Details" />
@@ -55,7 +61,7 @@ const OrderDetail = () => {
           <CustomerInfoCard 
             customer={customer} 
             customerDetails={customerDetails} 
-            deliveryAddress={order.delivery_address} 
+            deliveryAddress={deliveryAddressString} 
           />
         </div>
       </div>

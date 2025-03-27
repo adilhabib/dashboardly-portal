@@ -8,7 +8,7 @@ import { formatDate } from '@/lib/utils';
 interface OrderItemType {
   id: string;
   quantity: number;
-  price_per_item: number;
+  unit_price: number; // Changed from price_per_item to match database
   total_price: number;
   special_instructions?: string;
   foods?: {
@@ -22,7 +22,7 @@ interface OrderType {
   id: string;
   status: string;
   payment_status: string;
-  total_amount: number;
+  total: number; // Changed from total_amount to match database
   created_at: string;
 }
 
@@ -76,7 +76,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ order, orderItems }
                     <div>
                       <p className="font-medium">{item.foods ? item.foods.name : 'Unknown item'}</p>
                       <p className="text-sm text-gray-500">
-                        {item.quantity} × PKR {item.price_per_item.toFixed(2)}
+                        {item.quantity} × PKR {item.unit_price.toFixed(2)}
                       </p>
                       {item.special_instructions && (
                         <p className="text-sm italic mt-1">"{item.special_instructions}"</p>
@@ -97,7 +97,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ order, orderItems }
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-500">Total</p>
-          <p className="text-xl font-bold">PKR {order.total_amount.toFixed(2)}</p>
+          <p className="text-xl font-bold">PKR {order.total.toFixed(2)}</p>
         </div>
       </CardFooter>
     </Card>

@@ -41,7 +41,7 @@ export const fetchAnalyticsData = async (dateRange?: { from: Date; to: Date }): 
     throw foodError;
   }
   
-  const totalRevenue = orderData.reduce((sum, order) => sum + (order.total_amount || 0), 0);
+  const totalRevenue = orderData.reduce((sum, order) => sum + (order.total || 0), 0);
   const totalOrders = orderData.length;
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
   const totalFoods = foodData.length;

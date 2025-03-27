@@ -69,5 +69,28 @@ export const fetchOrderDetail = async (orderId: string) => {
 
   console.log('Fetched order items:', orderItems);
 
-  return { order, customer, customerDetails, orderItems };
+  // Map order items to add special_instructions from customizations if needed
+  const mappedOrderItems = orderItems.map(item => {
+    // Extract special instructions from customizations if it exists
+    let special_instructions = null;
+    if (item.customizations && typeof item.customizations === 'object') {
+      special_instructions = item.customizations.special_instructions || null;
+    }
+    
+    return {
+      ...item,
+      special_instructions,
+      unit_price: item.unit_price // Ensure unit_price is used
+    };
+  });
+
+  return { 
+    order: {
+      ...order,
+      // No need to map total to total_amount anymore as we've updated our components
+    }, 
+    customer, 
+    customerDetails, 
+    orderItems: mappedOrderItems 
+  };
 };
