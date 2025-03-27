@@ -9,8 +9,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, Search, UserPlus, Loader2 } from 'lucide-react';
 import { AddCustomerModal } from '@/components/customer/AddCustomerModal';
+import { useAuth } from '@/contexts/AuthContext';
 
-const fetchCustomers = async () => {
+const fetchCustomers = async (userId: string | undefined) => {
+  if (!userId) {
+    console.log('No user ID provided for fetchCustomers');
+    return [];
+  }
+  
+  console.log('Fetching customers for user ID:', userId);
+  
   const { data, error } = await supabase
     .from('customers')
     .select('*, customer_details(*)')
@@ -27,10 +35,17 @@ const fetchCustomers = async () => {
 const Customer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const { user } = useAuth();
   
-  const { data: customers, isLoading, isError, refetch } = useQuery({
-    queryKey: ['customers'],
-    queryFn: fetchCustomers,
+  const { 
+    data: customers, 
+    isLoading, 
+    isError, 
+    refetch 
+  } = useQuery({
+    queryKey: ['customers', user?.id],
+    queryFn: () => fetchCustomers(user?.id),
+    enabled: !!user,
   });
 
   const filteredCustomers = customers?.filter(customer => 
