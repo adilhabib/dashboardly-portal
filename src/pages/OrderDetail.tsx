@@ -10,12 +10,58 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft } from 'lucide-react';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 
-const fetchOrderDetail = async (orderId: string) => {
+// Define improved types
+interface CustomerType {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  user_id?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface OrderType {
+  id: string;
+  customer_id: string;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  payment_status?: string | null;
+  delivery_address?: string | null;
+  customers?: CustomerType;
+}
+
+interface OrderItemType {
+  id: string;
+  order_id: string;
+  food_id: string;
+  price_per_item: number;
+  quantity: number;
+  total_price: number;
+  special_instructions?: string | null;
+  created_at: string;
+  foods: {
+    id: string;
+    name: string;
+    price: number;
+    image_url?: string | null;
+  };
+}
+
+interface OrderDetailResult {
+  order: OrderType;
+  orderItems: OrderItemType[];
+}
+
+const fetchOrderDetail = async (orderId: string): Promise<OrderDetailResult> => {
+  // Fetch the order with customer details
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .select(`
       *,
-      customers(*, customer_details(*))
+      customers(*)
     `)
     .eq('id', orderId)
     .single();
@@ -25,6 +71,7 @@ const fetchOrderDetail = async (orderId: string) => {
     throw orderError;
   }
 
+  // Fetch order items for this order
   const { data: orderItems, error: itemsError } = await supabase
     .from('order_items')
     .select(`
@@ -37,8 +84,8 @@ const fetchOrderDetail = async (orderId: string) => {
     console.error('Error fetching order items:', itemsError);
     throw itemsError;
   }
-
-  return { order, orderItems };
+  
+  return { order, orderItems: orderItems || [] };
 };
 
 const OrderDetail = () => {
@@ -109,7 +156,7 @@ const OrderDetail = () => {
                 <div>
                   <h3 className="text-lg font-medium mb-2">Order Items</h3>
                   <div className="space-y-4">
-                    {orderItems && orderItems.map((item: any) => (
+                    {orderItems && orderItems.map((item: OrderItemType) => (
                       <div key={item.id} className="flex justify-between items-center border-b pb-4">
                         <div className="flex items-center gap-4">
                           {item.foods.image_url && (
@@ -169,24 +216,6 @@ const OrderDetail = () => {
                 <h4 className="text-sm font-medium text-gray-500">Delivery Address</h4>
                 <p>{order.delivery_address || order.customers?.address || 'No address provided'}</p>
               </div>
-              {order.customers?.customer_details?.dietary_restrictions && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500">Dietary Restrictions</h4>
-                    <p>{order.customers.customer_details.dietary_restrictions}</p>
-                  </div>
-                </>
-              )}
-              {order.customers?.customer_details?.delivery_instructions && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500">Delivery Instructions</h4>
-                    <p>{order.customers.customer_details.delivery_instructions}</p>
-                  </div>
-                </>
-              )}
             </CardContent>
           </Card>
         </div>

@@ -31,7 +31,6 @@ const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[
   
   console.log('Fetching customers for user ID:', userId);
   
-  // Modified query to only select from customers table without attempting to join with customer_details
   const { data, error } = await supabase
     .from('customers')
     .select('*')

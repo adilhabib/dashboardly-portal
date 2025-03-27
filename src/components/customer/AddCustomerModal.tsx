@@ -69,7 +69,6 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
       console.log('Adding customer with user_id:', user.id);
       
       // Insert new customer into the database
-      // Updated to use 'customers' table instead of 'customer'
       const { data, error } = await supabase
         .from('customers')
         .insert([
