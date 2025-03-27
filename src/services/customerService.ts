@@ -48,3 +48,19 @@ export const fetchCustomerDetail = async (customerId: string) => {
   
   return { customer, customerDetails, orders: orders || [] };
 };
+
+export const fetchCustomers = async () => {
+  console.log('Fetching customers from the customer table');
+  const { data, error } = await supabase
+    .from('customer')
+    .select('*')
+    .order('name');
+  
+  if (error) {
+    console.error('Error fetching customers:', error);
+    throw error;
+  }
+  
+  console.log('Fetched customers:', data);
+  return data;
+};

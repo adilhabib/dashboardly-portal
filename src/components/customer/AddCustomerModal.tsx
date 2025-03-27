@@ -180,3 +180,5 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
     </Dialog>
   );
 }
+
+export default AddCustomerModal;
