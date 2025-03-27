@@ -79,8 +79,14 @@ export const fetchOrderDetail = async (orderId: string) => {
       special_instructions = customizations.special_instructions || null;
     }
     
+    // Ensure foods is properly handled, even if it's an error object
+    const foods = item.foods && typeof item.foods === 'object' && !('error' in item.foods) 
+      ? item.foods 
+      : { id: '', name: 'Unknown item', image_url: null };
+    
     return {
       ...item,
+      foods,
       special_instructions,
       unit_price: item.unit_price // Ensure unit_price is used
     };

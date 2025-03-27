@@ -8,21 +8,21 @@ import { formatDate } from '@/lib/utils';
 interface OrderItemType {
   id: string;
   quantity: number;
-  unit_price: number; // Changed from price_per_item to match database
+  unit_price: number;
   total_price: number;
   special_instructions?: string;
   foods?: {
-    id: string;
-    name: string;
+    id?: string;
+    name?: string;
     image_url?: string;
-  };
+  } | null;
 }
 
 interface OrderType {
   id: string;
   status: string;
   payment_status: string;
-  total: number; // Changed from total_amount to match database
+  total: number;
   created_at: string;
 }
 
@@ -69,12 +69,14 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ order, orderItems }
                     {item.foods && item.foods.image_url && (
                       <img 
                         src={item.foods.image_url} 
-                        alt={item.foods?.name}
+                        alt={item.foods.name || 'Food item'}
                         className="w-16 h-16 object-cover rounded-md"
                       />
                     )}
                     <div>
-                      <p className="font-medium">{item.foods ? item.foods.name : 'Unknown item'}</p>
+                      <p className="font-medium">
+                        {item.foods && item.foods.name ? item.foods.name : 'Unknown item'}
+                      </p>
                       <p className="text-sm text-gray-500">
                         {item.quantity} × PKR {item.unit_price.toFixed(2)}
                       </p>
