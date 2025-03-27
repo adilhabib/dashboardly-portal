@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Eye, Search, UserPlus } from 'lucide-react';
+import { Eye, Search, UserPlus, Loader2 } from 'lucide-react';
+import { AddCustomerModal } from '@/components/customer/AddCustomerModal';
 
 const fetchCustomers = async () => {
   const { data, error } = await supabase
@@ -25,8 +26,9 @@ const fetchCustomers = async () => {
 
 const Customer = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
-  const { data: customers, isLoading, isError } = useQuery({
+  const { data: customers, isLoading, isError, refetch } = useQuery({
     queryKey: ['customers'],
     queryFn: fetchCustomers,
   });
@@ -37,13 +39,14 @@ const Customer = () => {
     (customer.phone && customer.phone.includes(searchTerm))
   );
 
-  if (isLoading) {
-    return <div className="text-center py-10">Loading customers...</div>;
-  }
+  const handleOpenAddModal = () => {
+    setIsAddModalOpen(true);
+  };
 
-  if (isError) {
-    return <div className="text-center py-10 text-red-500">Error loading customers</div>;
-  }
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+    refetch(); // Refresh the customer list when modal is closed
+  };
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -54,7 +57,7 @@ const Customer = () => {
               <CardTitle className="text-2xl font-bold">Customers</CardTitle>
               <CardDescription>Manage your customer database</CardDescription>
             </div>
-            <Button className="flex items-center gap-2">
+            <Button className="flex items-center gap-2" onClick={handleOpenAddModal}>
               <UserPlus size={16} />
               Add Customer
             </Button>
@@ -73,7 +76,16 @@ const Customer = () => {
             </div>
           </div>
           
-          {filteredCustomers && filteredCustomers.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center py-10">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
+              <p className="mt-2 text-gray-500">Loading customers...</p>
+            </div>
+          ) : isError ? (
+            <div className="text-center py-10 text-red-500">
+              Error loading customers. Please try again later.
+            </div>
+          ) : filteredCustomers && filteredCustomers.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -121,7 +133,7 @@ const Customer = () => {
               <p className="text-gray-500">
                 {searchTerm ? 'No customers found matching your search.' : 'No customers available'}
               </p>
-              <Button className="mt-4 flex items-center gap-2">
+              <Button className="mt-4 flex items-center gap-2" onClick={handleOpenAddModal}>
                 <UserPlus size={16} />
                 Add Your First Customer
               </Button>
@@ -129,6 +141,12 @@ const Customer = () => {
           )}
         </CardContent>
       </Card>
+      
+      {/* Add Customer Modal */}
+      <AddCustomerModal 
+        open={isAddModalOpen} 
+        onClose={handleCloseAddModal} 
+      />
     </div>
   );
 };

@@ -36,6 +36,45 @@ export type Database = {
         }
         Relationships: []
       }
+      customer: {
+        Row: {
+          address: string | null
+          avatar: string | null
+          created_at: string
+          email: string
+          favorite_products: string[] | null
+          id: string
+          loyalty_points: number | null
+          name: string
+          phone_number: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar?: string | null
+          created_at?: string
+          email: string
+          favorite_products?: string[] | null
+          id: string
+          loyalty_points?: number | null
+          name: string
+          phone_number?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar?: string | null
+          created_at?: string
+          email?: string
+          favorite_products?: string[] | null
+          id?: string
+          loyalty_points?: number | null
+          name?: string
+          phone_number?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       customer_details: {
         Row: {
           created_at: string
@@ -266,6 +305,38 @@ export type Database = {
           },
           {
             foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_status_updates: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          order_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          order_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          order_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_updates_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
