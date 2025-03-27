@@ -14,7 +14,7 @@ interface OrderItemType {
   foods?: {
     id?: string;
     name?: string;
-    image_url?: string;
+    image_url?: string | null;
   } | null;
 }
 
