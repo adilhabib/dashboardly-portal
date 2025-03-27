@@ -1,5 +1,11 @@
-
 import { supabase } from '@/integrations/supabase/client';
+
+// Define an interface for the foods object to help with type safety
+interface FoodItem {
+  id: string;
+  name: string;
+  image_url: string | null;
+}
 
 export const fetchOrderDetail = async (orderId: string) => {
   console.log('Fetching order details for ID:', orderId);
@@ -69,38 +75,27 @@ export const fetchOrderDetail = async (orderId: string) => {
 
   console.log('Fetched order items:', orderItems);
 
-  // Map order items to add special_instructions from customizations if needed
+  // Map order items with proper null checking
   const mappedOrderItems = orderItems.map(item => {
     // Extract special instructions from customizations if it exists
     let special_instructions = null;
     if (item.customizations && typeof item.customizations === 'object') {
-      // Safely access special_instructions with proper type checking
       const customizations = item.customizations as Record<string, any>;
       special_instructions = customizations.special_instructions || null;
     }
     
-    // Handle foods properly, ensuring it matches our interface
-    let formattedFoods = null;
-    
-    // Check if foods exists and is not an error object
-    if (item.foods && 
-        typeof item.foods === 'object' && 
-        item.foods !== null && 
-        !('error' in (item.foods || {}))) {
-      // Create a properly typed foods object
-      formattedFoods = {
-        id: item.foods.id || '',
-        name: item.foods.name || 'Unknown item',
-        image_url: item.foods.image_url || null
-      };
-    } else {
-      // Provide default foods object if missing or has error
-      formattedFoods = {
-        id: '',
-        name: 'Unknown item',
-        image_url: null
-      };
-    }
+    // Safely handle foods with proper null checking
+    const formattedFoods: FoodItem = item.foods && typeof item.foods === 'object' && item.foods !== null
+      ? {
+          id: (item.foods as any).id ?? '',
+          name: (item.foods as any).name ?? 'Unknown item',
+          image_url: (item.foods as any).image_url ?? null
+        }
+      : {
+          id: '',
+          name: 'Unknown item',
+          image_url: null
+        };
     
     return {
       ...item,
@@ -113,7 +108,6 @@ export const fetchOrderDetail = async (orderId: string) => {
   return { 
     order: {
       ...order,
-      // No need to map total to total_amount anymore as we've updated our components
     }, 
     customer, 
     customerDetails, 
