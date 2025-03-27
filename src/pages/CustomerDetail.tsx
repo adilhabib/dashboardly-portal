@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Mail, Phone, MapPin } from 'lucide-react';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const fetchCustomerDetail = async (customerId: string) => {
   console.log('Fetching customer details for ID:', customerId);
@@ -77,6 +79,8 @@ const CustomerDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <PageBreadcrumb pageName="Customer Details" />
+      
       <div className="mb-6">
         <Link to="/customer">
           <Button variant="ghost" className="flex items-center gap-2">
@@ -177,7 +181,7 @@ const CustomerDetail = () => {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">${order.total_amount.toFixed(2)}</p>
+                        <p className="font-medium">PKR {order.total_amount.toFixed(2)}</p>
                         <p className="text-sm text-gray-500">{order.status}</p>
                       </div>
                       <Link to={`/order-detail?id=${order.id}`}>
@@ -210,7 +214,7 @@ const CustomerDetail = () => {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Total Spent</h3>
                   <p className="text-2xl font-bold mt-1">
-                    ${orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0).toFixed(2) || '0.00'}
+                    PKR {orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0).toFixed(2) || '0.00'}
                   </p>
                 </div>
                 <Separator />

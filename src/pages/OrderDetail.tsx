@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
@@ -151,7 +152,7 @@ const OrderDetail = () => {
                     {orderItems && orderItems.map((item: any) => (
                       <div key={item.id} className="flex justify-between items-center border-b pb-4">
                         <div className="flex items-center gap-4">
-                          {item.foods.image_url && (
+                          {item.foods && item.foods.image_url && (
                             <img 
                               src={item.foods.image_url} 
                               alt={item.foods.name}
@@ -159,7 +160,7 @@ const OrderDetail = () => {
                             />
                           )}
                           <div>
-                            <p className="font-medium">{item.foods.name}</p>
+                            <p className="font-medium">{item.foods ? item.foods.name : 'Unknown item'}</p>
                             <p className="text-sm text-gray-500">
                               {item.quantity} × PKR {item.price_per_item.toFixed(2)}
                             </p>
