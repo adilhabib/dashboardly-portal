@@ -31,6 +31,9 @@ const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[
   
   console.log('Fetching customers for user ID:', userId);
   
+  // Explicitly log the query being executed to debug
+  console.log('Executing query: supabase.from("customers").select("*").order("name")');
+  
   const { data, error } = await supabase
     .from('customers')
     .select('*')
@@ -41,6 +44,7 @@ const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[
     throw error;
   }
   
+  console.log('Fetched customers data:', data);
   return data || [];
 };
 

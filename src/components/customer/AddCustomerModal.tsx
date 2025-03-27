@@ -87,6 +87,8 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
         throw error;
       }
       
+      console.log('Customer added successfully:', data);
+      
       // Invalidate and refetch the customers query
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       
