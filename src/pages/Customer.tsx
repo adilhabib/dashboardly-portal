@@ -38,7 +38,7 @@ const Customer = () => {
   const { user } = useAuth();
   
   const { 
-    data: customers, 
+    data: customer, 
     isLoading, 
     isError, 
     refetch 
@@ -48,7 +48,7 @@ const Customer = () => {
     enabled: !!user,
   });
 
-  const filteredCustomers = customers?.filter(customer => 
+  const filteredCustomers = customer?.filter(customer => 
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (customer.phone && customer.phone.includes(searchTerm))

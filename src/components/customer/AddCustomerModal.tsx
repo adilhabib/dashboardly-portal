@@ -70,12 +70,13 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
       
       // Insert new customer into the database
       const { data, error } = await supabase
-        .from('customers')
+        .from('customer')
         .insert([
           {
+            id: crypto.randomUUID(), // Add required id field
             name: values.name,
-            email: values.email || null,
-            phone: values.phone || null,
+            email: values.email || '',  // Change null to empty string
+            phone_number: values.phone || '',
             address: values.address || null,
             user_id: user.id // Associate the customer with the current user
           },
@@ -88,7 +89,7 @@ export function AddCustomerModal({ open, onClose }: AddCustomerModalProps) {
       }
       
       // Invalidate and refetch the customers query
-      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customer'] });
       
       toast.success('Customer added successfully');
       form.reset();
