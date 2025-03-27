@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,7 +20,8 @@ type CustomerType = {
   created_at: string;
 }
 
-const fetchCustomers = async (userId: string | undefined) => {
+// Explicitly define the return type of the fetchCustomers function
+const fetchCustomers = async (userId: string | undefined): Promise<CustomerType[]> => {
   if (!userId) {
     console.log('No user ID provided for fetchCustomers');
     return [];
