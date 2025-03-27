@@ -223,6 +223,95 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          created_at: string
+          food_id: string | null
+          id: string
+          order_id: string | null
+          price_per_item: number
+          quantity: number
+          special_instructions: string | null
+          total_price: number
+        }
+        Insert: {
+          created_at?: string
+          food_id?: string | null
+          id?: string
+          order_id?: string | null
+          price_per_item: number
+          quantity?: number
+          special_instructions?: string | null
+          total_price: number
+        }
+        Update: {
+          created_at?: string
+          food_id?: string | null
+          id?: string
+          order_id?: string | null
+          price_per_item?: number
+          quantity?: number
+          special_instructions?: string | null
+          total_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          delivery_address: string | null
+          id: string
+          payment_status: string | null
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          delivery_address?: string | null
+          id?: string
+          payment_status?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          delivery_address?: string | null
+          id?: string
+          payment_status?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

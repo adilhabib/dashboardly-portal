@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +14,7 @@ const fetchOrders = async () => {
     .from('orders')
     .select(`
       *,
-      customers(name, phone)
+      customer(name, phone_number)
     `)
     .order('created_at', { ascending: false });
   
@@ -94,8 +93,8 @@ const OrderList = () => {
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">{order.id.slice(0, 8)}</TableCell>
                     <TableCell>
-                      {order.customers?.name || 'Unknown'}
-                      <div className="text-xs text-gray-500">{order.customers?.phone || 'No phone'}</div>
+                      {order.customer?.name || 'Unknown'}
+                      <div className="text-xs text-gray-500">{order.customer?.phone_number || 'No phone'}</div>
                     </TableCell>
                     <TableCell>{formatDate(order.created_at)}</TableCell>
                     <TableCell>PKR {order.total_amount.toFixed(2)}</TableCell>
