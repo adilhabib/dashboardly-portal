@@ -74,7 +74,7 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
   console.log('Fetched order items:', orderItems);
 
   // Map order items with proper null checking
-  const mappedOrderItems = orderItems.map(item => {
+  const mappedOrderItems: OrderItem[] = orderItems.map(item => {
     // Extract special instructions from customizations if it exists
     let special_instructions = null;
     if (item.customizations && typeof item.customizations === 'object') {
@@ -107,7 +107,8 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
       ...item,
       foods: formattedFoods,
       special_instructions,
-      unit_price: item.unit_price
+      unit_price: item.unit_price,
+      customizations: item.customizations as Record<string, any> | null
     };
   });
 

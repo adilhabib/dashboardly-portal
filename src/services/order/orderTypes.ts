@@ -15,8 +15,11 @@ export interface OrderItem {
   unit_price: number;
   quantity: number;
   total_price: number;
-  customizations?: Record<string, any>;
+  customizations?: Record<string, any> | null;
   special_instructions?: string | null;
+  created_at?: string;
+  product_id?: string;
+  product_data?: Record<string, any> | null;
 }
 
 export interface CustomerDetails {
@@ -53,6 +56,7 @@ export interface Order {
   created_at: string;
   updated_at: string;
   customer?: Customer | null;
+  delivery_address?: string;
 }
 
 export interface OrderDetail {
