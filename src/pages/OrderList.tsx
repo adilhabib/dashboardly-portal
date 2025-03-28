@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,11 +9,11 @@ import { Eye, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { toast } from '@/hooks/use-toast';
+import { fetchCustomers } from '@/services/customerService';
 
 const fetchOrders = async () => {
   console.log('Fetching orders...');
   
-  // Modified query to avoid using the relationship between orders and customer
   const { data: orders, error: ordersError } = await supabase
     .from('orders')
     .select('*')
@@ -28,7 +27,6 @@ const fetchOrders = async () => {
   console.log('Orders fetched:', orders ? orders.length : 0, 'records found');
   console.log('Sample order data:', orders && orders.length > 0 ? orders[0] : 'No orders found');
   
-  // For each order, fetch the customer data separately
   const ordersWithCustomers = await Promise.all(
     orders.map(async (order) => {
       if (order.customer_id) {
@@ -54,6 +52,34 @@ const fetchOrders = async () => {
   return ordersWithCustomers;
 };
 
+const createTestOrder = async (customerId) => {
+  console.log('Creating test order for customer ID:', customerId);
+  
+  const { data: newOrder, error } = await supabase
+    .from('orders')
+    .insert({
+      customer_id: customerId,
+      status: 'pending',
+      payment_status: 'unpaid',
+      payment_method: 'cash',
+      order_type: 'delivery',
+      subtotal: 1500.00,
+      tax: 7.5,
+      total: 1612.50,
+      special_instructions: 'Test order, please do not process.'
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating test order:', error);
+    throw error;
+  }
+  
+  console.log('Test order created:', newOrder);
+  return newOrder;
+};
+
 const OrderList = () => {
   const queryClient = useQueryClient();
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
@@ -68,7 +94,6 @@ const OrderList = () => {
     queryFn: fetchCustomers,
   });
 
-  // Log actual data and any errors
   useEffect(() => {
     console.log('Orders data in component:', orders);
     if (isError) {
@@ -76,9 +101,7 @@ const OrderList = () => {
     }
   }, [orders, isError, error]);
 
-  // Subscribe to real-time changes in the orders table
   useEffect(() => {
-    // Enable real-time for the orders table
     const channel = supabase
       .channel('public:orders')
       .on('postgres_changes', 
@@ -86,7 +109,6 @@ const OrderList = () => {
         (payload) => {
           console.log('Real-time update received:', payload);
           
-          // Show toast notification based on the event type
           if (payload.eventType === 'INSERT') {
             toast({
               title: 'New Order Received',
@@ -104,14 +126,12 @@ const OrderList = () => {
             });
           }
           
-          // Invalidate and refetch orders
           queryClient.invalidateQueries({ queryKey: ['orders'] });
         })
       .subscribe();
 
     console.log('Subscribed to real-time updates for orders table');
 
-    // Cleanup subscription when component unmounts
     return () => {
       supabase.removeChannel(channel);
     };
@@ -129,7 +149,6 @@ const OrderList = () => {
 
     try {
       setIsCreatingOrder(true);
-      // Use the first customer in the list
       const customer = customers[0];
       const newOrder = await createTestOrder(customer.id);
       
@@ -138,7 +157,6 @@ const OrderList = () => {
         description: `New test order #${newOrder.id.slice(0, 8)} has been created for ${customer.name}.`,
       });
       
-      // Manually trigger a refetch
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     } catch (error) {
       console.error('Error creating test order:', error);
@@ -258,7 +276,6 @@ const OrderList = () => {
                 <Button
                   variant="outline" 
                   onClick={() => {
-                    // Manually trigger a refetch
                     queryClient.invalidateQueries({ queryKey: ['orders'] });
                     toast({
                       title: "Refreshing orders",
