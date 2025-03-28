@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { OrderDetail, OrderItem, FoodItem } from './orderTypes';
+import { OrderDetail, OrderItem, FoodItem, Order } from './orderTypes';
 
 /**
  * Fetches a detailed view of an order including customer data and order items
@@ -108,14 +108,21 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
       foods: formattedFoods,
       special_instructions,
       unit_price: item.unit_price,
-      customizations: item.customizations as Record<string, any> | null
+      customizations: item.customizations as Record<string, any> | null,
+      product_data: item.product_data as Record<string, any> | null // Ensure correct type casting
     };
   });
 
+  // Safely convert delivery_address to ensure type compatibility
+  const formattedOrder: Order = {
+    ...order,
+    delivery_address: typeof order.delivery_address === 'string' 
+      ? order.delivery_address 
+      : order.delivery_address as unknown as Record<string, any> | null
+  };
+
   return { 
-    order: {
-      ...order,
-    }, 
+    order: formattedOrder, 
     customer, 
     customerDetails, 
     orderItems: mappedOrderItems 
@@ -143,22 +150,30 @@ export const fetchOrders = async () => {
   // For each order, fetch the customer data separately
   const ordersWithCustomers = await Promise.all(
     orders.map(async (order) => {
-      if (order.customer_id) {
+      // Ensure delivery_address is properly formatted
+      const formattedOrder = {
+        ...order,
+        delivery_address: typeof order.delivery_address === 'string' 
+          ? order.delivery_address 
+          : order.delivery_address as unknown as Record<string, any> | null
+      };
+      
+      if (formattedOrder.customer_id) {
         const { data: customer, error: customerError } = await supabase
           .from('customer')
           .select('name, phone_number')
-          .eq('id', order.customer_id)
+          .eq('id', formattedOrder.customer_id)
           .maybeSingle();
         
         if (customerError) {
           console.error('Error fetching customer for order:', customerError);
-          return { ...order, customer: null };
+          return { ...formattedOrder, customer: null };
         }
         
-        return { ...order, customer };
+        return { ...formattedOrder, customer };
       }
       
-      return { ...order, customer: null };
+      return { ...formattedOrder, customer: null };
     })
   );
   
