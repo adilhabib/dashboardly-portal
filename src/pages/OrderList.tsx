@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,10 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { toast } from '@/hooks/use-toast';
 import { fetchCustomers } from '@/services/customerService';
-import { fetchOrders } from '@/services/orderService';
-import OrderTable from '@/components/order/OrderTable';
-import EmptyStateMessage from '@/components/order/EmptyStateMessage';
-import OrderActions from '@/components/order/OrderActions';
+import { fetchOrders } from '@/services/order';
+import { OrderTable, EmptyStateMessage, OrderActions } from '@/components/order';
 import { getStatusColor, formatDate } from '@/services/orderUtils';
 
 const OrderList = () => {

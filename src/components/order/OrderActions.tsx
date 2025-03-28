@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { createTestOrder } from '@/services/order';  // Updated import
 import { useQueryClient } from '@tanstack/react-query';
 
 interface OrderActionsProps {
@@ -18,34 +18,6 @@ const OrderActions: React.FC<OrderActionsProps> = ({
   setIsCreatingOrder 
 }) => {
   const queryClient = useQueryClient();
-
-  const createTestOrder = async (customerId: string) => {
-    console.log('Creating test order for customer ID:', customerId);
-    
-    const { data: newOrder, error } = await supabase
-      .from('orders')
-      .insert({
-        customer_id: customerId,
-        status: 'pending',
-        payment_status: 'unpaid',
-        payment_method: 'cash',
-        order_type: 'delivery',
-        subtotal: 1500.00,
-        tax: 7.5,
-        total: 1612.50,
-        special_instructions: 'Test order, please do not process.'
-      })
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Error creating test order:', error);
-      throw error;
-    }
-    
-    console.log('Test order created:', newOrder);
-    return newOrder;
-  };
 
   const handleCreateTestOrder = async () => {
     if (!customers || customers.length === 0) {
