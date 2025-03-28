@@ -12,46 +12,44 @@ import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { toast } from '@/hooks/use-toast';
 
 const fetchOrders = async () => {
-  console.log('Fetching orders...');
-  
-  // Modified query to avoid using the relationship between orders and customer
-  const { data: orders, error: ordersError } = await supabase
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (ordersError) {
-    console.error('Error fetching orders:', ordersError);
-    throw ordersError;
+  try {
+    console.log('Fetching orders...');
+    
+    // Use a join query to fetch orders with customer data
+    const { data: orders, error: ordersError } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        customer:customer_id(name, phone_number)
+      `)
+      .order('created_at', { ascending: false });
+    
+    if (ordersError) {
+      console.error('Error fetching orders:', ordersError);
+      throw new Error(`Failed to fetch orders: ${ordersError.message}`);
+    }
+    
+    if (!orders) {
+      console.error('No orders data received from the database');
+      throw new Error('No orders data received from the database');
+    }
+    
+    console.log('Orders fetched:', orders.length, 'records found');
+    console.log('Sample order data:', orders.length > 0 ? orders[0] : 'No orders found');
+    
+    // Transform the response to match the expected format
+    const ordersWithCustomers = orders.map(order => ({
+      ...order,
+      customer: order.customer || null
+    }));
+    
+    console.log('Orders with customers:', ordersWithCustomers.length);
+    return ordersWithCustomers;
+  } catch (error) {
+    console.error('Error in fetchOrders:', error);
+    throw error instanceof Error ? error : new Error('An unexpected error occurred while fetching orders');
   }
-  
-  console.log('Orders fetched:', orders ? orders.length : 0, 'records found');
-  console.log('Sample order data:', orders && orders.length > 0 ? orders[0] : 'No orders found');
-  
-  // For each order, fetch the customer data separately
-  const ordersWithCustomers = await Promise.all(
-    orders.map(async (order) => {
-      if (order.customer_id) {
-        const { data: customer, error: customerError } = await supabase
-          .from('customer')
-          .select('name, phone_number')
-          .eq('id', order.customer_id)
-          .maybeSingle();
-        
-        if (customerError) {
-          console.error('Error fetching customer for order:', customerError);
-          return { ...order, customer: null };
-        }
-        
-        return { ...order, customer };
-      }
-      
-      return { ...order, customer: null };
-    })
-  );
-  
-  console.log('Orders with customers:', ordersWithCustomers.length);
-  return ordersWithCustomers;
+
 };
 
 const OrderList = () => {
