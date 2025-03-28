@@ -1,11 +1,12 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Order } from './orderTypes';
 
 /**
  * Creates a test order for a customer
  * Uses the create_order RPC function to bypass RLS policies
  */
-export const createTestOrder = async (customerId: string) => {
+export const createTestOrder = async (customerId: string): Promise<Order> => {
   try {
     console.log('Creating test order for customer:', customerId);
     
@@ -32,8 +33,11 @@ export const createTestOrder = async (customerId: string) => {
       throw error;
     }
     
-    console.log('Test order created:', data);
-    return data;
+    // Properly cast the data to ensure TypeScript knows it's an Order object
+    const orderResponse = data as Order;
+    
+    console.log('Test order created:', orderResponse);
+    return orderResponse;
   } catch (error) {
     console.error('Failed to create test order:', error);
     throw error;
