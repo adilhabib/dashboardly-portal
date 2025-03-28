@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Define an interface for the foods object to help with type safety
@@ -162,7 +161,6 @@ export const createTestOrder = async (customerId: string) => {
 export const fetchOrders = async () => {
   console.log('Fetching orders...');
   
-  // Modified query to avoid using the relationship between orders and customer
   const { data: orders, error: ordersError } = await supabase
     .from('orders')
     .select('*')
