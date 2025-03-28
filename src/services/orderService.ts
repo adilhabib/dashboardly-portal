@@ -123,3 +123,81 @@ export const fetchOrderDetail = async (orderId: string) => {
     orderItems: mappedOrderItems 
   };
 };
+
+export const createTestOrder = async (customerId: string) => {
+  try {
+    console.log('Creating test order for customer:', customerId);
+    
+    // Create a new order
+    const { data: newOrder, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        customer_id: customerId,
+        order_type: 'delivery',
+        status: 'pending',
+        payment_status: 'paid',
+        payment_method: 'card',
+        subtotal: 1500,
+        tax: 150,
+        delivery_fee: 100,
+        total: 1750,
+        special_instructions: 'Test order created from the order management screen'
+      })
+      .select()
+      .single();
+    
+    if (orderError) {
+      console.error('Error creating test order:', orderError);
+      throw orderError;
+    }
+    
+    console.log('Test order created:', newOrder);
+    return newOrder;
+  } catch (error) {
+    console.error('Failed to create test order:', error);
+    throw error;
+  }
+};
+
+export const fetchOrders = async () => {
+  console.log('Fetching orders...');
+  
+  // Modified query to avoid using the relationship between orders and customer
+  const { data: orders, error: ordersError } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (ordersError) {
+    console.error('Error fetching orders:', ordersError);
+    throw ordersError;
+  }
+  
+  console.log('Orders fetched:', orders ? orders.length : 0, 'records found');
+  console.log('Sample order data:', orders && orders.length > 0 ? orders[0] : 'No orders found');
+  
+  // For each order, fetch the customer data separately
+  const ordersWithCustomers = await Promise.all(
+    orders.map(async (order) => {
+      if (order.customer_id) {
+        const { data: customer, error: customerError } = await supabase
+          .from('customer')
+          .select('name, phone_number')
+          .eq('id', order.customer_id)
+          .maybeSingle();
+        
+        if (customerError) {
+          console.error('Error fetching customer for order:', customerError);
+          return { ...order, customer: null };
+        }
+        
+        return { ...order, customer };
+      }
+      
+      return { ...order, customer: null };
+    })
+  );
+  
+  console.log('Orders with customers:', ordersWithCustomers.length);
+  return ordersWithCustomers;
+};

@@ -1,63 +1,71 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { Eye, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { toast } from '@/hooks/use-toast';
 
 const fetchOrders = async () => {
-  try {
-    console.log('Fetching orders...');
-    
-    // Use a join query to fetch orders with customer data
-    const { data: orders, error: ordersError } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        customer:customer_id(name, phone_number)
-      `)
-      .order('created_at', { ascending: false });
-    
-    if (ordersError) {
-      console.error('Error fetching orders:', ordersError);
-      throw new Error(`Failed to fetch orders: ${ordersError.message}`);
-    }
-    
-    if (!orders) {
-      console.error('No orders data received from the database');
-      throw new Error('No orders data received from the database');
-    }
-    
-    console.log('Orders fetched:', orders.length, 'records found');
-    console.log('Sample order data:', orders.length > 0 ? orders[0] : 'No orders found');
-    
-    // Transform the response to match the expected format
-    const ordersWithCustomers = orders.map(order => ({
-      ...order,
-      customer: order.customer || null
-    }));
-    
-    console.log('Orders with customers:', ordersWithCustomers.length);
-    return ordersWithCustomers;
-  } catch (error) {
-    console.error('Error in fetchOrders:', error);
-    throw error instanceof Error ? error : new Error('An unexpected error occurred while fetching orders');
+  console.log('Fetching orders...');
+  
+  // Modified query to avoid using the relationship between orders and customer
+  const { data: orders, error: ordersError } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (ordersError) {
+    console.error('Error fetching orders:', ordersError);
+    throw ordersError;
   }
-
+  
+  console.log('Orders fetched:', orders ? orders.length : 0, 'records found');
+  console.log('Sample order data:', orders && orders.length > 0 ? orders[0] : 'No orders found');
+  
+  // For each order, fetch the customer data separately
+  const ordersWithCustomers = await Promise.all(
+    orders.map(async (order) => {
+      if (order.customer_id) {
+        const { data: customer, error: customerError } = await supabase
+          .from('customer')
+          .select('name, phone_number')
+          .eq('id', order.customer_id)
+          .maybeSingle();
+        
+        if (customerError) {
+          console.error('Error fetching customer for order:', customerError);
+          return { ...order, customer: null };
+        }
+        
+        return { ...order, customer };
+      }
+      
+      return { ...order, customer: null };
+    })
+  );
+  
+  console.log('Orders with customers:', ordersWithCustomers.length);
+  return ordersWithCustomers;
 };
 
 const OrderList = () => {
   const queryClient = useQueryClient();
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   
   const { data: orders, isLoading, isError, error } = useQuery({
     queryKey: ['orders'],
     queryFn: fetchOrders,
+  });
+
+  const { data: customers } = useQuery({
+    queryKey: ['customers'],
+    queryFn: fetchCustomers,
   });
 
   // Log actual data and any errors
@@ -109,6 +117,41 @@ const OrderList = () => {
     };
   }, [queryClient]);
 
+  const handleCreateTestOrder = async () => {
+    if (!customers || customers.length === 0) {
+      toast({
+        title: "No customers found",
+        description: "Please create a customer first before creating a test order.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsCreatingOrder(true);
+      // Use the first customer in the list
+      const customer = customers[0];
+      const newOrder = await createTestOrder(customer.id);
+      
+      toast({
+        title: "Test Order Created",
+        description: `New test order #${newOrder.id.slice(0, 8)} has been created for ${customer.name}.`,
+      });
+      
+      // Manually trigger a refetch
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    } catch (error) {
+      console.error('Error creating test order:', error);
+      toast({
+        title: "Error Creating Order",
+        description: "Failed to create test order. Check console for details.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCreatingOrder(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -153,8 +196,16 @@ const OrderList = () => {
       <PageBreadcrumb pageName="Order List" />
       
       <Card className="shadow-sm">
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <CardTitle className="text-2xl font-bold">Order List</CardTitle>
+          <Button 
+            onClick={handleCreateTestOrder} 
+            disabled={isCreatingOrder}
+            className="flex items-center gap-2"
+          >
+            <Plus size={16} />
+            Create Test Order
+          </Button>
         </CardHeader>
         <CardContent>
           {orders && orders.length > 0 ? (
@@ -201,7 +252,7 @@ const OrderList = () => {
             <div className="text-center py-10 bg-gray-50 rounded-lg">
               <p className="text-gray-500">No orders available</p>
               <p className="text-sm text-gray-400 mt-2">
-                You don't have any orders in your database yet. Try adding some orders to see them here.
+                You don't have any orders in your database yet. Click the "Create Test Order" button above to add a test order.
               </p>
               <div className="mt-4">
                 <Button

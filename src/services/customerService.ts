@@ -44,7 +44,10 @@ export const fetchCustomerDetail = async (customerId: string) => {
     // Don't throw here, just continue without orders
   }
   
-  console.log('Fetched orders:', orders);
+  console.log('Fetched orders for customer:', orders ? orders.length : 0);
+  if (orders && orders.length > 0) {
+    console.log('Sample order data:', orders[0]);
+  }
   
   return { customer, customerDetails, orders: orders || [] };
 };
