@@ -41,6 +41,7 @@ export type Database = {
           address: string | null
           avatar: string | null
           created_at: string
+          customer_id: string | null
           email: string
           favorite_products: string[] | null
           id: string
@@ -53,6 +54,7 @@ export type Database = {
           address?: string | null
           avatar?: string | null
           created_at?: string
+          customer_id?: string | null
           email: string
           favorite_products?: string[] | null
           id: string
@@ -65,6 +67,7 @@ export type Database = {
           address?: string | null
           avatar?: string | null
           created_at?: string
+          customer_id?: string | null
           email?: string
           favorite_products?: string[] | null
           id?: string
@@ -73,7 +76,15 @@ export type Database = {
           phone_number?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customer_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_details: {
         Row: {

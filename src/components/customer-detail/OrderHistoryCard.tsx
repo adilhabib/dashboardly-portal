@@ -10,6 +10,8 @@ interface OrderHistoryCardProps {
 }
 
 const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({ orders }) => {
+  console.log('Orders passed to OrderHistoryCard:', orders);
+  
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-2">
@@ -27,7 +29,7 @@ const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({ orders }) => {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">PKR {order.total_amount.toFixed(2)}</p>
+                  <p className="font-medium">PKR {order.total.toFixed(2)}</p>
                   <p className="text-sm text-gray-500">{order.status}</p>
                 </div>
                 <Link to={`/order-detail?id=${order.id}`}>

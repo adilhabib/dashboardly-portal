@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,14 @@ const CustomerDetail = () => {
     queryFn: () => fetchCustomerDetail(customerId || ''),
     enabled: !!customerId,
   });
+
+  // Log data for debugging
+  useEffect(() => {
+    console.log('Customer detail data:', data);
+    if (data?.orders) {
+      console.log('Orders for customer:', data.orders.length);
+    }
+  }, [data]);
 
   if (isLoading) {
     return <div className="text-center py-10">Loading customer details...</div>;
