@@ -11,7 +11,7 @@ export const createTestOrder = async (customerId: string) => {
     
     // Prepare order data
     const orderData = {
-      customer_id: customerId,
+      user_id: customerId,
       order_type: 'delivery',
       status: 'pending',
       payment_status: 'paid',

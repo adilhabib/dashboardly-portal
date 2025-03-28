@@ -10,7 +10,7 @@ DECLARE
 BEGIN
   -- Insert the order with the provided data
   INSERT INTO orders (
-    customer_id,
+    user_id,
     order_type,
     status,
     payment_status,
@@ -23,7 +23,7 @@ BEGIN
     created_at,
     updated_at
   ) VALUES (
-    (order_data->>'customer_id')::UUID,
+    (order_data->>'user_id')::UUID,
     order_data->>'order_type',
     order_data->>'status',
     order_data->>'payment_status',
