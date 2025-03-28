@@ -109,7 +109,7 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
       special_instructions,
       unit_price: item.unit_price,
       customizations: item.customizations as Record<string, any> | null,
-      product_data: item.product_data as Record<string, any> | null // Ensure correct type casting
+      product_data: item.product_data as Record<string, any> | null
     };
   });
 
@@ -118,7 +118,7 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
     ...order,
     delivery_address: typeof order.delivery_address === 'string' 
       ? order.delivery_address 
-      : order.delivery_address as unknown as Record<string, any> | null
+      : order.delivery_address 
   };
 
   return { 

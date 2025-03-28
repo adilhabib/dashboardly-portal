@@ -33,6 +33,8 @@ export const createTestOrder = async (customerId: string): Promise<Order> => {
       throw error;
     }
     
+    console.log('Raw RPC response:', data);
+    
     // First cast to unknown, then to Order to avoid direct casting issues
     const orderResponse = data as unknown as Order;
     
