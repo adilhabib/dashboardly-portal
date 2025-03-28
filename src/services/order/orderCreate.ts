@@ -33,8 +33,8 @@ export const createTestOrder = async (customerId: string): Promise<Order> => {
       throw error;
     }
     
-    // Properly cast the data to ensure TypeScript knows it's an Order object
-    const orderResponse = data as Order;
+    // First cast to unknown, then to Order to avoid direct casting issues
+    const orderResponse = data as unknown as Order;
     
     console.log('Test order created:', orderResponse);
     return orderResponse;
