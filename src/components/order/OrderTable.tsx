@@ -54,6 +54,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, getStatusColor, formatD
               <TableCell>
                 {order.customer?.name || 'Unknown'}
                 <div className="text-xs text-gray-500">{order.customer?.phone_number || 'No phone'}</div>
+                <div className="text-xs text-gray-500">{order.customer?.email || 'No email'}</div>
               </TableCell>
               <TableCell>{formatDate(order.created_at)}</TableCell>
               <TableCell>{formatCurrency(order.total)}</TableCell>
