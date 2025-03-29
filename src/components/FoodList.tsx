@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchFoods, deleteFood } from '@/services/foodService';
@@ -9,12 +10,14 @@ import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLocation } from 'react-router-dom';
 import PageBreadcrumb from './PageBreadcrumb';
+import CategoryFilter from './CategoryFilter';
 
 const FoodList: React.FC = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const [foodToEdit, setFoodToEdit] = useState<Food | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (location.state?.openAddModal) {
@@ -61,6 +64,15 @@ const FoodList: React.FC = () => {
     setFoodToEdit(null);
   };
 
+  const handleCategoryChange = (categoryId: string | null) => {
+    setSelectedCategory(categoryId);
+  };
+
+  // Filter foods by selected category
+  const filteredFoods = foods?.filter(food => 
+    selectedCategory ? food.category === selectedCategory : true
+  );
+
   if (isLoading) {
     return <div className="text-center py-10">Loading food items...</div>;
   }
@@ -81,9 +93,14 @@ const FoodList: React.FC = () => {
         </Button>
       </div>
 
-      {foods && foods.length > 0 ? (
+      <CategoryFilter 
+        selectedCategory={selectedCategory} 
+        onSelectCategory={handleCategoryChange} 
+      />
+
+      {filteredFoods && filteredFoods.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {foods.map((food) => (
+          {filteredFoods.map((food) => (
             <FoodCard 
               key={food.id} 
               food={food} 
@@ -94,7 +111,11 @@ const FoodList: React.FC = () => {
         </div>
       ) : (
         <div className="text-center py-10 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">No food items available</p>
+          <p className="text-gray-500">
+            {selectedCategory && foods && foods.length > 0 ? 
+              'No food items in this category' : 
+              'No food items available'}
+          </p>
           <Button onClick={handleAddFood} className="mt-4">
             Add Your First Food Item
           </Button>
