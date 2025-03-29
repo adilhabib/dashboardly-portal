@@ -18,11 +18,11 @@ const DashboardCharts: FC<DashboardChartsProps> = ({
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <DonutChartsCollection data={donutChartsData} />
-        <AreaChartComponent title="Chart Order" data={orderData} />
+        <AreaChartComponent title="Daily Orders" data={orderData} />
       </div>
       
       <div className="mb-8">
-        <DoubleLineChart title="Total Revenue" data={revenueData} />
+        <DoubleLineChart title="Revenue Trends" data={revenueData} />
       </div>
     </>
   );

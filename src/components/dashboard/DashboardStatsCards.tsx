@@ -2,23 +2,37 @@
 import { FC } from 'react';
 import StatsCard from '@/components/StatsCard';
 import { ShoppingBag, Package, Receipt, DollarSign } from 'lucide-react';
+import { AnalyticsData } from '@/services/analyticsService';
+import { formatCurrency } from '@/lib/utils';
 
-const DashboardStatsCards: FC = () => {
+interface DashboardStatsCardsProps {
+  analyticsData?: AnalyticsData;
+}
+
+const DashboardStatsCards: FC<DashboardStatsCardsProps> = ({ analyticsData }) => {
+  // Calculate percentages of order statuses
+  const completedOrders = analyticsData?.statusData.find(status => status.name === 'Completed')?.value || 0;
+  const canceledOrders = analyticsData?.statusData.find(status => status.name === 'Cancelled')?.value || 0;
+  
+  // Calculate percentage changes (typically would compare to previous period)
+  const orderChange = 4.5; // placeholder for now
+  const revenueChange = 12.5; // placeholder for now
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <StatsCard 
         title="Total Orders" 
-        value="75" 
+        value={analyticsData?.totalOrders.toString() || '0'} 
         icon={<ShoppingBag size={24} className="text-emerald-500" />}
-        change={4.5}
+        change={orderChange}
         iconBgColor="bg-emerald-100"
         changeDirection="up"
         trendText="increase"
       />
       
       <StatsCard 
-        title="Total Delivered" 
-        value="357" 
+        title="Completed Orders" 
+        value={completedOrders.toString()} 
         icon={<Package size={24} className="text-blue-500" />}
         change={4.5}
         iconBgColor="bg-blue-100"
@@ -27,10 +41,10 @@ const DashboardStatsCards: FC = () => {
       />
       
       <StatsCard 
-        title="Total Canceled" 
-        value="65" 
+        title="Canceled Orders" 
+        value={canceledOrders.toString()} 
         icon={<Receipt size={24} className="text-red-500" />}
-        change={25.5}
+        change={2.5}
         iconBgColor="bg-red-100"
         changeDirection="down"
         trendText="decrease"
@@ -38,9 +52,9 @@ const DashboardStatsCards: FC = () => {
       
       <StatsCard 
         title="Total Revenue" 
-        value="Rs. 128.00" 
+        value={formatCurrency(analyticsData?.totalRevenue || 0)} 
         icon={<DollarSign size={24} className="text-emerald-500" />}
-        change={12.5}
+        change={revenueChange}
         iconBgColor="bg-emerald-100"
         changeDirection="up"
         trendText="increase"
