@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from './orderTypes';
 
@@ -27,15 +28,15 @@ export const createTestOrder = async (customerId: string): Promise<Order> => {
     const { data: newOrder, error: orderError } = await supabase
       .rpc('create_order', { order_data: orderData });
     
-    if (error) {
-      console.error('Error creating test order:', error);
-      throw error;
+    if (orderError) {
+      console.error('Error creating test order:', orderError);
+      throw orderError;
     }
     
-    console.log('Raw RPC response:', data);
+    console.log('Raw RPC response:', newOrder);
     
     // First cast to unknown, then to Order to avoid direct casting issues
-    const orderResponse = data as unknown as Order;
+    const orderResponse = newOrder as unknown as Order;
     
     console.log('Test order created:', orderResponse);
     return orderResponse;
