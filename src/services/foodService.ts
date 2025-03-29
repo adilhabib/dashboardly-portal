@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Food, FoodDetail } from "@/types/food";
 
@@ -117,4 +118,20 @@ export const deleteFood = async (id: string) => {
   }
   
   return true;
+};
+
+// Fetch foods by subcategory
+export const fetchFoodsBySubcategory = async (subcategory: string) => {
+  const { data, error } = await supabase
+    .from('foods')
+    .select('*')
+    .eq('subcategory', subcategory)
+    .order('name');
+  
+  if (error) {
+    console.error('Error fetching foods by subcategory:', error);
+    throw error;
+  }
+  
+  return data as Food[];
 };

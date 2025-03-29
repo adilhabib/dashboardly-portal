@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { useCategories } from '@/hooks/useCategories';
+import { useCategories, useSubcategories } from '@/hooks/useCategories';
 import { FoodFormValues } from './FoodForm';
 import FoodImageGallery from './FoodImageGallery';
 import { Separator } from "@/components/ui/separator";
@@ -23,9 +23,14 @@ interface FoodFormFieldsProps {
 }
 
 const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
-  const { categories, isLoading } = useCategories();
-  const { control } = form;
-
+  const { categories, isLoading: isCategoriesLoading } = useCategories();
+  const { control, watch } = form;
+  
+  const selectedCategory = watch('category');
+  const { subcategories, isLoading: isSubcategoriesLoading } = useSubcategories(
+    categories.find(cat => cat.name === selectedCategory)?.id
+  );
+  
   return (
     <>
       <FormField
@@ -91,7 +96,7 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
                 <Select 
                   onValueChange={field.onChange}
                   value={field.value || ""}
-                  disabled={isLoading}
+                  disabled={isCategoriesLoading}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
@@ -111,6 +116,38 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
           )}
         />
       </div>
+      
+      {selectedCategory && selectedCategory !== 'none' && (
+        <FormField
+          control={control}
+          name="subcategory"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Subcategory</FormLabel>
+              <FormControl>
+                <Select 
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                  disabled={isSubcategoriesLoading || subcategories.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={subcategories.length === 0 ? "No subcategories available" : "Select a subcategory"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {subcategories.map((subcat) => (
+                      <SelectItem key={subcat.id} value={subcat.name}>
+                        {subcat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       
       <FormField
         control={control}
