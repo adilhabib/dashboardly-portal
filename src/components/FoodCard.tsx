@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Food } from "@/types/food";
 import { Edit, Trash2, Eye } from "lucide-react";
+import { useFoodSizes } from '@/hooks/useFoodSizes';
+import { Badge } from '@/components/ui/badge';
 
 interface FoodCardProps {
   food: Food;
@@ -13,6 +15,8 @@ interface FoodCardProps {
 }
 
 const FoodCard: React.FC<FoodCardProps> = ({ food, onEdit, onDelete }) => {
+  const { sizes, isLoading } = useFoodSizes(food.id);
+  
   return (
     <Card className="overflow-hidden">
       {food.image_url ? (
@@ -37,14 +41,32 @@ const FoodCard: React.FC<FoodCardProps> = ({ food, onEdit, onDelete }) => {
               <CardDescription className="text-sm">{food.category}</CardDescription>
             )}
           </div>
-          <span className="text-lg font-semibold">PKR {food.price.toFixed(2)}</span>
+          <span className="text-lg font-semibold">${food.price.toFixed(2)}</span>
         </div>
       </CardHeader>
       
       <CardContent className="p-4 pt-0">
         {food.description && <p className="text-sm text-gray-600">{food.description}</p>}
-        <div className="mt-2">
-          <span className={`px-2 py-1 text-xs rounded-full ${food.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        
+        <div className="mt-3">
+          {!isLoading && sizes.length > 0 && (
+            <div className="mb-2">
+              <p className="text-xs text-muted-foreground mb-1">Available sizes:</p>
+              <div className="flex flex-wrap gap-1">
+                {sizes.map((size) => (
+                  <Badge 
+                    key={size.id} 
+                    variant={size.is_default ? "default" : "outline"}
+                    className="text-xs"
+                  >
+                    {size.size_name}: ${size.price.toFixed(2)}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <span className={`px-2 py-1 mt-2 inline-block text-xs rounded-full ${food.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
             {food.is_available ? 'Available' : 'Unavailable'}
           </span>
         </div>

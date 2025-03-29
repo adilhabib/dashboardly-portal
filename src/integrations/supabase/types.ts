@@ -190,6 +190,44 @@ export type Database = {
           },
         ]
       }
+      food_sizes: {
+        Row: {
+          created_at: string
+          food_id: string
+          id: string
+          is_default: boolean | null
+          price: number
+          size_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          food_id: string
+          id?: string
+          is_default?: boolean | null
+          price: number
+          size_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          food_id?: string
+          id?: string
+          is_default?: boolean | null
+          price?: number
+          size_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_sizes_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       foods: {
         Row: {
           category: string | null
@@ -200,6 +238,7 @@ export type Database = {
           is_available: boolean | null
           name: string
           price: number
+          subcategory: string | null
           updated_at: string
         }
         Insert: {
@@ -211,6 +250,7 @@ export type Database = {
           is_available?: boolean | null
           name: string
           price: number
+          subcategory?: string | null
           updated_at?: string
         }
         Update: {
@@ -222,6 +262,7 @@ export type Database = {
           is_available?: boolean | null
           name?: string
           price?: number
+          subcategory?: string | null
           updated_at?: string
         }
         Relationships: []
