@@ -66,8 +66,11 @@ const CategoryManagement: React.FC = () => {
     },
   });
 
+  // Fix: Update the mutation function type 
   const updateCategoryMutation = useMutation({
-    mutationFn: updateCategory,
+    mutationFn: (params: { id: string; category: Partial<Omit<Category, "id">> }) => {
+      return updateCategory(params.id, params.category);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Category updated successfully');
@@ -104,8 +107,11 @@ const CategoryManagement: React.FC = () => {
     },
   });
 
+  // Fix: Update the mutation function type 
   const updateSubcategoryMutation = useMutation({
-    mutationFn: updateSubcategory,
+    mutationFn: (params: { id: string; subcategory: Partial<Omit<SubCategory, "id">> }) => {
+      return updateSubcategory(params.id, params.subcategory);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Subcategory updated successfully');
@@ -178,7 +184,14 @@ const CategoryManagement: React.FC = () => {
 
   const handleSaveCategory = (category: Omit<Category, 'id'> | Category) => {
     if ('id' in category) {
-      updateCategoryMutation.mutate(category as Category);
+      // Fix: Update to use correct parameter structure
+      updateCategoryMutation.mutate({ 
+        id: category.id, 
+        category: {
+          name: category.name,
+          description: category.description
+        }
+      });
     } else {
       createCategoryMutation.mutate(category);
     }
@@ -186,7 +199,15 @@ const CategoryManagement: React.FC = () => {
 
   const handleSaveSubcategory = (subcategory: Omit<SubCategory, 'id'> | SubCategory) => {
     if ('id' in subcategory) {
-      updateSubcategoryMutation.mutate(subcategory as SubCategory);
+      // Fix: Update to use correct parameter structure
+      updateSubcategoryMutation.mutate({ 
+        id: subcategory.id, 
+        subcategory: {
+          name: subcategory.name,
+          description: subcategory.description,
+          parentId: subcategory.parentId
+        }
+      });
     } else {
       createSubcategoryMutation.mutate(subcategory);
     }
