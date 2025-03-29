@@ -36,6 +36,7 @@ export const useOrderRealtime = () => {
           
           // Extract basic order details for display
           const orderId = payload.new?.id || payload.old?.id;
+          // Check if payload.new or payload.old has an id before trying to slice it
           const orderIdDisplay = orderId ? orderId.slice(0, 8) : 'Unknown';
           
           if (payload.eventType === 'INSERT') {
@@ -45,17 +46,17 @@ export const useOrderRealtime = () => {
             });
             setLastUpdate({
               type: 'INSERT',
-              order: payload.new,
+              order: payload.new || null,
               timestamp: new Date()
             });
           } else if (payload.eventType === 'UPDATE') {
             toast({
               title: 'Order Updated',
-              description: `Order #${orderIdDisplay} has been updated to "${payload.new.status}".`,
+              description: `Order #${orderIdDisplay} has been updated to "${payload.new?.status || 'unknown status'}".`,
             });
             setLastUpdate({
               type: 'UPDATE',
-              order: payload.new,
+              order: payload.new || null,
               timestamp: new Date()
             });
           } else if (payload.eventType === 'DELETE') {
@@ -65,7 +66,7 @@ export const useOrderRealtime = () => {
             });
             setLastUpdate({
               type: 'DELETE',
-              order: payload.old,
+              order: payload.old || null,
               timestamp: new Date()
             });
           }
