@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { OrderDetail, OrderItem, FoodItem, Order } from './orderTypes';
 
@@ -79,10 +80,11 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
     }
     
     // Create a default food item since we can't join with foods table
+    const productData = item.product_data as Record<string, any> || {};
     const defaultFoodItem: FoodItem = {
       id: item.product_id || '',
-      name: item.product_data?.name || 'Unknown item',
-      image_url: item.product_data?.image_url || null
+      name: productData.name || 'Unknown item',
+      image_url: productData.image_url || null
     };
     
     return {
