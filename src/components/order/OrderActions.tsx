@@ -1,70 +1,79 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { createTestOrder } from '@/services/order';
+import { updateOrderStatus } from '@/services/order';
 import { useQueryClient } from '@tanstack/react-query';
-import { Order } from '@/services/order';
+import { Check, X } from 'lucide-react';
 
 interface OrderActionsProps {
-  customers: any[] | undefined;
-  isCreatingOrder: boolean;
-  setIsCreatingOrder: (value: boolean) => void;
+  orderId: string;
+  currentStatus: string;
 }
 
-const OrderActions: React.FC<OrderActionsProps> = ({ 
-  customers, 
-  isCreatingOrder, 
-  setIsCreatingOrder 
-}) => {
+const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) => {
   const queryClient = useQueryClient();
+  const [isUpdating, setIsUpdating] = React.useState(false);
 
-  const handleCreateTestOrder = async () => {
-    if (!customers || customers.length === 0) {
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (!orderId) {
       toast({
-        title: "No customers found",
-        description: "Please create a customer first before creating a test order.",
+        title: "No order selected",
+        description: "Please select an order to update its status.",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      setIsCreatingOrder(true);
-      const customer = customers[0];
-      const newOrder = await createTestOrder(customer.id);
-      
-      // Safely access the id property, ensuring it's a string
-      const orderId = typeof newOrder.id === 'string' ? newOrder.id : JSON.stringify(newOrder.id);
+      setIsUpdating(true);
+      await updateOrderStatus(orderId, newStatus);
       
       toast({
-        title: "Test Order Created",
-        description: `New test order #${orderId.slice(0, 8)} has been created for ${customer.name}.`,
+        title: "Order Status Updated",
+        description: `Order #${orderId.slice(0, 8)} has been ${newStatus === 'completed' ? 'accepted' : 'rejected'}.`,
       });
       
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     } catch (error) {
-      console.error('Error creating test order:', error);
+      console.error('Error updating order status:', error);
       toast({
-        title: "Error Creating Order",
-        description: "Failed to create test order. Check console for details.",
+        title: "Error Updating Order",
+        description: "Failed to update order status. Check console for details.",
         variant: "destructive"
       });
     } finally {
-      setIsCreatingOrder(false);
+      setIsUpdating(false);
     }
   };
 
+  // Don't show the buttons if the order is already completed or cancelled
+  if (currentStatus === 'completed' || currentStatus === 'cancelled') {
+    return null;
+  }
+
   return (
-    <Button 
-      onClick={handleCreateTestOrder} 
-      disabled={isCreatingOrder}
-      className="flex items-center gap-2"
-    >
-      <Plus size={16} />
-      Create Test Order
-    </Button>
+    <div className="flex items-center gap-2">
+      <Button 
+        onClick={() => handleStatusUpdate('completed')}
+        disabled={isUpdating}
+        variant="default"
+        size="sm"
+        className="bg-green-500 hover:bg-green-600"
+      >
+        <Check size={16} />
+        Accept
+      </Button>
+      <Button 
+        onClick={() => handleStatusUpdate('cancelled')}
+        disabled={isUpdating}
+        variant="destructive"
+        size="sm"
+      >
+        <X size={16} />
+        Reject
+      </Button>
+    </div>
   );
 };
 

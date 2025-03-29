@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { toast } from '@/hooks/use-toast';
 import { fetchOrders } from '@/services/order';
-import { fetchCustomers } from '@/services/customerService';
-import { OrderTable, EmptyStateMessage, OrderActions } from '@/components/order';
+import { OrderTable, EmptyStateMessage } from '@/components/order';
 import { getStatusColor, formatDate } from '@/services/orderUtils';
 import { useOrderRealtime } from '@/hooks/useOrderRealtime';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,7 +16,6 @@ import { Badge } from '@/components/ui/badge';
 
 const OrderList = () => {
   const queryClient = useQueryClient();
-  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<OrderStatus>('all');
   
@@ -30,11 +28,6 @@ const OrderList = () => {
     // Increase the staleness time to prevent unnecessary refetching
     staleTime: 1000 * 60, // 1 minute
     retry: 3, // Retry 3 times before considering it an error
-  });
-
-  const { data: customers } = useQuery({
-    queryKey: ['customers'],
-    queryFn: fetchCustomers,
   });
 
   useEffect(() => {
@@ -154,11 +147,6 @@ const OrderList = () => {
                   <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
                   Refresh
                 </Button>
-                <OrderActions 
-                  customers={customers}
-                  isCreatingOrder={isCreatingOrder}
-                  setIsCreatingOrder={setIsCreatingOrder}
-                />
               </div>
             </div>
           </div>

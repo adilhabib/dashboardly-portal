@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '@/lib/utils';
+import OrderActions from './OrderActions';
 
 interface OrderTableProps {
   orders: any[];
@@ -45,12 +46,15 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, getStatusColor, formatD
             <TableCell>
               <Badge variant="outline">{order.payment_status}</Badge>
             </TableCell>
-            <TableCell>
-              <Link to={`/order-detail?id=${order.id}`}>
-                <Button variant="ghost" size="icon">
-                  <Eye size={16} />
-                </Button>
-              </Link>
+            <TableCell className="space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <Link to={`/order-detail?id=${order.id}`}>
+                  <Button variant="ghost" size="icon">
+                    <Eye size={16} />
+                  </Button>
+                </Link>
+                <OrderActions orderId={order.id} currentStatus={order.status} />
+              </div>
             </TableCell>
           </TableRow>
         ))}
