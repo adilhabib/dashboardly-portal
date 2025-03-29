@@ -10,7 +10,12 @@ interface SummaryCardProps {
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ customer, orders }) => {
-  const totalSpent = orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0) || 0;
+  // Calculate total spent (properly checking if orders exist and have a total field)
+  const totalSpent = orders?.reduce((sum: number, order: any) => {
+    // Make sure to check if total property exists and is a number
+    const orderTotal = typeof order.total === 'number' ? order.total : 0;
+    return sum + orderTotal;
+  }, 0) || 0;
 
   return (
     <Card className="shadow-sm mb-6">

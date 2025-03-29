@@ -67,3 +67,21 @@ export const fetchCustomers = async () => {
   console.log('Fetched customers:', data);
   return data;
 };
+
+// New function to fetch orders for a specific customer
+export const fetchCustomerOrders = async (customerId: string) => {
+  console.log('Fetching orders for customer ID:', customerId);
+  
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('customer_id', customerId);
+  
+  if (error) {
+    console.error('Error fetching customer orders:', error);
+    throw error;
+  }
+  
+  console.log('Fetched orders count:', data?.length || 0);
+  return data || [];
+};
