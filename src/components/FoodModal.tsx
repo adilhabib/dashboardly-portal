@@ -24,6 +24,7 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
     price: food?.price || 0,
     image_url: food?.image_url || '',
     category: food?.category || '',
+    subcategory: food?.subcategory || '',
     is_available: food?.is_available ?? true,
   };
 
@@ -65,6 +66,7 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
         price: values.price,
         image_url: values.image_url,
         category: values.category,
+        subcategory: values.subcategory,
         is_available: values.is_available
       });
     }
