@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -11,7 +10,7 @@ export const createTestOrder = async (customerId: string) => {
     
     // Prepare order data
     const orderData = {
-      user_id: customerId,
+      customer_id: customerId,
       order_type: 'delivery',
       status: 'pending',
       payment_status: 'paid',
@@ -25,7 +24,7 @@ export const createTestOrder = async (customerId: string) => {
     
     // Call the RPC function that bypasses RLS policies
     const { data: newOrder, error: orderError } = await supabase
-      .rpc('create_order', { order_data: orderData });
+      .rpc('create_order', orderData);
     
     if (orderError) {
       console.error('Error creating test order:', orderError);

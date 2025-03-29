@@ -432,6 +432,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_order: {
+        Args: Record<string, any>
+        Returns: Json
+      }
       create_order_items_table: {
         Args: Record<PropertyKey, never>
         Returns: undefined
