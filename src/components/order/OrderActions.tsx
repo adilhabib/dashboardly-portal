@@ -31,7 +31,7 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
       
       toast({
         title: "Order Status Updated",
-        description: `Order #${orderId.slice(0, 8)} has been ${newStatus === 'completed' ? 'accepted' : 'rejected'}.`,
+        description: `Order #${orderId.slice(0, 8)} has been ${newStatus === 'processing' ? 'accepted' : 'cancelled'}.`,
       });
       
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -47,15 +47,15 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
     }
   };
 
-  // Don't show the buttons if the order is already completed or cancelled
-  if (currentStatus === 'completed' || currentStatus === 'cancelled') {
+  // Don't show the buttons if the order is already processed or cancelled
+  if (currentStatus === 'processing' || currentStatus === 'completed' || currentStatus === 'cancelled') {
     return null;
   }
 
   return (
     <div className="flex items-center gap-2">
       <Button 
-        onClick={() => handleStatusUpdate('completed')}
+        onClick={() => handleStatusUpdate('processing')}
         disabled={isUpdating}
         variant="default"
         size="sm"
