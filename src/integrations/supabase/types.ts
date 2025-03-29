@@ -200,7 +200,6 @@ export type Database = {
           is_available: boolean | null
           name: string
           price: number
-          subcategory: string | null
           updated_at: string
         }
         Insert: {
@@ -212,7 +211,6 @@ export type Database = {
           is_available?: boolean | null
           name: string
           price: number
-          subcategory?: string | null
           updated_at?: string
         }
         Update: {
@@ -224,7 +222,6 @@ export type Database = {
           is_available?: boolean | null
           name?: string
           price?: number
-          subcategory?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -400,41 +397,6 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
-      }
-      subcategories: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          parent_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          parent_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          parent_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subcategories_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_roles: {
         Row: {

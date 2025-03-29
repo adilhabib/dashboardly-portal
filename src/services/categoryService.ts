@@ -2,97 +2,47 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Category, SubCategory } from '@/types/category';
 
+// Fetch all categories
 export const fetchCategories = async (): Promise<Category[]> => {
-  const { data: categories, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name');
-
-  if (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
-  }
-
-  // Transform the data to match our Category interface
-  const formattedCategories: Category[] = categories.map(category => ({
-    id: category.id,
-    name: category.name,
-    description: category.description || undefined
-  }));
-
-  return formattedCategories;
-};
-
-export const fetchCategoriesWithSubcategories = async (): Promise<Category[]> => {
-  // First, fetch all categories
-  const { data: categories, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name');
-
-  if (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
-  }
-
-  // Then, fetch all subcategories
-  const { data: subcategories, error: subError } = await supabase
-    .from('subcategories')
-    .select('*')
-    .order('name');
-
-  if (subError) {
-    console.error('Error fetching subcategories:', subError);
-    throw subError;
-  }
-
-  // Map subcategories to their parent categories
-  const categoriesWithSubs: Category[] = categories.map(category => {
-    const categorySubs = subcategories.filter(sub => sub.parent_id === category.id).map(sub => ({
-      id: sub.id,
-      name: sub.name,
-      description: sub.description,
-      parentId: sub.parent_id
-    }));
-
-    return {
-      id: category.id,
-      name: category.name,
-      description: category.description || undefined,
-      subcategories: categorySubs
-    };
-  });
-
-  return categoriesWithSubs;
-};
-
-export const fetchSubcategoriesByParent = async (parentId: string): Promise<SubCategory[]> => {
   const { data, error } = await supabase
-    .from('subcategories')
+    .from('categories')
     .select('*')
-    .eq('parent_id', parentId)
     .order('name');
 
   if (error) {
-    console.error('Error fetching subcategories:', error);
+    console.error('Error fetching categories:', error);
     throw error;
   }
 
-  // Transform the data to match our SubCategory interface
-  const formattedSubcategories: SubCategory[] = data.map(sub => ({
-    id: sub.id,
-    name: sub.name,
-    description: sub.description || undefined,
-    parentId: sub.parent_id
-  }));
+  // Fetch subcategories for each category
+  const categoriesWithSubs = await Promise.all(
+    data.map(async (category) => {
+      const { data: subcategories, error: subError } = await supabase
+        .from('subcategories')
+        .select('*')
+        .eq('parent_id', category.id)
+        .order('name');
 
-  return formattedSubcategories;
+      if (subError) {
+        console.error('Error fetching subcategories:', subError);
+        return category;
+      }
+
+      return {
+        ...category,
+        subcategories: subcategories || []
+      };
+    })
+  );
+
+  return categoriesWithSubs || [];
 };
 
+// Create a new category
 export const createCategory = async (category: Omit<Category, 'id'>): Promise<Category> => {
   const { data, error } = await supabase
     .from('categories')
-    .insert({ name: category.name, description: category.description })
+    .insert(category)
     .select()
     .single();
 
@@ -101,13 +51,74 @@ export const createCategory = async (category: Omit<Category, 'id'>): Promise<Ca
     throw error;
   }
 
-  return {
-    id: data.id,
-    name: data.name,
-    description: data.description || undefined
-  };
+  return data;
 };
 
+// Update an existing category
+export const updateCategory = async (category: Category): Promise<Category> => {
+  const { data, error } = await supabase
+    .from('categories')
+    .update({
+      name: category.name,
+      description: category.description
+    })
+    .eq('id', category.id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
+
+  return data;
+};
+
+// Delete a category
+export const deleteCategory = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('categories')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting category:', error);
+    throw error;
+  }
+};
+
+// Fetch all subcategories
+export const fetchSubcategories = async (): Promise<SubCategory[]> => {
+  const { data, error } = await supabase
+    .from('subcategories')
+    .select('*')
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching subcategories:', error);
+    throw error;
+  }
+
+  return data || [];
+};
+
+// Fetch subcategories for a specific parent category
+export const fetchSubcategoriesByParent = async (parentId: string): Promise<SubCategory[]> => {
+  const { data, error } = await supabase
+    .from('subcategories')
+    .select('*')
+    .eq('parent_id', parentId)
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching subcategories by parent:', error);
+    throw error;
+  }
+
+  return data || [];
+};
+
+// Create a new subcategory
 export const createSubcategory = async (subcategory: Omit<SubCategory, 'id'>): Promise<SubCategory> => {
   const { data, error } = await supabase
     .from('subcategories')
@@ -124,35 +135,11 @@ export const createSubcategory = async (subcategory: Omit<SubCategory, 'id'>): P
     throw error;
   }
 
-  return {
-    id: data.id,
-    name: data.name,
-    description: data.description || undefined,
-    parentId: data.parent_id
-  };
+  return data;
 };
 
-export const updateCategory = async (id: string, category: Partial<Omit<Category, 'id'>>): Promise<Category> => {
-  const { data, error } = await supabase
-    .from('categories')
-    .update({ name: category.name, description: category.description })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error updating category:', error);
-    throw error;
-  }
-
-  return {
-    id: data.id,
-    name: data.name,
-    description: data.description || undefined
-  };
-};
-
-export const updateSubcategory = async (id: string, subcategory: Partial<Omit<SubCategory, 'id'>>): Promise<SubCategory> => {
+// Update an existing subcategory
+export const updateSubcategory = async (subcategory: SubCategory): Promise<SubCategory> => {
   const { data, error } = await supabase
     .from('subcategories')
     .update({
@@ -160,7 +147,7 @@ export const updateSubcategory = async (id: string, subcategory: Partial<Omit<Su
       description: subcategory.description,
       parent_id: subcategory.parentId
     })
-    .eq('id', id)
+    .eq('id', subcategory.id)
     .select()
     .single();
 
@@ -169,29 +156,11 @@ export const updateSubcategory = async (id: string, subcategory: Partial<Omit<Su
     throw error;
   }
 
-  return {
-    id: data.id,
-    name: data.name,
-    description: data.description || undefined,
-    parentId: data.parent_id
-  };
+  return data;
 };
 
-export const deleteCategory = async (id: string): Promise<boolean> => {
-  const { error } = await supabase
-    .from('categories')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error deleting category:', error);
-    throw error;
-  }
-
-  return true;
-};
-
-export const deleteSubcategory = async (id: string): Promise<boolean> => {
+// Delete a subcategory
+export const deleteSubcategory = async (id: string): Promise<void> => {
   const { error } = await supabase
     .from('subcategories')
     .delete()
@@ -201,6 +170,4 @@ export const deleteSubcategory = async (id: string): Promise<boolean> => {
     console.error('Error deleting subcategory:', error);
     throw error;
   }
-
-  return true;
 };

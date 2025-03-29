@@ -66,11 +66,8 @@ const CategoryManagement: React.FC = () => {
     },
   });
 
-  // Fix: Update the mutation function type 
   const updateCategoryMutation = useMutation({
-    mutationFn: (params: { id: string; category: Partial<Omit<Category, "id">> }) => {
-      return updateCategory(params.id, params.category);
-    },
+    mutationFn: updateCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Category updated successfully');
@@ -107,11 +104,8 @@ const CategoryManagement: React.FC = () => {
     },
   });
 
-  // Fix: Update the mutation function type 
   const updateSubcategoryMutation = useMutation({
-    mutationFn: (params: { id: string; subcategory: Partial<Omit<SubCategory, "id">> }) => {
-      return updateSubcategory(params.id, params.subcategory);
-    },
+    mutationFn: updateSubcategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Subcategory updated successfully');
@@ -184,14 +178,7 @@ const CategoryManagement: React.FC = () => {
 
   const handleSaveCategory = (category: Omit<Category, 'id'> | Category) => {
     if ('id' in category) {
-      // Fix: Update to use correct parameter structure
-      updateCategoryMutation.mutate({ 
-        id: category.id, 
-        category: {
-          name: category.name,
-          description: category.description
-        }
-      });
+      updateCategoryMutation.mutate(category as Category);
     } else {
       createCategoryMutation.mutate(category);
     }
@@ -199,15 +186,7 @@ const CategoryManagement: React.FC = () => {
 
   const handleSaveSubcategory = (subcategory: Omit<SubCategory, 'id'> | SubCategory) => {
     if ('id' in subcategory) {
-      // Fix: Update to use correct parameter structure
-      updateSubcategoryMutation.mutate({ 
-        id: subcategory.id, 
-        subcategory: {
-          name: subcategory.name,
-          description: subcategory.description,
-          parentId: subcategory.parentId
-        }
-      });
+      updateSubcategoryMutation.mutate(subcategory as SubCategory);
     } else {
       createSubcategoryMutation.mutate(subcategory);
     }

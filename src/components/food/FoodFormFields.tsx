@@ -1,26 +1,21 @@
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { FoodFormValues } from './FoodForm';
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
 import { useCategories, useSubcategories } from '@/hooks/useCategories';
+import { FoodFormValues } from './FoodForm';
 import FoodImageGallery from './FoodImageGallery';
+import { Separator } from "@/components/ui/separator";
 
 interface FoodFormFieldsProps {
   form: UseFormReturn<FoodFormValues>;
@@ -29,42 +24,38 @@ interface FoodFormFieldsProps {
 
 const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
   const { categories, isLoading: isCategoriesLoading } = useCategories();
-  const selectedCategory = form.watch('category');
-  const { subcategories, isLoading: isSubcategoriesLoading } = useSubcategories(selectedCategory || undefined);
-
-  // Reset subcategory when category changes
-  useEffect(() => {
-    if (selectedCategory) {
-      form.setValue('subcategory', '');
-    }
-  }, [selectedCategory, form]);
-
+  const { control, watch } = form;
+  
+  const selectedCategory = watch('category');
+  const { subcategories, isLoading: isSubcategoriesLoading } = useSubcategories(
+    categories.find(cat => cat.name === selectedCategory)?.id
+  );
+  
   return (
-    <div className="space-y-6">
+    <>
       <FormField
-        control={form.control}
+        control={control}
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Food Name</FormLabel>
+            <FormLabel>Name</FormLabel>
             <FormControl>
-              <Input placeholder="Enter food name" {...field} />
+              <Input placeholder="Food name" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
+      
       <FormField
-        control={form.control}
+        control={control}
         name="description"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Description</FormLabel>
             <FormControl>
               <Textarea 
-                placeholder="Enter food description" 
-                className="resize-none" 
+                placeholder="Description (optional)" 
                 {...field} 
                 value={field.value || ''}
               />
@@ -73,106 +64,127 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
           </FormItem>
         )}
       />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <div className="grid grid-cols-2 gap-4">
         <FormField
-          control={form.control}
+          control={control}
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Price</FormLabel>
+              <FormLabel>Price ($)</FormLabel>
               <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="0.00" 
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
                   {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        
         <FormField
-          control={form.control}
+          control={control}
           name="category"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <Select 
-                value={field.value || ''} 
-                onValueChange={field.onChange}
-              >
-                <FormControl>
+              <FormControl>
+                <Select 
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                  disabled={isCategoriesLoading}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
       </div>
-
-      {selectedCategory && (
+      
+      {selectedCategory && selectedCategory !== 'none' && (
         <FormField
-          control={form.control}
+          control={control}
           name="subcategory"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Subcategory</FormLabel>
-              <Select 
-                value={field.value || ''} 
-                onValueChange={field.onChange}
-                disabled={isSubcategoriesLoading || subcategories.length === 0}
-              >
-                <FormControl>
+              <FormControl>
+                <Select 
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                  disabled={isSubcategoriesLoading || subcategories.length === 0}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder={
-                      isSubcategoriesLoading 
-                        ? "Loading subcategories..." 
-                        : subcategories.length === 0 
-                          ? "No subcategories available" 
-                          : "Select a subcategory"
-                    } />
+                    <SelectValue placeholder={subcategories.length === 0 ? "No subcategories available" : "Select a subcategory"} />
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  {subcategories.map((subcategory) => (
-                    <SelectItem key={subcategory.id} value={subcategory.id}>
-                      {subcategory.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {subcategories.map((subcat) => (
+                      <SelectItem key={subcat.id} value={subcat.name}>
+                        {subcat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
       )}
-
+      
       <FormField
-        control={form.control}
+        control={control}
+        name="image_url"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Main Image URL</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Image URL (optional)" 
+                {...field} 
+                value={field.value || ''}
+              />
+            </FormControl>
+            <FormMessage />
+            <p className="text-xs text-muted-foreground">
+              This field will be automatically updated when you set a main image in the gallery.
+            </p>
+          </FormItem>
+        )}
+      />
+
+      <Separator className="my-4" />
+      
+      {foodId && (
+        <>
+          <FoodImageGallery foodId={foodId} />
+          <Separator className="my-4" />
+        </>
+      )}
+      
+      <FormField
+        control={control}
         name="is_available"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <FormLabel className="text-base">Availability</FormLabel>
-              <div className="text-sm text-muted-foreground">
-                Is this food item available for ordering?
-              </div>
-            </div>
+          <FormItem className="flex items-center justify-between space-y-0 p-4 border rounded-md">
+            <FormLabel>Available for order</FormLabel>
             <FormControl>
               <Switch
                 checked={field.value}
@@ -182,14 +194,7 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
           </FormItem>
         )}
       />
-
-      {foodId && (
-        <div className="pt-4">
-          <FormLabel>Food Images</FormLabel>
-          <FoodImageGallery foodId={foodId} />
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 
