@@ -14,6 +14,12 @@ interface AnalyticsTrendChartsProps {
 }
 
 const AnalyticsTrendCharts: FC<AnalyticsTrendChartsProps> = ({ dailyRevenue }) => {
+  // Format dates to be more readable
+  const formattedData = dailyRevenue.map(item => ({
+    ...item,
+    date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }));
+
   return (
     <Tabs defaultValue="revenue" className="mb-6">
       <TabsList className="mb-4">
@@ -30,7 +36,7 @@ const AnalyticsTrendCharts: FC<AnalyticsTrendChartsProps> = ({ dailyRevenue }) =
           <CardContent>
             <div className="h-80">
               <AnalyticsChart
-                data={dailyRevenue}
+                data={formattedData}
                 xKey="date"
                 yKey="revenue"
                 yFormatter={(value) => formatCurrency(value)}
@@ -49,7 +55,7 @@ const AnalyticsTrendCharts: FC<AnalyticsTrendChartsProps> = ({ dailyRevenue }) =
           <CardContent>
             <div className="h-80">
               <AnalyticsChart
-                data={dailyRevenue}
+                data={formattedData}
                 xKey="date"
                 yKey="orders"
                 color="#4f46e5"

@@ -1,7 +1,6 @@
 
 import { FC } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DonutCharts from '@/components/DonutCharts';
 import { formatCurrency } from '@/lib/utils';
 

@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAnalyticsData } from '@/services/analyticsService';
-
+import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar';
 import AnalyticsHeader from '@/components/analytics/AnalyticsHeader';
 import AnalyticsStatsCards from '@/components/analytics/AnalyticsStatsCards';
 import AnalyticsTrendCharts from '@/components/analytics/AnalyticsTrendCharts';
@@ -19,36 +20,51 @@ const Analytics = () => {
     queryFn: () => fetchAnalyticsData(dateRange),
   });
   
-  if (isLoading) {
-    return <div className="text-center py-10">Loading analytics...</div>;
-  }
-  
-  if (isError || !data) {
-    return <div className="text-center py-10 text-red-500">Error loading analytics</div>;
-  }
-  
   return (
-    <div className="container mx-auto px-4 py-6">
-      <AnalyticsHeader 
-        dateRange={dateRange} 
-        setDateRange={setDateRange} 
-      />
+    <div className="flex min-h-screen bg-slate-50">
+      <Sidebar />
       
-      <AnalyticsStatsCards
-        totalRevenue={data.totalRevenue}
-        totalOrders={data.totalOrders}
-        avgOrderValue={data.avgOrderValue}
-        totalFoods={data.totalFoods}
-      />
-      
-      <AnalyticsTrendCharts 
-        dailyRevenue={data.dailyRevenue} 
-      />
-      
-      <AnalyticsDonutCharts
-        categoryData={data.categoryData}
-        statusData={data.statusData}
-      />
+      <div className="flex-1 ml-[220px]">
+        <Navbar 
+          userName="Samantha" 
+          userAvatar="https://randomuser.me/api/portraits/women/65.jpg" 
+        />
+        
+        <main className="p-6">
+          <AnalyticsHeader 
+            dateRange={dateRange} 
+            setDateRange={setDateRange} 
+          />
+          
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <p className="text-lg text-gray-500">Loading analytics data...</p>
+            </div>
+          ) : isError ? (
+            <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
+              <p className="text-red-700">Error loading analytics data. Please try again later.</p>
+            </div>
+          ) : (
+            <>
+              <AnalyticsStatsCards
+                totalRevenue={data.totalRevenue}
+                totalOrders={data.totalOrders}
+                avgOrderValue={data.avgOrderValue}
+                totalFoods={data.totalFoods}
+              />
+              
+              <AnalyticsTrendCharts 
+                dailyRevenue={data.dailyRevenue} 
+              />
+              
+              <AnalyticsDonutCharts
+                categoryData={data.categoryData}
+                statusData={data.statusData}
+              />
+            </>
+          )}
+        </main>
+      </div>
     </div>
   );
 };
