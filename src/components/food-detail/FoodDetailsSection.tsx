@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { formatCurrency } from '@/lib/utils';
 
 interface FoodDetailsSectionProps {
   price: number;
@@ -69,7 +70,7 @@ const FoodDetailsSection: React.FC<FoodDetailsSectionProps> = ({
       </div>
       
       <div className="bg-gray-50 p-4 rounded-md">
-        <div className="text-2xl font-bold mb-3">${displayPrice.toFixed(2)}</div>
+        <div className="text-2xl font-bold mb-3">{formatCurrency(displayPrice)}</div>
         
         {!loadingSizes && sizes.length > 0 && (
           <div className="mb-4">
@@ -86,7 +87,7 @@ const FoodDetailsSection: React.FC<FoodDetailsSectionProps> = ({
                       <RadioGroupItem value={size.id} id={size.id} />
                       <Label htmlFor={size.id} className="flex-1 flex justify-between items-center">
                         <span>{size.size_name}</span>
-                        <span className="font-medium">${size.price.toFixed(2)}</span>
+                        <span className="font-medium">{formatCurrency(size.price)}</span>
                       </Label>
                       {size.is_default && (
                         <Badge variant="outline" className="bg-green-50">Default</Badge>

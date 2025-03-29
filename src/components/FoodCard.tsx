@@ -7,6 +7,7 @@ import { Food } from "@/types/food";
 import { Edit, Trash2, Eye } from "lucide-react";
 import { useFoodSizes } from '@/hooks/useFoodSizes';
 import { Badge } from '@/components/ui/badge';
+import { formatCurrency } from '@/lib/utils';
 
 interface FoodCardProps {
   food: Food;
@@ -41,7 +42,7 @@ const FoodCard: React.FC<FoodCardProps> = ({ food, onEdit, onDelete }) => {
               <CardDescription className="text-sm">{food.category}</CardDescription>
             )}
           </div>
-          <span className="text-lg font-semibold">${food.price.toFixed(2)}</span>
+          <span className="text-lg font-semibold">{formatCurrency(food.price)}</span>
         </div>
       </CardHeader>
       
@@ -59,7 +60,7 @@ const FoodCard: React.FC<FoodCardProps> = ({ food, onEdit, onDelete }) => {
                     variant={size.is_default ? "default" : "outline"}
                     className="text-xs"
                   >
-                    {size.size_name}: ${size.price.toFixed(2)}
+                    {size.size_name}: {formatCurrency(size.price)}
                   </Badge>
                 ))}
               </div>
