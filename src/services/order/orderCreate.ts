@@ -1,10 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
+import { Order } from './orderTypes';
 
 /**
  * Creates a test order for a customer
  * Uses the create_order RPC function to bypass RLS policies
  */
-export const createTestOrder = async (customerId: string) => {
+export const createTestOrder = async (customerId: string): Promise<Order> => {
   try {
     console.log('Creating test order for customer:', customerId);
     
@@ -24,15 +25,20 @@ export const createTestOrder = async (customerId: string) => {
     
     // Call the RPC function that bypasses RLS policies
     const { data: newOrder, error: orderError } = await supabase
-      .rpc('create_order', orderData);
+      .rpc('create_order', { order_data: orderData });
     
-    if (orderError) {
-      console.error('Error creating test order:', orderError);
-      throw orderError;
+    if (error) {
+      console.error('Error creating test order:', error);
+      throw error;
     }
     
-    console.log('Test order created:', newOrder);
-    return newOrder;
+    console.log('Raw RPC response:', data);
+    
+    // First cast to unknown, then to Order to avoid direct casting issues
+    const orderResponse = data as unknown as Order;
+    
+    console.log('Test order created:', orderResponse);
+    return orderResponse;
   } catch (error) {
     console.error('Failed to create test order:', error);
     throw error;

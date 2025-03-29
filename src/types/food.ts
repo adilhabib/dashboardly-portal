@@ -21,3 +21,13 @@ export interface FoodDetail {
   created_at: string;
   updated_at: string;
 }
+
+export interface FoodSize {
+  id: string;
+  food_id: string;
+  size_name: string;
+  price: number;
+  is_default: boolean | null;
+  created_at: string;
+  updated_at: string;
+}

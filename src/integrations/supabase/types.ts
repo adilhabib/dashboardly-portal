@@ -17,6 +17,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
@@ -25,6 +26,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
@@ -33,6 +35,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -41,7 +44,6 @@ export type Database = {
           address: string | null
           avatar: string | null
           created_at: string
-          customer_id: string | null
           email: string
           favorite_products: string[] | null
           id: string
@@ -54,7 +56,6 @@ export type Database = {
           address?: string | null
           avatar?: string | null
           created_at?: string
-          customer_id?: string | null
           email: string
           favorite_products?: string[] | null
           id: string
@@ -67,7 +68,6 @@ export type Database = {
           address?: string | null
           avatar?: string | null
           created_at?: string
-          customer_id?: string | null
           email?: string
           favorite_products?: string[] | null
           id?: string
@@ -76,15 +76,7 @@ export type Database = {
           phone_number?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "customer_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customer"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       customer_details: {
         Row: {
@@ -198,6 +190,44 @@ export type Database = {
           },
         ]
       }
+      food_sizes: {
+        Row: {
+          created_at: string
+          food_id: string
+          id: string
+          is_default: boolean | null
+          price: number
+          size_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          food_id: string
+          id?: string
+          is_default?: boolean | null
+          price: number
+          size_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          food_id?: string
+          id?: string
+          is_default?: boolean | null
+          price?: number
+          size_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_sizes_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       foods: {
         Row: {
           category: string | null
@@ -208,6 +238,7 @@ export type Database = {
           is_available: boolean | null
           name: string
           price: number
+          subcategory: string | null
           updated_at: string
         }
         Insert: {
@@ -219,6 +250,7 @@ export type Database = {
           is_available?: boolean | null
           name: string
           price: number
+          subcategory?: string | null
           updated_at?: string
         }
         Update: {
@@ -230,6 +262,7 @@ export type Database = {
           is_available?: boolean | null
           name?: string
           price?: number
+          subcategory?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -433,7 +466,13 @@ export type Database = {
     }
     Functions: {
       create_order: {
+<<<<<<< HEAD
         Args: Record<string, any>
+=======
+        Args: {
+          order_data: Json
+        }
+>>>>>>> 4164382612dcf8d34c1829f7da9999f7571111a8
         Returns: Json
       }
       create_order_items_table: {
@@ -444,6 +483,13 @@ export type Database = {
         Args: {
           table_name: string
           table_schema: Json
+        }
+        Returns: undefined
+      }
+      create_user_with_log: {
+        Args: {
+          user_email: string
+          user_name: string
         }
         Returns: undefined
       }

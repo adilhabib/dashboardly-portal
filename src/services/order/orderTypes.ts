@@ -19,7 +19,7 @@ export interface OrderItem {
   special_instructions?: string | null;
   created_at?: string;
   product_id?: string;
-  product_data?: Record<string, any> | null; // Changed from Record<string, any> to Record<string, any> | null
+  product_data?: Record<string, any> | null;
 }
 
 export interface CustomerDetails {
@@ -56,7 +56,7 @@ export interface Order {
   created_at: string;
   updated_at: string;
   customer?: Customer | null;
-  delivery_address?: string | Record<string, any> | null; // Updated to accept both string and JSON object
+  delivery_address?: any; // Use any to handle both string and object formats
 }
 
 export interface OrderDetail {

@@ -15,6 +15,7 @@ import {
 import { useCategories } from '@/hooks/useCategories';
 import { FoodFormValues } from './FoodForm';
 import FoodImageGallery from './FoodImageGallery';
+import FoodSizeManager from './FoodSizeManager';
 import { Separator } from "@/components/ui/separator";
 
 interface FoodFormFieldsProps {
@@ -24,7 +25,11 @@ interface FoodFormFieldsProps {
 
 const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
   const { categories, isLoading } = useCategories();
-  const { control } = form;
+  const { control, setValue } = form;
+
+  const handleDefaultPriceChange = (price: number) => {
+    setValue('price', price);
+  };
 
   return (
     <>
@@ -66,7 +71,7 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Price ($)</FormLabel>
+              <FormLabel>Base Price ($)</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -77,6 +82,11 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
                 />
               </FormControl>
               <FormMessage />
+              {foodId && (
+                <p className="text-xs text-muted-foreground">
+                  This price will be updated when you set a default size.
+                </p>
+              )}
             </FormItem>
           )}
         />
@@ -141,6 +151,10 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
           <Separator className="my-4" />
         </>
       )}
+
+      <FoodSizeManager foodId={foodId} onPriceChange={handleDefaultPriceChange} />
+      
+      <Separator className="my-4" />
       
       <FormField
         control={control}

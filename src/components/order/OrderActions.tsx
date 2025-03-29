@@ -3,8 +3,9 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { createTestOrder } from '@/services/order';  // Updated import
+import { createTestOrder } from '@/services/order';
 import { useQueryClient } from '@tanstack/react-query';
+import { Order } from '@/services/order';
 
 interface OrderActionsProps {
   customers: any[] | undefined;
@@ -34,9 +35,12 @@ const OrderActions: React.FC<OrderActionsProps> = ({
       const customer = customers[0];
       const newOrder = await createTestOrder(customer.id);
       
+      // Safely access the id property, ensuring it's a string
+      const orderId = typeof newOrder.id === 'string' ? newOrder.id : JSON.stringify(newOrder.id);
+      
       toast({
         title: "Test Order Created",
-        description: `New test order #${newOrder.id.slice(0, 8)} has been created for ${customer.name}.`,
+        description: `New test order #${orderId.slice(0, 8)} has been created for ${customer.name}.`,
       });
       
       queryClient.invalidateQueries({ queryKey: ['orders'] });
