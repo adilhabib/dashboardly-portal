@@ -165,7 +165,7 @@ export const fetchOrders = async () => {
         if (formattedOrder.customer_id) {
           const { data: customer, error: customerError } = await supabase
             .from('customer')
-            .select('name, phone_number')
+            .select('name, phone_number, email')  // Explicitly include email field
             .eq('id', formattedOrder.customer_id)
             .maybeSingle();
           
