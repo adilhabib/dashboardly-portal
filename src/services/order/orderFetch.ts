@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { OrderDetail, OrderItem, FoodItem, Order } from './orderTypes';
 
@@ -57,13 +56,10 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
     }
   }
 
-  // Fetch order items
+  // Fetch order items - UPDATED QUERY TO AVOID USING RELATIONSHIP
   const { data: orderItems, error: itemsError } = await supabase
     .from('order_items')
-    .select(`
-      *,
-      foods(*)
-    `)
+    .select('*')
     .eq('order_id', orderId);
 
   if (itemsError) {
@@ -74,7 +70,7 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
   console.log('Fetched order items:', orderItems);
 
   // Map order items with proper null checking
-  const mappedOrderItems: OrderItem[] = orderItems.map(item => {
+  const mappedOrderItems: OrderItem[] = (orderItems || []).map(item => {
     // Extract special instructions from customizations if it exists
     let special_instructions = null;
     if (item.customizations && typeof item.customizations === 'object') {
@@ -82,30 +78,16 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
       special_instructions = customizations.special_instructions || null;
     }
     
-    // Default food item structure if foods is null or invalid
+    // Create a default food item since we can't join with foods table
     const defaultFoodItem: FoodItem = {
-      id: '',
-      name: 'Unknown item',
-      image_url: null
+      id: item.product_id || '',
+      name: item.product_data?.name || 'Unknown item',
+      image_url: item.product_data?.image_url || null
     };
-    
-    // Safely handle foods with proper null checking
-    const formattedFoods: FoodItem = 
-      (item.foods !== null && 
-      item.foods !== undefined && 
-      typeof item.foods === 'object' && 
-      // Make sure it's not an error object from Supabase
-      !('code' in (item.foods as object)))
-        ? {
-            id: ((item.foods as any).id ?? defaultFoodItem.id),
-            name: ((item.foods as any).name ?? defaultFoodItem.name),
-            image_url: ((item.foods as any).image_url ?? defaultFoodItem.image_url)
-          }
-        : defaultFoodItem;
     
     return {
       ...item,
-      foods: formattedFoods,
+      foods: defaultFoodItem,
       special_instructions,
       unit_price: item.unit_price,
       customizations: item.customizations as Record<string, any> | null,
