@@ -11,15 +11,18 @@ import { getStatusColor, formatDate } from '@/services/orderUtils';
 import { useOrderRealtime } from '@/hooks/useOrderRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import OrderStatusFilter, { OrderStatus } from '@/components/order/OrderStatusFilter';
+import { Badge } from '@/components/ui/badge';
 
 const OrderList = () => {
   const queryClient = useQueryClient();
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<OrderStatus>('all');
   
-  // Use our custom hook for real-time updates
-  useOrderRealtime();
+  // Use our enhanced custom hook for real-time updates
+  const { isConnected, lastUpdate } = useOrderRealtime();
   
   const { data: orders, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['orders'],
@@ -83,6 +86,17 @@ const OrderList = () => {
     }
   };
 
+  // Filter orders based on selected status
+  const filteredOrders = React.useMemo(() => {
+    if (!orders || !orders.length) return [];
+    
+    if (statusFilter === 'all') {
+      return orders;
+    }
+    
+    return orders.filter(order => order.status === statusFilter);
+  }, [orders, statusFilter]);
+
   if (isLoading) {
     return <div className="text-center py-10">Loading orders...</div>;
   }
@@ -107,29 +121,61 @@ const OrderList = () => {
       <PageBreadcrumb pageName="Order List" />
       
       <Card className="shadow-sm">
-        <CardHeader className="pb-2 flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl font-bold">Order List</CardTitle>
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline"
-              onClick={handleRefreshOrders} 
-              disabled={isRefreshing}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
-              Refresh
-            </Button>
-            <OrderActions 
-              customers={customers}
-              isCreatingOrder={isCreatingOrder}
-              setIsCreatingOrder={setIsCreatingOrder}
-            />
+        <CardHeader className="pb-2">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <CardTitle className="text-2xl font-bold">Order List</CardTitle>
+            
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+              <OrderStatusFilter 
+                value={statusFilter} 
+                onChange={setStatusFilter} 
+              />
+              
+              <div className="flex items-center gap-2 ml-auto">
+                <div className="flex items-center text-sm text-gray-500 mr-2">
+                  {isConnected ? (
+                    <Badge variant="outline" className="bg-green-50 text-green-600 flex items-center gap-1 py-1">
+                      <Wifi size={14} className="text-green-600" />
+                      <span>Realtime Connected</span>
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-amber-50 text-amber-600 flex items-center gap-1 py-1">
+                      <WifiOff size={14} className="text-amber-600" />
+                      <span>Realtime Disconnected</span>
+                    </Badge>
+                  )}
+                </div>
+                <Button 
+                  variant="outline"
+                  onClick={handleRefreshOrders} 
+                  disabled={isRefreshing}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
+                  Refresh
+                </Button>
+                <OrderActions 
+                  customers={customers}
+                  isCreatingOrder={isCreatingOrder}
+                  setIsCreatingOrder={setIsCreatingOrder}
+                />
+              </div>
+            </div>
           </div>
+          
+          {lastUpdate.timestamp && (
+            <div className="text-xs text-gray-500 mt-2">
+              Last update: {lastUpdate.type} - {lastUpdate.timestamp.toLocaleTimeString()}
+              {lastUpdate.order && lastUpdate.order.id && 
+                <span> - Order #{(lastUpdate.order.id as string).slice(0, 8)}</span>
+              }
+            </div>
+          )}
         </CardHeader>
         <CardContent>
-          {orders && orders.length > 0 ? (
+          {filteredOrders.length > 0 ? (
             <OrderTable 
-              orders={orders} 
+              orders={filteredOrders} 
               getStatusColor={getStatusColor} 
               formatDate={formatDate} 
             />
