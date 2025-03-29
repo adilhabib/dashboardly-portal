@@ -11,6 +11,7 @@ export const useOrderRealtime = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // Subscribe to real-time changes on the orders table
     const channel = supabase
       .channel('public:orders')
       .on('postgres_changes', 
@@ -35,12 +36,14 @@ export const useOrderRealtime = () => {
             });
           }
           
+          // Invalidate the orders query to trigger a refetch
           queryClient.invalidateQueries({ queryKey: ['orders'] });
         })
       .subscribe();
 
     console.log('Subscribed to real-time updates for orders table');
 
+    // Clean up subscription when component unmounts
     return () => {
       supabase.removeChannel(channel);
     };

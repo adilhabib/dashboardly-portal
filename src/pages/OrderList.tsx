@@ -17,9 +17,11 @@ const OrderList = () => {
   // Use our custom hook for real-time updates
   useOrderRealtime();
   
-  const { data: orders, isLoading, isError, error } = useQuery({
+  const { data: orders, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['orders'],
     queryFn: fetchOrders,
+    // Increase the staleness time to prevent unnecessary refetching
+    staleTime: 1000 * 60, // 1 minute
   });
 
   const { data: customers } = useQuery({
@@ -33,6 +35,12 @@ const OrderList = () => {
       console.error('Error in useQuery:', error);
     }
   }, [orders, isError, error]);
+
+  // Force a refetch when the component mounts
+  useEffect(() => {
+    // Retry fetching on component mount
+    refetch();
+  }, [refetch]);
 
   const handleRefreshOrders = () => {
     queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -51,6 +59,12 @@ const OrderList = () => {
       <div className="text-center py-10 text-red-500">
         <p>Error loading orders</p>
         <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error'}</p>
+        <button 
+          onClick={() => refetch()} 
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -62,11 +76,19 @@ const OrderList = () => {
       <Card className="shadow-sm">
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <CardTitle className="text-2xl font-bold">Order List</CardTitle>
-          <OrderActions 
-            customers={customers}
-            isCreatingOrder={isCreatingOrder}
-            setIsCreatingOrder={setIsCreatingOrder}
-          />
+          <div className="flex space-x-2">
+            <button 
+              onClick={handleRefreshOrders} 
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+            >
+              Refresh
+            </button>
+            <OrderActions 
+              customers={customers}
+              isCreatingOrder={isCreatingOrder}
+              setIsCreatingOrder={setIsCreatingOrder}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {orders && orders.length > 0 ? (

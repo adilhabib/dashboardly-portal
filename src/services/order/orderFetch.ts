@@ -147,6 +147,11 @@ export const fetchOrders = async () => {
   
   console.log('Orders fetched:', orders ? orders.length : 0, 'records found');
   
+  // If no orders were found, return an empty array
+  if (!orders || orders.length === 0) {
+    return [];
+  }
+  
   // For each order, fetch the customer data separately
   const ordersWithCustomers = await Promise.all(
     orders.map(async (order) => {

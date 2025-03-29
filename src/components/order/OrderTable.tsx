@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatCurrency } from '@/lib/utils';
 
 interface OrderTableProps {
   orders: any[];
@@ -13,6 +14,8 @@ interface OrderTableProps {
 }
 
 const OrderTable: React.FC<OrderTableProps> = ({ orders, getStatusColor, formatDate }) => {
+  console.log('Orders passed to OrderTable:', orders);
+  
   return (
     <Table>
       <TableHeader>
@@ -35,7 +38,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, getStatusColor, formatD
               <div className="text-xs text-gray-500">{order.customer?.phone_number || 'No phone'}</div>
             </TableCell>
             <TableCell>{formatDate(order.created_at)}</TableCell>
-            <TableCell>Rs. {order.total.toFixed(2)}</TableCell>
+            <TableCell>{formatCurrency(order.total)}</TableCell>
             <TableCell>
               <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
             </TableCell>
