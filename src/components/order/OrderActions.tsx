@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { updateOrderStatus } from '@/services/order';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, X } from 'lucide-react';
+import { Check, X, PackageCheck } from 'lucide-react';
 
 interface OrderActionsProps {
   orderId: string;
@@ -29,9 +29,24 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
       setIsUpdating(true);
       await updateOrderStatus(orderId, newStatus);
       
+      let statusMessage = '';
+      switch(newStatus) {
+        case 'processing':
+          statusMessage = 'accepted';
+          break;
+        case 'cancelled':
+          statusMessage = 'cancelled';
+          break;
+        case 'completed':
+          statusMessage = 'completed';
+          break;
+        default:
+          statusMessage = 'updated';
+      }
+      
       toast({
         title: "Order Status Updated",
-        description: `Order #${orderId.slice(0, 8)} has been ${newStatus === 'processing' ? 'accepted' : 'cancelled'}.`,
+        description: `Order #${orderId.slice(0, 8)} has been ${statusMessage}.`,
       });
       
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -47,34 +62,50 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
     }
   };
 
-  // Don't show the buttons if the order is already processed or cancelled
-  if (currentStatus === 'processing' || currentStatus === 'completed' || currentStatus === 'cancelled') {
-    return null;
+  // Render appropriate actions based on current status
+  if (currentStatus === 'pending') {
+    return (
+      <div className="flex items-center gap-2">
+        <Button 
+          onClick={() => handleStatusUpdate('processing')}
+          disabled={isUpdating}
+          variant="default"
+          size="sm"
+          className="bg-green-500 hover:bg-green-600"
+        >
+          <Check size={16} />
+          Accept
+        </Button>
+        <Button 
+          onClick={() => handleStatusUpdate('cancelled')}
+          disabled={isUpdating}
+          variant="destructive"
+          size="sm"
+        >
+          <X size={16} />
+          Reject
+        </Button>
+      </div>
+    );
+  } else if (currentStatus === 'processing') {
+    return (
+      <div className="flex items-center gap-2">
+        <Button 
+          onClick={() => handleStatusUpdate('completed')}
+          disabled={isUpdating}
+          variant="default"
+          size="sm"
+          className="bg-blue-500 hover:bg-blue-600"
+        >
+          <PackageCheck size={16} />
+          Complete
+        </Button>
+      </div>
+    );
   }
 
-  return (
-    <div className="flex items-center gap-2">
-      <Button 
-        onClick={() => handleStatusUpdate('processing')}
-        disabled={isUpdating}
-        variant="default"
-        size="sm"
-        className="bg-green-500 hover:bg-green-600"
-      >
-        <Check size={16} />
-        Accept
-      </Button>
-      <Button 
-        onClick={() => handleStatusUpdate('cancelled')}
-        disabled={isUpdating}
-        variant="destructive"
-        size="sm"
-      >
-        <X size={16} />
-        Reject
-      </Button>
-    </div>
-  );
+  // Don't show any buttons for completed or cancelled orders
+  return null;
 };
 
 export default OrderActions;
