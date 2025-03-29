@@ -18,7 +18,7 @@ const AnalyticsDonutCharts: FC<AnalyticsDonutChartsProps> = ({ categoryData, sta
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'PKR',
+      currency: 'Rs.',
     }).format(value);
   };
 

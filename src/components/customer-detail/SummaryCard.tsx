@@ -25,7 +25,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ customer, orders }) => {
           <div>
             <h3 className="text-sm font-medium text-gray-500">Total Spent</h3>
             <p className="text-2xl font-bold mt-1">
-              PKR {orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0).toFixed(2) || '0.00'}
+              Rs. {orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0).toFixed(2) || '0.00'}
             </p>
           </div>
           <Separator />

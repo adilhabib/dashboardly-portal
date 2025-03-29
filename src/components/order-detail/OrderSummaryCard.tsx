@@ -78,14 +78,14 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ order, orderItems }
                         {item.foods && item.foods.name ? item.foods.name : 'Unknown item'}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {item.quantity} × PKR {item.unit_price.toFixed(2)}
+                        {item.quantity} × Rs. {item.unit_price.toFixed(2)}
                       </p>
                       {item.special_instructions && (
                         <p className="text-sm italic mt-1">"{item.special_instructions}"</p>
                       )}
                     </div>
                   </div>
-                  <p className="font-medium">PKR {item.total_price.toFixed(2)}</p>
+                  <p className="font-medium">Rs. {item.total_price.toFixed(2)}</p>
                 </div>
               ))}
             </div>
@@ -99,7 +99,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ order, orderItems }
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-500">Total</p>
-          <p className="text-xl font-bold">PKR {order.total.toFixed(2)}</p>
+          <p className="text-xl font-bold">Rs. {order.total.toFixed(2)}</p>
         </div>
       </CardFooter>
     </Card>

@@ -33,7 +33,7 @@ const OrderStatistics: React.FC = () => {
           <Separator />
           <div>
             <h3 className="text-sm font-medium text-gray-500">Revenue Generated</h3>
-            <p className="text-2xl font-bold mt-1">PKR 0.00</p>
+            <p className="text-2xl font-bold mt-1">Rs. 0.00</p>
           </div>
           <Separator />
           <div>
