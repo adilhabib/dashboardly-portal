@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchCategories, fetchSubcategoriesByParent } from '@/services/categoryService';
-import { Category, SubCategory } from '@/types/category';
+import { fetchCategories } from '@/services/categoryService';
+import { Category } from '@/types/category';
 
 export function useCategories() {
   const { 
@@ -15,24 +15,6 @@ export function useCategories() {
 
   return {
     categories: categories || [],
-    isLoading,
-    isError
-  };
-}
-
-export function useSubcategories(parentId?: string) {
-  const { 
-    data: subcategories, 
-    isLoading, 
-    isError 
-  } = useQuery({
-    queryKey: ['subcategories', parentId],
-    queryFn: () => parentId ? fetchSubcategoriesByParent(parentId) : [],
-    enabled: !!parentId,
-  });
-
-  return {
-    subcategories: subcategories || [],
     isLoading,
     isError
   };

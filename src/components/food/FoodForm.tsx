@@ -27,7 +27,6 @@ const foodFormSchema = z.object({
   }),
   image_url: z.string().optional(),
   category: z.string().optional(),
-  subcategory: z.string().optional(),
   is_available: z.boolean().default(true),
 });
 

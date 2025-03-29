@@ -1,20 +1,10 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  fetchCategories, 
-  createCategory, 
-  updateCategory, 
-  deleteCategory,
-  createSubcategory,
-  updateSubcategory,
-  deleteSubcategory
-} from '@/services/categoryService';
+import { fetchCategories, createCategory, updateCategory, deleteCategory } from '@/services/categoryService';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit2, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import CategoryModal from './CategoryModal';
-import SubcategoryModal from './SubcategoryModal';
 import {
   Table,
   TableBody,
@@ -23,29 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Category, SubCategory } from '@/types/category';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+import { Category } from '@/types/category';
 
 const CategoryManagement: React.FC = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubcategoryModalOpen, setIsSubcategoryModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<SubCategory | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-
-  // Toggle category expansion
-  const toggleCategory = (categoryId: string) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [categoryId]: !prev[categoryId]
-    }));
-  };
 
   const { data: categories, isLoading, isError, error } = useQuery({
     queryKey: ['categories'],
@@ -53,7 +26,7 @@ const CategoryManagement: React.FC = () => {
     retry: 1,
   });
 
-  const createCategoryMutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: createCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -66,7 +39,7 @@ const CategoryManagement: React.FC = () => {
     },
   });
 
-  const updateCategoryMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: updateCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -79,7 +52,7 @@ const CategoryManagement: React.FC = () => {
     },
   });
 
-  const deleteCategoryMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: deleteCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -88,44 +61,6 @@ const CategoryManagement: React.FC = () => {
     onError: (error) => {
       console.error('Error deleting category:', error);
       toast.error('Failed to delete category');
-    },
-  });
-
-  const createSubcategoryMutation = useMutation({
-    mutationFn: createSubcategory,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast.success('Subcategory created successfully');
-      setIsSubcategoryModalOpen(false);
-    },
-    onError: (error) => {
-      console.error('Error creating subcategory:', error);
-      toast.error('Failed to create subcategory');
-    },
-  });
-
-  const updateSubcategoryMutation = useMutation({
-    mutationFn: updateSubcategory,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast.success('Subcategory updated successfully');
-      setIsSubcategoryModalOpen(false);
-    },
-    onError: (error) => {
-      console.error('Error updating subcategory:', error);
-      toast.error('Failed to update subcategory');
-    },
-  });
-
-  const deleteSubcategoryMutation = useMutation({
-    mutationFn: deleteSubcategory,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast.success('Subcategory deleted successfully');
-    },
-    onError: (error) => {
-      console.error('Error deleting subcategory:', error);
-      toast.error('Failed to delete subcategory');
     },
   });
 
@@ -140,29 +75,8 @@ const CategoryManagement: React.FC = () => {
   };
 
   const handleDeleteCategory = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this category? This will also delete all subcategories.')) {
-      deleteCategoryMutation.mutate(id);
-    }
-  };
-
-  const handleAddSubcategory = (categoryId: string) => {
-    setSelectedSubcategory(null);
-    setIsSubcategoryModalOpen(true);
-    // Find the category to pre-fill the parent ID
-    const category = categories?.find(cat => cat.id === categoryId);
-    if (category) {
-      setSelectedCategory(category);
-    }
-  };
-
-  const handleEditSubcategory = (subcategory: SubCategory) => {
-    setSelectedSubcategory(subcategory);
-    setIsSubcategoryModalOpen(true);
-  };
-
-  const handleDeleteSubcategory = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this subcategory?')) {
-      deleteSubcategoryMutation.mutate(id);
+    if (window.confirm('Are you sure you want to delete this category?')) {
+      deleteMutation.mutate(id);
     }
   };
 
@@ -171,24 +85,11 @@ const CategoryManagement: React.FC = () => {
     setSelectedCategory(null);
   };
 
-  const handleCloseSubcategoryModal = () => {
-    setIsSubcategoryModalOpen(false);
-    setSelectedSubcategory(null);
-  };
-
   const handleSaveCategory = (category: Omit<Category, 'id'> | Category) => {
     if ('id' in category) {
-      updateCategoryMutation.mutate(category as Category);
+      updateMutation.mutate(category as Category);
     } else {
-      createCategoryMutation.mutate(category);
-    }
-  };
-
-  const handleSaveSubcategory = (subcategory: Omit<SubCategory, 'id'> | SubCategory) => {
-    if ('id' in subcategory) {
-      updateSubcategoryMutation.mutate(subcategory as SubCategory);
-    } else {
-      createSubcategoryMutation.mutate(subcategory);
+      createMutation.mutate(category);
     }
   };
 
@@ -222,89 +123,35 @@ const CategoryManagement: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40%]">Name</TableHead>
-                <TableHead className="w-[40%]">Description</TableHead>
-                <TableHead className="w-[20%]">Actions</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead className="w-[120px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {categories.map((category) => (
-                <React.Fragment key={category.id}>
-                  <TableRow className="group">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="p-0 mr-2"
-                          onClick={() => toggleCategory(category.id)}
-                        >
-                          {expandedCategories[category.id] ? (
-                            <ChevronDown size={16} />
-                          ) : (
-                            <ChevronRight size={16} />
-                          )}
-                        </Button>
-                        {category.name}
-                      </div>
-                    </TableCell>
-                    <TableCell>{category.description}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">Actions</Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => handleEditCategory(category)}>
-                              <Edit2 size={16} className="mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleAddSubcategory(category.id)}>
-                              <Plus size={16} className="mr-2" />
-                              Add Subcategory
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleDeleteCategory(category.id)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 size={16} className="mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                  
-                  {/* Display subcategories if expanded */}
-                  {expandedCategories[category.id] && category.subcategories && category.subcategories.map((subcategory) => (
-                    <TableRow key={subcategory.id} className="bg-slate-50">
-                      <TableCell className="pl-10">
-                        <span className="text-sm">— {subcategory.name}</span>
-                      </TableCell>
-                      <TableCell className="text-sm">{subcategory.description}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleEditSubcategory(subcategory)}
-                          >
-                            <Edit2 size={14} />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleDeleteSubcategory(subcategory.id)}
-                          >
-                            <Trash2 size={14} />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </React.Fragment>
+                <TableRow key={category.id}>
+                  <TableCell className="font-medium">{category.name}</TableCell>
+                  <TableCell>{category.description}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleEditCategory(category)}
+                      >
+                        <Edit2 size={16} />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleDeleteCategory(category.id)}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
               ))}
             </TableBody>
           </Table>
@@ -324,16 +171,6 @@ const CategoryManagement: React.FC = () => {
           onClose={handleCloseModal} 
           onSave={handleSaveCategory}
           category={selectedCategory}
-        />
-      )}
-
-      {isSubcategoryModalOpen && (
-        <SubcategoryModal 
-          isOpen={isSubcategoryModalOpen} 
-          onClose={handleCloseSubcategoryModal} 
-          onSave={handleSaveSubcategory}
-          subcategory={selectedSubcategory}
-          parentCategoryId={selectedCategory?.id}
         />
       )}
     </div>
