@@ -466,13 +466,9 @@ export type Database = {
     }
     Functions: {
       create_order: {
-<<<<<<< HEAD
-        Args: Record<string, any>
-=======
         Args: {
           order_data: Json
         }
->>>>>>> 4164382612dcf8d34c1829f7da9999f7571111a8
         Returns: Json
       }
       create_order_items_table: {

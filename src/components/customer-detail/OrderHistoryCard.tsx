@@ -12,6 +12,13 @@ interface OrderHistoryCardProps {
 const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({ orders }) => {
   console.log('Orders passed to OrderHistoryCard:', orders);
   
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+  };
+  
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-2">
@@ -29,7 +36,7 @@ const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({ orders }) => {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">Rs. {order.total.toFixed(2)}</p>
+                  <p className="font-medium">{formatCurrency(order.total)}</p>
                   <p className="text-sm text-gray-500">{order.status}</p>
                 </div>
                 <Link to={`/order-detail?id=${order.id}`}>

@@ -19,6 +19,13 @@ const PriceHistory: React.FC = () => {
 };
 
 const OrderStatistics: React.FC = () => {
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+  };
+
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-2">
@@ -33,7 +40,7 @@ const OrderStatistics: React.FC = () => {
           <Separator />
           <div>
             <h3 className="text-sm font-medium text-gray-500">Revenue Generated</h3>
-            <p className="text-2xl font-bold mt-1">Rs. 0.00</p>
+            <p className="text-2xl font-bold mt-1">{formatCurrency(0)}</p>
           </div>
           <Separator />
           <div>

@@ -10,6 +10,15 @@ interface SummaryCardProps {
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ customer, orders }) => {
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+  };
+
+  const totalSpent = orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0) || 0;
+
   return (
     <Card className="shadow-sm mb-6">
       <CardHeader className="pb-2">
@@ -25,7 +34,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ customer, orders }) => {
           <div>
             <h3 className="text-sm font-medium text-gray-500">Total Spent</h3>
             <p className="text-2xl font-bold mt-1">
-              Rs. {orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0).toFixed(2) || '0.00'}
+              {formatCurrency(totalSpent)}
             </p>
           </div>
           <Separator />
