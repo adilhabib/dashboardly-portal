@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatCurrency } from '@/lib/utils';
 
 interface OrderHistoryCardProps {
   orders: any[];
@@ -11,10 +11,6 @@ interface OrderHistoryCardProps {
 
 const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({ orders }) => {
   console.log('Orders passed to OrderHistoryCard:', orders);
-  
-  const formatCurrency = (value: number) => {
-    return `Rs. ${value.toFixed(2)}`;
-  };
   
   return (
     <Card className="shadow-sm">

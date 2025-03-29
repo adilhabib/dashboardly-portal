@@ -38,7 +38,7 @@ const DashboardStatsCards: FC = () => {
       
       <StatsCard 
         title="Total Revenue" 
-        value="$128" 
+        value="Rs. 128.00" 
         icon={<DollarSign size={24} className="text-emerald-500" />}
         change={12.5}
         iconBgColor="bg-emerald-100"

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { formatCurrency } from '@/lib/utils';
 
 const PriceHistory: React.FC = () => {
   return (
@@ -19,10 +20,6 @@ const PriceHistory: React.FC = () => {
 };
 
 const OrderStatistics: React.FC = () => {
-  const formatCurrency = (value: number) => {
-    return `Rs. ${value.toFixed(2)}`;
-  };
-
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-2">

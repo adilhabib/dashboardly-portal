@@ -3,6 +3,7 @@ import { FC } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AnalyticsChart } from '@/components/charts';
+import { formatCurrency } from '@/lib/utils';
 
 interface AnalyticsTrendChartsProps {
   dailyRevenue: Array<{
@@ -32,7 +33,7 @@ const AnalyticsTrendCharts: FC<AnalyticsTrendChartsProps> = ({ dailyRevenue }) =
                 data={dailyRevenue}
                 xKey="date"
                 yKey="revenue"
-                yFormatter={(value) => `Rs. ${value}`}
+                yFormatter={(value) => formatCurrency(value)}
               />
             </div>
           </CardContent>

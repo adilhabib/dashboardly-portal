@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatCurrency } from '@/lib/utils';
 
 interface SummaryCardProps {
   customer: any;
@@ -10,10 +10,6 @@ interface SummaryCardProps {
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ customer, orders }) => {
-  const formatCurrency = (value: number) => {
-    return `Rs. ${value.toFixed(2)}`;
-  };
-
   const totalSpent = orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0) || 0;
 
   return (

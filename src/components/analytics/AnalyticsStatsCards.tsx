@@ -1,7 +1,8 @@
 
 import { FC } from 'react';
+import { BarChart3, ShoppingCart, TrendingUp, Users } from 'lucide-react';
 import StatsCard from '@/components/StatsCard';
-import { DollarSign, ShoppingCart, BarChart3, UtensilsCrossed } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface AnalyticsStatsCardsProps {
   totalRevenue: number;
@@ -10,61 +11,48 @@ interface AnalyticsStatsCardsProps {
   totalFoods: number;
 }
 
-const formatCurrency = (value: number) => {
-  return `Rs. ${value.toFixed(2)}`;
-};
-
 const AnalyticsStatsCards: FC<AnalyticsStatsCardsProps> = ({
   totalRevenue,
   totalOrders,
   avgOrderValue,
-  totalFoods,
+  totalFoods
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <StatsCard
         title="Total Revenue"
         value={formatCurrency(totalRevenue)}
-        description="Total sales revenue"
-        trend={7.2}
-        trendText="from last period"
-        icon={<DollarSign className="h-6 w-6 text-white" />}
+        icon={<TrendingUp className="h-6 w-6 text-white" />}
+        change={12.6}
         iconBgColor="bg-green-500"
         changeDirection="up"
-        change={7.2}
       />
+      
       <StatsCard
-        title="Orders"
+        title="Total Orders"
         value={totalOrders.toString()}
-        description="Total number of orders"
-        trend={-2.5}
-        trendText="from last period"
         icon={<ShoppingCart className="h-6 w-6 text-white" />}
+        change={4.3}
         iconBgColor="bg-blue-500"
-        changeDirection="down"
-        change={-2.5}
+        changeDirection="up"
       />
+      
       <StatsCard
         title="Average Order Value"
         value={formatCurrency(avgOrderValue)}
-        description="Average value per order"
-        trend={3.1}
-        trendText="from last period"
         icon={<BarChart3 className="h-6 w-6 text-white" />}
+        change={8.2}
         iconBgColor="bg-purple-500"
         changeDirection="up"
-        change={3.1}
       />
+      
       <StatsCard
-        title="Menu Items"
+        title="Total Foods"
         value={totalFoods.toString()}
-        description="Active menu items"
-        trend={0}
-        trendText="unchanged"
-        icon={<UtensilsCrossed className="h-6 w-6 text-white" />}
-        iconBgColor="bg-amber-500"
+        icon={<Users className="h-6 w-6 text-white" />}
+        change={2.1}
+        iconBgColor="bg-orange-500"
         changeDirection="up"
-        change={0}
       />
     </div>
   );

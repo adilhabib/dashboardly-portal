@@ -16,3 +16,7 @@ export function formatDate(dateString: string) {
     minute: '2-digit',
   }).format(date);
 }
+
+export function formatCurrency(value: number) {
+  return `Rs. ${value.toFixed(2)}`;
+}
