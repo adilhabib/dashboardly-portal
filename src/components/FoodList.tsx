@@ -68,10 +68,15 @@ const FoodList: React.FC = () => {
     setSelectedCategory(categoryId);
   };
 
-  // Filter foods by selected category
+  // Filter foods by selected category name, not ID
   const filteredFoods = foods?.filter(food => 
     selectedCategory ? food.category === selectedCategory : true
   );
+
+  // Add console log to debug filtering
+  console.log('Selected category:', selectedCategory);
+  console.log('Available foods:', foods);
+  console.log('Filtered foods:', filteredFoods);
 
   if (isLoading) {
     return <div className="text-center py-10">Loading food items...</div>;
