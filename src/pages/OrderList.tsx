@@ -9,10 +9,14 @@ import { fetchCustomers } from '@/services/customerService';
 import { OrderTable, EmptyStateMessage, OrderActions } from '@/components/order';
 import { getStatusColor, formatDate } from '@/services/orderUtils';
 import { useOrderRealtime } from '@/hooks/useOrderRealtime';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 const OrderList = () => {
   const queryClient = useQueryClient();
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Use our custom hook for real-time updates
   useOrderRealtime();
@@ -22,6 +26,7 @@ const OrderList = () => {
     queryFn: fetchOrders,
     // Increase the staleness time to prevent unnecessary refetching
     staleTime: 1000 * 60, // 1 minute
+    retry: 3, // Retry 3 times before considering it an error
   });
 
   const { data: customers } = useQuery({
@@ -40,14 +45,42 @@ const OrderList = () => {
   useEffect(() => {
     // Retry fetching on component mount
     refetch();
+
+    // Check Supabase connection and tables
+    const checkSupabase = async () => {
+      try {
+        const { data, error } = await supabase.from('orders').select('count(*)', { count: 'exact', head: true });
+        if (error) {
+          console.error('Supabase connection check error:', error);
+        } else {
+          console.log('Supabase connection successful, count result:', data);
+        }
+      } catch (err) {
+        console.error('Failed to check Supabase connection:', err);
+      }
+    };
+
+    checkSupabase();
   }, [refetch]);
 
-  const handleRefreshOrders = () => {
-    queryClient.invalidateQueries({ queryKey: ['orders'] });
-    toast({
-      title: "Refreshing orders",
-      description: "Checking for new orders..."
-    });
+  const handleRefreshOrders = async () => {
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['orders'] });
+      toast({
+        title: "Refreshing orders",
+        description: "Checking for new orders..."
+      });
+    } catch (error) {
+      console.error('Error refreshing orders:', error);
+      toast({
+        title: "Error Refreshing",
+        description: "Failed to refresh orders. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   if (isLoading) {
@@ -77,12 +110,15 @@ const OrderList = () => {
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <CardTitle className="text-2xl font-bold">Order List</CardTitle>
           <div className="flex space-x-2">
-            <button 
+            <Button 
+              variant="outline"
               onClick={handleRefreshOrders} 
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              disabled={isRefreshing}
+              className="flex items-center gap-2"
             >
+              <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
               Refresh
-            </button>
+            </Button>
             <OrderActions 
               customers={customers}
               isCreatingOrder={isCreatingOrder}

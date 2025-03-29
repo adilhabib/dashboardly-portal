@@ -11,6 +11,33 @@ export const useOrderRealtime = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // Enable full replication for real-time updates
+    supabase.from('orders')
+      .on('INSERT', (payload) => {
+        console.log('New order received:', payload);
+        toast({
+          title: 'New Order Received',
+          description: `Order #${payload.new.id.slice(0, 8)} has been placed.`,
+        });
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+      })
+      .on('UPDATE', (payload) => {
+        console.log('Order updated:', payload);
+        toast({
+          title: 'Order Updated',
+          description: `Order #${payload.new.id.slice(0, 8)} has been updated to "${payload.new.status}".`,
+        });
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+      })
+      .on('DELETE', (payload) => {
+        console.log('Order deleted:', payload);
+        toast({
+          title: 'Order Deleted',
+          description: `Order #${payload.old.id.slice(0, 8)} has been removed.`,
+        });
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+      });
+
     // Subscribe to real-time changes on the orders table
     const channel = supabase
       .channel('public:orders')

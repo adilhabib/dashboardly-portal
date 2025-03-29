@@ -135,53 +135,77 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
 export const fetchOrders = async () => {
   console.log('Fetching orders...');
   
-  const { data: orders, error: ordersError } = await supabase
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (ordersError) {
-    console.error('Error fetching orders:', ordersError);
-    throw ordersError;
-  }
-  
-  console.log('Orders fetched:', orders ? orders.length : 0, 'records found');
-  
-  // If no orders were found, return an empty array
-  if (!orders || orders.length === 0) {
-    return [];
-  }
-  
-  // For each order, fetch the customer data separately
-  const ordersWithCustomers = await Promise.all(
-    orders.map(async (order) => {
-      // Ensure delivery_address is properly formatted
-      const formattedOrder = {
-        ...order,
-        delivery_address: typeof order.delivery_address === 'string' 
-          ? order.delivery_address 
-          : order.delivery_address as unknown as Record<string, any> | null
-      };
-      
-      if (formattedOrder.customer_id) {
-        const { data: customer, error: customerError } = await supabase
-          .from('customer')
-          .select('name, phone_number')
-          .eq('id', formattedOrder.customer_id)
-          .maybeSingle();
+  try {
+    // Check if the orders table exists and has data
+    const { count, error: countError } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) {
+      console.error('Error checking orders count:', countError);
+      throw countError;
+    }
+    
+    console.log('Orders count:', count);
+    
+    // Fetch orders with more detailed logging
+    const { data: orders, error: ordersError } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (ordersError) {
+      console.error('Error fetching orders:', ordersError);
+      throw ordersError;
+    }
+    
+    console.log('Orders fetched:', orders ? orders.length : 0, 'records found');
+    console.log('Sample order data:', orders && orders.length > 0 ? orders[0] : 'No orders found');
+    
+    // If no orders were found, return an empty array
+    if (!orders || orders.length === 0) {
+      return [];
+    }
+    
+    // For each order, fetch the customer data separately
+    const ordersWithCustomers = await Promise.all(
+      orders.map(async (order) => {
+        // Ensure delivery_address is properly formatted
+        const formattedOrder = {
+          ...order,
+          delivery_address: typeof order.delivery_address === 'string' 
+            ? order.delivery_address 
+            : order.delivery_address as unknown as Record<string, any> | null
+        };
         
-        if (customerError) {
-          console.error('Error fetching customer for order:', customerError);
-          return { ...formattedOrder, customer: null };
+        if (formattedOrder.customer_id) {
+          const { data: customer, error: customerError } = await supabase
+            .from('customer')
+            .select('name, phone_number')
+            .eq('id', formattedOrder.customer_id)
+            .maybeSingle();
+          
+          if (customerError) {
+            console.error('Error fetching customer for order:', customerError);
+            return { ...formattedOrder, customer: null };
+          }
+          
+          return { ...formattedOrder, customer };
         }
         
-        return { ...formattedOrder, customer };
-      }
-      
-      return { ...formattedOrder, customer: null };
-    })
-  );
-  
-  console.log('Orders with customers:', ordersWithCustomers.length);
-  return ordersWithCustomers;
+        return { ...formattedOrder, customer: null };
+      })
+    );
+    
+    console.log('Orders with customers:', ordersWithCustomers.length);
+    if (ordersWithCustomers.length > 0) {
+      console.log('Sample processed order:', ordersWithCustomers[0]);
+    }
+    
+    return ordersWithCustomers;
+  } catch (error) {
+    console.error('Unexpected error in fetchOrders:', error);
+    // Return empty array instead of throwing to prevent UI errors
+    return [];
+  }
 };
