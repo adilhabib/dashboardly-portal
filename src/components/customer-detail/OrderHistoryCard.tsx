@@ -13,10 +13,7 @@ const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({ orders }) => {
   console.log('Orders passed to OrderHistoryCard:', orders);
   
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
+    return `Rs. ${value.toFixed(2)}`;
   };
   
   return (

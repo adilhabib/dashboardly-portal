@@ -16,10 +16,7 @@ interface AnalyticsDonutChartsProps {
 
 const AnalyticsDonutCharts: FC<AnalyticsDonutChartsProps> = ({ categoryData, statusData }) => {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
+    return `Rs. ${value.toFixed(2)}`;
   };
 
   return (

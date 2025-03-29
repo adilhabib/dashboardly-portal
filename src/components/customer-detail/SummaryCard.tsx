@@ -11,10 +11,7 @@ interface SummaryCardProps {
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ customer, orders }) => {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
+    return `Rs. ${value.toFixed(2)}`;
   };
 
   const totalSpent = orders?.reduce((sum: number, order: any) => sum + order.total_amount, 0) || 0;

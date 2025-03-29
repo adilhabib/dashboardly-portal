@@ -20,10 +20,7 @@ const PriceHistory: React.FC = () => {
 
 const OrderStatistics: React.FC = () => {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
+    return `Rs. ${value.toFixed(2)}`;
   };
 
   return (

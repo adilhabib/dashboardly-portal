@@ -11,10 +11,7 @@ interface AnalyticsStatsCardsProps {
 }
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-PK', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(value);
+  return `Rs. ${value.toFixed(2)}`;
 };
 
 const AnalyticsStatsCards: FC<AnalyticsStatsCardsProps> = ({

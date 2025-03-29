@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -89,7 +88,7 @@ const revenueData = [
   { name: 'Aug', value: 6800 },
   { name: 'Sep', value: 7500 },
   { name: 'Oct', value: 8200 },
-  { name: 'Nov', value: 3500 }, // Current month (partial)
+  { name: 'Nov', value: 3500 },
   { name: 'Dec', value: 0 },
 ];
 
@@ -104,16 +103,13 @@ const expensesData = [
   { name: 'Aug', value: 4200 },
   { name: 'Sep', value: 4600 },
   { name: 'Oct', value: 4800 },
-  { name: 'Nov', value: 2200 }, // Current month (partial)
+  { name: 'Nov', value: 2200 },
   { name: 'Dec', value: 0 },
 ];
 
 const Wallet = () => {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-PK', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
+    return `Rs. ${amount.toFixed(2)}`;
   };
   
   const totalIncome = dummyTransactions
