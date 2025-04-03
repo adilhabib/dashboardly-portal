@@ -8,8 +8,6 @@ import {
   User, 
   BarChart2, 
   MessageSquare, 
-  Calendar, 
-  MessageCircle, 
   Wallet,
   Pizza,
   Plus,
@@ -36,8 +34,6 @@ const Sidebar: FC = () => {
     { path: '/food-detail', icon: <FileText size={18} />, label: 'Food Detail' },
     { path: '/customer-detail', icon: <User size={18} />, label: 'Customer Detail' },
     { path: '/notifications', icon: <Bell size={18} />, label: 'Notifications', badge: notificationState.unreadCount },
-    { path: '/calendar', icon: <Calendar size={18} />, label: 'Calendar' },
-    { path: '/chat', icon: <MessageCircle size={18} />, label: 'Chat' },
     { path: '/wallet', icon: <Wallet size={18} />, label: 'Wallet' },
     { path: '/profile', icon: <UserCircle size={18} />, label: 'My Profile' },
   ];

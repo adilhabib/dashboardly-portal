@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,8 +18,6 @@ import Customer from "./pages/Customer";
 import CustomerDetail from "./pages/CustomerDetail";
 import Analytics from "./pages/Analytics";
 import Reviews from "./pages/Reviews";
-import Calendar from "./pages/Calendar";
-import Chat from "./pages/Chat";
 import Wallet from "./pages/Wallet";
 import Categories from "./pages/Categories";
 import Notifications from "./pages/Notifications";
@@ -111,22 +110,6 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CustomerDetail />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/calendar" 
-              element={
-                <ProtectedRoute>
-                  <Calendar />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/chat" 
-              element={
-                <ProtectedRoute>
-                  <Chat />
                 </ProtectedRoute>
               } 
             />
