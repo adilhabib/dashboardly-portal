@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/Layout";
 import Foods from "./pages/Foods";
 import FoodDetail from "./pages/FoodDetail";
 import OrderList from "./pages/OrderList";
@@ -33,11 +34,15 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
+            
+            {/* Protected routes with Layout */}
             <Route 
               path="/" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -45,7 +50,9 @@ const App = () => (
               path="/order-list" 
               element={
                 <ProtectedRoute>
-                  <OrderList />
+                  <Layout>
+                    <OrderList />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -53,7 +60,9 @@ const App = () => (
               path="/order-detail" 
               element={
                 <ProtectedRoute>
-                  <OrderDetail />
+                  <Layout>
+                    <OrderDetail />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -61,7 +70,9 @@ const App = () => (
               path="/customer" 
               element={
                 <ProtectedRoute>
-                  <Customer />
+                  <Layout>
+                    <Customer />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -69,7 +80,9 @@ const App = () => (
               path="/analytics" 
               element={
                 <ProtectedRoute>
-                  <Analytics />
+                  <Layout>
+                    <Analytics />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -77,7 +90,9 @@ const App = () => (
               path="/reviews" 
               element={
                 <ProtectedRoute>
-                  <Reviews />
+                  <Layout>
+                    <Reviews />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -85,7 +100,9 @@ const App = () => (
               path="/foods" 
               element={
                 <ProtectedRoute>
-                  <Foods />
+                  <Layout>
+                    <Foods />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -93,7 +110,9 @@ const App = () => (
               path="/food-detail" 
               element={
                 <ProtectedRoute>
-                  <FoodDetail />
+                  <Layout>
+                    <FoodDetail />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -101,7 +120,9 @@ const App = () => (
               path="/categories" 
               element={
                 <ProtectedRoute>
-                  <Categories />
+                  <Layout>
+                    <Categories />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -109,7 +130,9 @@ const App = () => (
               path="/customer-detail" 
               element={
                 <ProtectedRoute>
-                  <CustomerDetail />
+                  <Layout>
+                    <CustomerDetail />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -117,7 +140,9 @@ const App = () => (
               path="/wallet" 
               element={
                 <ProtectedRoute>
-                  <Wallet />
+                  <Layout>
+                    <Wallet />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -125,7 +150,9 @@ const App = () => (
               path="/notifications" 
               element={
                 <ProtectedRoute>
-                  <Notifications />
+                  <Layout>
+                    <Notifications />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />
@@ -133,7 +160,9 @@ const App = () => (
               path="/profile" 
               element={
                 <ProtectedRoute>
-                  <Profile />
+                  <Layout>
+                    <Profile />
+                  </Layout>
                 </ProtectedRoute>
               } 
             />

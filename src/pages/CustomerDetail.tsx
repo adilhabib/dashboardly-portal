@@ -37,7 +37,7 @@ const CustomerDetail = () => {
   const { customer, customerDetails, orders } = data;
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <>
       <PageBreadcrumb pageName="Customer Details" />
       
       <div className="mb-6">
@@ -59,7 +59,7 @@ const CustomerDetail = () => {
           <SummaryCard customer={customer} orders={orders} />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

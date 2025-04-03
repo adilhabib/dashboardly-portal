@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAnalyticsData } from '@/services/analyticsService';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
 import AnalyticsHeader from '@/components/analytics/AnalyticsHeader';
 import AnalyticsStatsCards from '@/components/analytics/AnalyticsStatsCards';
 import AnalyticsTrendCharts from '@/components/analytics/AnalyticsTrendCharts';
@@ -33,57 +31,46 @@ const Analytics = () => {
   }, [lastUpdate, refetch]);
   
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
+    <>
+      <AnalyticsHeader 
+        dateRange={dateRange} 
+        setDateRange={setDateRange} 
+      />
       
-      <div className="flex-1 ml-[220px]">
-        <Navbar 
-          userName="Samantha" 
-          userAvatar="https://randomuser.me/api/portraits/women/65.jpg" 
-        />
-        
-        <main className="p-6">
-          <AnalyticsHeader 
-            dateRange={dateRange} 
-            setDateRange={setDateRange} 
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <p className="text-lg text-gray-500">Loading analytics data...</p>
+        </div>
+      ) : isError ? (
+        <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
+          <p className="text-red-700">Error loading analytics data. Please try again later.</p>
+        </div>
+      ) : (
+        <>
+          <AnalyticsStatsCards
+            totalRevenue={data.totalRevenue}
+            totalOrders={data.totalOrders}
+            avgOrderValue={data.avgOrderValue}
+            totalFoods={data.totalFoods}
           />
           
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <p className="text-lg text-gray-500">Loading analytics data...</p>
+          <AnalyticsTrendCharts 
+            dailyRevenue={data.dailyRevenue} 
+          />
+          
+          <AnalyticsDonutCharts
+            categoryData={data.categoryData}
+            statusData={data.statusData}
+          />
+          
+          {isConnected && (
+            <div className="text-xs text-gray-500 mt-6 text-right">
+              ● Real-time updates active
             </div>
-          ) : isError ? (
-            <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
-              <p className="text-red-700">Error loading analytics data. Please try again later.</p>
-            </div>
-          ) : (
-            <>
-              <AnalyticsStatsCards
-                totalRevenue={data.totalRevenue}
-                totalOrders={data.totalOrders}
-                avgOrderValue={data.avgOrderValue}
-                totalFoods={data.totalFoods}
-              />
-              
-              <AnalyticsTrendCharts 
-                dailyRevenue={data.dailyRevenue} 
-              />
-              
-              <AnalyticsDonutCharts
-                categoryData={data.categoryData}
-                statusData={data.statusData}
-              />
-              
-              {isConnected && (
-                <div className="text-xs text-gray-500 mt-6 text-right">
-                  ● Real-time updates active
-                </div>
-              )}
-            </>
           )}
-        </main>
-      </div>
-    </div>
+        </>
+      )}
+    </>
   );
 };
 

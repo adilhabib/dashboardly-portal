@@ -50,7 +50,7 @@ const OrderDetail = () => {
     undefined;
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <>
       <PageBreadcrumb pageName="Order Details" />
       
       <div className="mb-6">
@@ -78,7 +78,7 @@ const OrderDetail = () => {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
