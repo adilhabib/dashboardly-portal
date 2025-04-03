@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Bell, 
   ShoppingBag, 
@@ -14,15 +14,32 @@ import { Notification, useNotifications } from '@/contexts/NotificationContext';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const NotificationPanel: React.FC = () => {
   const { state, markAsRead, markAllAsRead, removeNotification, clearAll } = useNotifications();
   const navigate = useNavigate();
+  const [showLatestAlert, setShowLatestAlert] = useState(false);
+  const [latestNotification, setLatestNotification] = useState<Notification | null>(null);
 
   // Get notifications sorted by timestamp (newest first)
   const sortedNotifications = [...state.notifications].sort(
     (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
   );
+
+  // Effect to show alert for latest notification
+  useEffect(() => {
+    if (sortedNotifications.length > 0 && !sortedNotifications[0].read) {
+      setLatestNotification(sortedNotifications[0]);
+      setShowLatestAlert(true);
+      
+      const timer = setTimeout(() => {
+        setShowLatestAlert(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [sortedNotifications]);
 
   const getIcon = (type: Notification['type']) => {
     switch (type) {
@@ -95,6 +112,18 @@ const NotificationPanel: React.FC = () => {
           )}
         </div>
       </div>
+      
+      {showLatestAlert && latestNotification && (
+        <Alert className="m-2 bg-primary/10 border-primary">
+          <div className="flex items-start gap-2">
+            {getIcon(latestNotification.type)}
+            <AlertDescription className="text-xs">
+              <span className="font-semibold block">{latestNotification.title}</span>
+              {latestNotification.description}
+            </AlertDescription>
+          </div>
+        </Alert>
+      )}
       
       <div className="overflow-y-auto flex-1">
         {sortedNotifications.length === 0 ? (

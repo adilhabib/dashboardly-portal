@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Order } from '@/services/order';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 /**
  * Custom hook to handle real-time updates for orders
@@ -12,6 +13,7 @@ import { Order } from '@/services/order';
 export const useOrderRealtime = () => {
   const queryClient = useQueryClient();
   const [isConnected, setIsConnected] = useState(false);
+  const { addNotification } = useNotifications();
   const [lastUpdate, setLastUpdate] = useState<{
     type: 'INSERT' | 'UPDATE' | 'DELETE' | null;
     order: Partial<Order> | null;
@@ -52,6 +54,14 @@ export const useOrderRealtime = () => {
               order: newRecord ? newRecord as Partial<Order> : null,
               timestamp: new Date()
             });
+            
+            // Add to notifications
+            addNotification({
+              title: 'New Order Received',
+              description: `Order #${orderIdDisplay} has been placed.`,
+              type: 'order',
+              link: `/order-detail?id=${orderId}`
+            });
           } else if (payload.eventType === 'UPDATE') {
             toast({
               title: 'Order Updated',
@@ -62,6 +72,14 @@ export const useOrderRealtime = () => {
               order: newRecord ? newRecord as Partial<Order> : null,
               timestamp: new Date()
             });
+            
+            // Add to notifications
+            addNotification({
+              title: 'Order Updated',
+              description: `Order #${orderIdDisplay} has been updated to "${newRecord?.status || 'unknown status'}".`,
+              type: 'update',
+              link: `/order-detail?id=${orderId}`
+            });
           } else if (payload.eventType === 'DELETE') {
             toast({
               title: 'Order Deleted',
@@ -71,6 +89,13 @@ export const useOrderRealtime = () => {
               type: 'DELETE',
               order: oldRecord ? oldRecord as Partial<Order> : null,
               timestamp: new Date()
+            });
+            
+            // Add to notifications
+            addNotification({
+              title: 'Order Deleted',
+              description: `Order #${orderIdDisplay} has been removed.`,
+              type: 'alert'
             });
           }
           
@@ -89,7 +114,7 @@ export const useOrderRealtime = () => {
       console.log('Cleaning up real-time subscription');
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient, addNotification]);
 
   return {
     isConnected,
