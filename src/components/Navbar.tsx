@@ -6,6 +6,7 @@ import { useNotifications } from '@/contexts/NotificationContext';
 import NotificationPanel from './NotificationPanel';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import DateFilter from '@/components/DateFilter';
 
 interface NavbarProps {
   userName: string;
@@ -16,6 +17,10 @@ const Navbar: React.FC<NavbarProps> = ({ userName, userAvatar }) => {
   const { state: notificationState } = useNotifications();
   const [isRinging, setIsRinging] = useState(false);
   const [prevUnreadCount, setPrevUnreadCount] = useState(0);
+  const [dateRange, setDateRange] = useState({
+    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    to: new Date(),
+  });
 
   // Effect to trigger bell animation when new notifications arrive
   useEffect(() => {
@@ -35,7 +40,12 @@ const Navbar: React.FC<NavbarProps> = ({ userName, userAvatar }) => {
 
   return (
     <div className="border-b bg-white py-4 px-6 flex items-center justify-between">
-      <div className="flex-1"></div>
+      <div className="flex-1">
+        <DateFilter 
+          dateRange={dateRange} 
+          onChange={setDateRange} 
+        />
+      </div>
       
       <div className="flex items-center gap-4">
         <Popover>

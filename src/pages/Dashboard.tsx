@@ -1,8 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardStatsCards from '@/components/dashboard/DashboardStatsCards';
 import DashboardCharts from '@/components/dashboard/DashboardCharts';
 import DashboardCustomerSection from '@/components/dashboard/DashboardCustomerSection';
@@ -58,48 +56,38 @@ const Dashboard: React.FC = () => {
   const reviews = getReviews();
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
+    <div className="w-full">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
+          <p className="text-gray-500">Hi, Samantha. Welcome back to Virginia Admin!</p>
+        </div>
+      </div>
       
-      <div className="flex-1 ml-[220px]">
-        <Navbar 
-          userName="Samantha" 
-          userAvatar="https://randomuser.me/api/portraits/women/65.jpg" 
-        />
-        
-        <main className="p-6">
-          <DashboardHeader 
-            userName="Samantha" 
-            dateRange={dateRange}
-            setDateRange={setDateRange}
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <p className="text-lg text-gray-500">Loading dashboard data...</p>
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
+          <p className="text-red-700">Error loading dashboard data. Please try again later.</p>
+        </div>
+      ) : (
+        <>
+          <DashboardStatsCards analyticsData={analyticsData} />
+          
+          <DashboardCharts 
+            orderData={orderData}
+            revenueData={revenueData}
+            donutChartsData={donutChartsData}
           />
           
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <p className="text-lg text-gray-500">Loading dashboard data...</p>
-            </div>
-          ) : error ? (
-            <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
-              <p className="text-red-700">Error loading dashboard data. Please try again later.</p>
-            </div>
-          ) : (
-            <>
-              <DashboardStatsCards analyticsData={analyticsData} />
-              
-              <DashboardCharts 
-                orderData={orderData}
-                revenueData={revenueData}
-                donutChartsData={donutChartsData}
-              />
-              
-              <DashboardCustomerSection 
-                customerMapData={customerMapData}
-                reviews={reviews}
-              />
-            </>
-          )}
-        </main>
-      </div>
+          <DashboardCustomerSection 
+            customerMapData={customerMapData}
+            reviews={reviews}
+          />
+        </>
+      )}
     </div>
   );
 };
