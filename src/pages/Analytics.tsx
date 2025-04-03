@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAnalyticsData } from '@/services/analyticsService';
 import Navbar from '../components/Navbar';
@@ -8,6 +8,7 @@ import AnalyticsHeader from '@/components/analytics/AnalyticsHeader';
 import AnalyticsStatsCards from '@/components/analytics/AnalyticsStatsCards';
 import AnalyticsTrendCharts from '@/components/analytics/AnalyticsTrendCharts';
 import AnalyticsDonutCharts from '@/components/analytics/AnalyticsDonutCharts';
+import { useOrderRealtime } from '@/hooks/useOrderRealtime';
 
 const Analytics = () => {
   const [dateRange, setDateRange] = useState({
@@ -15,10 +16,21 @@ const Analytics = () => {
     to: new Date(),
   });
   
-  const { data, isLoading, isError } = useQuery({
+  // Set up real-time subscription for order updates
+  const { isConnected, lastUpdate } = useOrderRealtime();
+  
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['analytics', dateRange.from.toISOString(), dateRange.to.toISOString()],
     queryFn: () => fetchAnalyticsData(dateRange),
   });
+  
+  // Refetch data when we receive a real-time update
+  useEffect(() => {
+    if (lastUpdate.timestamp) {
+      console.log('Detected order update, refreshing analytics data');
+      refetch();
+    }
+  }, [lastUpdate, refetch]);
   
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -61,6 +73,12 @@ const Analytics = () => {
                 categoryData={data.categoryData}
                 statusData={data.statusData}
               />
+              
+              {isConnected && (
+                <div className="text-xs text-gray-500 mt-6 text-right">
+                  ● Real-time updates active
+                </div>
+              )}
             </>
           )}
         </main>
