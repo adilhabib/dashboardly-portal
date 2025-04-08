@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { PlusCircle, Trash2, Check } from 'lucide-react';
+import { PlusCircle, Trash2, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { useFoodSizes } from '@/hooks/useFoodSizes';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface FoodSizeManagerProps {
   foodId: string | null;
@@ -21,6 +23,7 @@ const FoodSizeManager: React.FC<FoodSizeManagerProps> = ({ foodId, onPriceChange
   const { 
     sizes, 
     isLoading, 
+    isError,
     createSize, 
     deleteSize, 
     setDefaultSize, 
@@ -59,6 +62,7 @@ const FoodSizeManager: React.FC<FoodSizeManagerProps> = ({ foodId, onPriceChange
     if (onPriceChange) {
       onPriceChange(size.price);
     }
+    toast.success(`${size.size_name} set as default size`);
   };
 
   if (!foodId) {
@@ -83,7 +87,16 @@ const FoodSizeManager: React.FC<FoodSizeManagerProps> = ({ foodId, onPriceChange
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="text-center py-4">Loading sizes...</div>
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+            <span className="ml-2 text-gray-500">Loading sizes...</span>
+          </div>
+        ) : isError ? (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>
+              Failed to load food sizes. Please try again.
+            </AlertDescription>
+          </Alert>
         ) : (
           <>
             <div className="space-y-2 mb-4">
@@ -96,7 +109,10 @@ const FoodSizeManager: React.FC<FoodSizeManagerProps> = ({ foodId, onPriceChange
                   {sizes.map((size) => (
                     <div 
                       key={size.id} 
-                      className="flex items-center justify-between p-2 border rounded-md"
+                      className={cn(
+                        "flex items-center justify-between p-2 border rounded-md",
+                        size.is_default && "border-green-200 bg-green-50"
+                      )}
                     >
                       <div className="flex items-center space-x-2">
                         <span className="font-medium">{size.size_name}</span>
@@ -113,8 +129,13 @@ const FoodSizeManager: React.FC<FoodSizeManagerProps> = ({ foodId, onPriceChange
                             className="h-8 w-8 p-0" 
                             onClick={() => handleSetDefault(size)}
                             disabled={isSettingDefault}
+                            title="Set as default size"
                           >
-                            <Check className="h-4 w-4" />
+                            {isSettingDefault ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check className="h-4 w-4" />
+                            )}
                           </Button>
                         )}
                         <Button 
@@ -123,8 +144,13 @@ const FoodSizeManager: React.FC<FoodSizeManagerProps> = ({ foodId, onPriceChange
                           className="h-8 w-8 p-0 text-red-500" 
                           onClick={() => deleteSize(size.id)}
                           disabled={isDeleting || (size.is_default && sizes.length > 1)}
+                          title="Delete this size"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {isDeleting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -162,8 +188,17 @@ const FoodSizeManager: React.FC<FoodSizeManagerProps> = ({ foodId, onPriceChange
                 className="w-full"
                 disabled={isCreating}
               >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Size
+                {isCreating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Size
+                  </>
+                )}
               </Button>
             </div>
           </>

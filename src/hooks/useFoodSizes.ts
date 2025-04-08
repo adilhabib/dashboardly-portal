@@ -1,5 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { 
   fetchFoodSizes, 
   createFoodSize, 
@@ -8,6 +9,8 @@ import {
   setDefaultFoodSize
 } from '@/services/foodSizeService';
 import { FoodSize } from '@/types/food';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export function useFoodSizes(foodId: string | null) {
   const queryClient = useQueryClient();
@@ -21,6 +24,47 @@ export function useFoodSizes(foodId: string | null) {
     queryFn: () => fetchFoodSizes(foodId || ''),
     enabled: !!foodId,
   });
+
+  // Subscribe to real-time changes on food_sizes table
+  useEffect(() => {
+    if (!foodId) return;
+
+    // Set up a real-time subscription for food sizes
+    const channel = supabase
+      .channel('food_sizes_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'food_sizes',
+          filter: `food_id=eq.${foodId}`
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          // Invalidate the query to refetch data
+          queryClient.invalidateQueries({ queryKey: ['foodSizes', foodId] });
+          
+          // Show toast notification based on the event
+          const eventType = payload.eventType;
+          const size = payload.new as FoodSize;
+          
+          if (eventType === 'INSERT') {
+            toast.success(`Size "${size.size_name}" added`);
+          } else if (eventType === 'UPDATE') {
+            toast.success(`Size "${size.size_name}" updated`);
+          } else if (eventType === 'DELETE') {
+            toast.success('Size removed');
+          }
+        }
+      )
+      .subscribe();
+
+    // Clean up subscription when component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [foodId, queryClient]);
 
   const createMutation = useMutation({
     mutationFn: createFoodSize,
