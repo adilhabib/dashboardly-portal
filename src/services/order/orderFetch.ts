@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { OrderDetail, OrderItem, FoodItem, Order } from './orderTypes';
+import { OrderDetail, OrderItem, FoodItem, Order, OrderStatus } from './orderTypes';
 
 /**
  * Fetches a detailed view of an order including customer data and order items
@@ -97,9 +97,13 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
     };
   });
 
+  // Validate and convert the order status to ensure it's a valid OrderStatus
+  const validOrderStatus = validateOrderStatus(order.status);
+
   // Safely convert delivery_address to ensure type compatibility
   const formattedOrder: Order = {
     ...order,
+    status: validOrderStatus,
     delivery_address: typeof order.delivery_address === 'string' 
       ? order.delivery_address 
       : order.delivery_address 
@@ -112,6 +116,21 @@ export const fetchOrderDetail = async (orderId: string): Promise<OrderDetail> =>
     orderItems: mappedOrderItems 
   };
 };
+
+/**
+ * Validates and ensures the order status is of type OrderStatus
+ */
+function validateOrderStatus(status: string): OrderStatus {
+  const validStatuses: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'completed', 'cancelled'];
+  
+  if (validStatuses.includes(status as OrderStatus)) {
+    return status as OrderStatus;
+  }
+  
+  // Default to 'pending' if an invalid status is provided
+  console.warn(`Invalid order status: ${status}. Defaulting to 'pending'`);
+  return 'pending';
+}
 
 /**
  * Fetches all orders with customer data
@@ -151,12 +170,16 @@ export const fetchOrders = async () => {
       return [];
     }
     
-    // For each order, fetch the customer data separately
+    // For each order, fetch the customer data separately and validate order status
     const ordersWithCustomers = await Promise.all(
       orders.map(async (order) => {
+        // Validate order status
+        const validOrderStatus = validateOrderStatus(order.status);
+        
         // Ensure delivery_address is properly formatted
         const formattedOrder = {
           ...order,
+          status: validOrderStatus,
           delivery_address: typeof order.delivery_address === 'string' 
             ? order.delivery_address 
             : order.delivery_address as unknown as Record<string, any> | null
