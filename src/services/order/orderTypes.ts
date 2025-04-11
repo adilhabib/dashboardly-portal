@@ -41,11 +41,14 @@ export interface Customer {
   loyalty_points?: number;
 }
 
+// Define possible order statuses
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'out_for_delivery' | 'completed' | 'cancelled';
+
 export interface Order {
   id: string;
   customer_id: string;
   order_type: string;
-  status: string;
+  status: OrderStatus;
   payment_status: string;
   payment_method: string;
   subtotal: number;

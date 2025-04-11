@@ -11,13 +11,13 @@ import { useOrderRealtime } from '@/hooks/useOrderRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Wifi, WifiOff } from 'lucide-react';
-import OrderStatusFilter, { OrderStatus } from '@/components/order/OrderStatusFilter';
+import OrderStatusFilter, { OrderStatusFilter as StatusFilterType } from '@/components/order/OrderStatusFilter';
 import { Badge } from '@/components/ui/badge';
 
 const OrderList = () => {
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<OrderStatus>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilterType>('all');
   
   // Use our enhanced custom hook for real-time updates
   const { isConnected, lastUpdate } = useOrderRealtime();

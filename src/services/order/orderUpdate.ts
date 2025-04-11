@@ -1,10 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { OrderStatus } from './orderTypes';
 
 /**
  * Updates an order's status
  */
-export const updateOrderStatus = async (orderId: string, status: string) => {
+export const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
   try {
     console.log(`Updating order ${orderId} status to ${status}`);
     

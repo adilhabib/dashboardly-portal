@@ -7,12 +7,14 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import { OrderStatus } from '@/services/order/orderTypes';
 
-export type OrderStatus = 'all' | 'pending' | 'processing' | 'completed' | 'cancelled';
+// Include 'all' option with the OrderStatus type
+export type OrderStatusFilter = OrderStatus | 'all';
 
 interface OrderStatusFilterProps {
-  value: OrderStatus;
-  onChange: (value: OrderStatus) => void;
+  value: OrderStatusFilter;
+  onChange: (value: OrderStatusFilter) => void;
 }
 
 const OrderStatusFilter: React.FC<OrderStatusFilterProps> = ({ value, onChange }) => {
@@ -20,7 +22,7 @@ const OrderStatusFilter: React.FC<OrderStatusFilterProps> = ({ value, onChange }
     <div className="w-full max-w-[200px]">
       <Select 
         value={value} 
-        onValueChange={(val) => onChange(val as OrderStatus)}
+        onValueChange={(val) => onChange(val as OrderStatusFilter)}
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Filter by status" />
@@ -28,7 +30,10 @@ const OrderStatusFilter: React.FC<OrderStatusFilterProps> = ({ value, onChange }
         <SelectContent>
           <SelectItem value="all">All Orders</SelectItem>
           <SelectItem value="pending">Pending</SelectItem>
-          <SelectItem value="processing">Processing</SelectItem>
+          <SelectItem value="confirmed">Confirmed</SelectItem>
+          <SelectItem value="preparing">Preparing</SelectItem>
+          <SelectItem value="ready">Ready</SelectItem>
+          <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
           <SelectItem value="completed">Completed</SelectItem>
           <SelectItem value="cancelled">Cancelled</SelectItem>
         </SelectContent>

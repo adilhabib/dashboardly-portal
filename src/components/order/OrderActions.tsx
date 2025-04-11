@@ -4,18 +4,19 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { updateOrderStatus } from '@/services/order';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, X, PackageCheck } from 'lucide-react';
+import { OrderStatus } from '@/services/order/orderTypes';
+import { Check, X, Utensils, Package, Truck } from 'lucide-react';
 
 interface OrderActionsProps {
   orderId: string;
-  currentStatus: string;
+  currentStatus: OrderStatus;
 }
 
 const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) => {
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = React.useState(false);
 
-  const handleStatusUpdate = async (newStatus: string) => {
+  const handleStatusUpdate = async (newStatus: OrderStatus) => {
     if (!orderId) {
       toast({
         title: "No order selected",
@@ -29,27 +30,13 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
       setIsUpdating(true);
       await updateOrderStatus(orderId, newStatus);
       
-      let statusMessage = '';
-      switch(newStatus) {
-        case 'processing':
-          statusMessage = 'accepted';
-          break;
-        case 'cancelled':
-          statusMessage = 'cancelled';
-          break;
-        case 'completed':
-          statusMessage = 'completed';
-          break;
-        default:
-          statusMessage = 'updated';
-      }
-      
       toast({
         title: "Order Status Updated",
-        description: `Order #${orderId.slice(0, 8)} has been ${statusMessage}.`,
+        description: `Order #${orderId.slice(0, 8)} status changed to ${newStatus}.`,
       });
       
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
     } catch (error) {
       console.error('Error updating order status:', error);
       toast({
@@ -63,49 +50,102 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
   };
 
   // Render appropriate actions based on current status
-  if (currentStatus === 'pending') {
-    return (
-      <div className="flex items-center gap-2">
-        <Button 
-          onClick={() => handleStatusUpdate('processing')}
-          disabled={isUpdating}
-          variant="default"
-          size="sm"
-          className="bg-green-500 hover:bg-green-600"
-        >
-          <Check size={16} />
-          Accept
-        </Button>
-        <Button 
-          onClick={() => handleStatusUpdate('cancelled')}
-          disabled={isUpdating}
-          variant="destructive"
-          size="sm"
-        >
-          <X size={16} />
-          Reject
-        </Button>
-      </div>
-    );
-  } else if (currentStatus === 'processing') {
-    return (
-      <div className="flex items-center gap-2">
-        <Button 
-          onClick={() => handleStatusUpdate('completed')}
-          disabled={isUpdating}
-          variant="default"
-          size="sm"
-          className="bg-blue-500 hover:bg-blue-600"
-        >
-          <PackageCheck size={16} />
-          Complete
-        </Button>
-      </div>
-    );
+  switch (currentStatus) {
+    case 'pending':
+      return (
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => handleStatusUpdate('confirmed')}
+            disabled={isUpdating}
+            variant="default"
+            size="sm"
+            className="bg-green-500 hover:bg-green-600"
+          >
+            <Check size={16} className="mr-1" />
+            Confirm
+          </Button>
+          <Button 
+            onClick={() => handleStatusUpdate('cancelled')}
+            disabled={isUpdating}
+            variant="destructive"
+            size="sm"
+          >
+            <X size={16} className="mr-1" />
+            Cancel
+          </Button>
+        </div>
+      );
+    
+    case 'confirmed':
+      return (
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => handleStatusUpdate('preparing')}
+            disabled={isUpdating}
+            variant="default"
+            size="sm"
+            className="bg-blue-500 hover:bg-blue-600"
+          >
+            <Utensils size={16} className="mr-1" />
+            Start Preparing
+          </Button>
+        </div>
+      );
+    
+    case 'preparing':
+      return (
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => handleStatusUpdate('ready')}
+            disabled={isUpdating}
+            variant="default"
+            size="sm"
+            className="bg-amber-500 hover:bg-amber-600"
+          >
+            <Package size={16} className="mr-1" />
+            Mark Ready
+          </Button>
+        </div>
+      );
+    
+    case 'ready':
+      return (
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => handleStatusUpdate('out_for_delivery')}
+            disabled={isUpdating}
+            variant="default"
+            size="sm"
+            className="bg-indigo-500 hover:bg-indigo-600"
+          >
+            <Truck size={16} className="mr-1" />
+            Out for Delivery
+          </Button>
+        </div>
+      );
+    
+    case 'out_for_delivery':
+      return (
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => handleStatusUpdate('completed')}
+            disabled={isUpdating}
+            variant="default"
+            size="sm"
+            className="bg-green-500 hover:bg-green-600"
+          >
+            <Check size={16} className="mr-1" />
+            Complete Order
+          </Button>
+        </div>
+      );
+    
+    // Don't show any buttons for completed or cancelled orders
+    case 'completed':
+    case 'cancelled':
+    default:
+      return null;
   }
-
-  // Don't show any buttons for completed or cancelled orders
-  return null;
 };
 
 export default OrderActions;
