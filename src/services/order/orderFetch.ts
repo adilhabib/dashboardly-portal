@@ -1,6 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { OrderDetail, OrderItem, FoodItem, Order, OrderStatus } from './orderTypes';
+import { toast } from '@/hooks/use-toast';
 
 /**
  * Fetches a detailed view of an order including customer data and order items
@@ -188,7 +188,7 @@ export const fetchOrders = async () => {
         if (formattedOrder.customer_id) {
           const { data: customer, error: customerError } = await supabase
             .from('customer')
-            .select('name, phone_number, email')  // Explicitly include email field
+            .select('name, phone_number, email')
             .eq('id', formattedOrder.customer_id)
             .maybeSingle();
           
@@ -212,7 +212,32 @@ export const fetchOrders = async () => {
     return ordersWithCustomers;
   } catch (error) {
     console.error('Unexpected error in fetchOrders:', error);
-    // Return empty array instead of throwing to prevent UI errors
     return [];
   }
+};
+
+// Set up real-time subscription for new orders
+export const setupOrderNotifications = () => {
+  const channel = supabase
+    .channel('public:orders')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'orders' },
+      (payload) => {
+        const newOrder = payload.new as Order;
+        const orderIdDisplay = newOrder.id ? String(newOrder.id).slice(0, 8) : 'Unknown';
+        
+        // Show toast notification for new order
+        toast({
+          title: "New Order Received",
+          description: `Order #${orderIdDisplay} has been placed.`,
+          duration: 5000,
+        });
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };

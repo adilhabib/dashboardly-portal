@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import DashboardStatsCards from '@/components/dashboard/DashboardStatsCards';
@@ -6,6 +5,7 @@ import DashboardCharts from '@/components/dashboard/DashboardCharts';
 import DashboardCustomerSection from '@/components/dashboard/DashboardCustomerSection';
 import { fetchAnalyticsData } from '@/services/analyticsService';
 import { getReviews } from '@/components/dashboard/DashboardData';
+import { setupOrderNotifications } from '@/services/order';
 
 const Dashboard: React.FC = () => {
   const [dateRange, setDateRange] = useState({
@@ -54,6 +54,11 @@ const Dashboard: React.FC = () => {
   ];
 
   const reviews = getReviews();
+
+  useEffect(() => {
+    const cleanup = setupOrderNotifications();
+    return () => cleanup();
+  }, []);
 
   return (
     <div className="w-full">
