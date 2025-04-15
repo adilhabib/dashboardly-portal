@@ -5,3 +5,4 @@ export * from './orderUpdate';
 export * from './orderTypes';
 export * from './orderNotifications';
 export * from './orderUtils';
+export * from './ordersList';
