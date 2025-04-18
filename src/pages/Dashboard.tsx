@@ -8,12 +8,15 @@ import DashboardCustomerSection from '@/components/dashboard/DashboardCustomerSe
 import { fetchAnalyticsData } from '@/services/analyticsService';
 import { getReviews } from '@/components/dashboard/DashboardData';
 import { setupOrderNotifications } from '@/services/order';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 const Dashboard: React.FC = () => {
   const [dateRange, setDateRange] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date(),
   });
+  
+  const { addNotification } = useNotifications();
 
   // Use dateRange in the query key to trigger refetches when it changes
   const { data: analyticsData, isLoading, error } = useQuery({
@@ -59,9 +62,9 @@ const Dashboard: React.FC = () => {
   const reviews = getReviews();
 
   useEffect(() => {
-    const cleanup = setupOrderNotifications();
+    const cleanup = setupOrderNotifications(addNotification);
     return () => cleanup();
-  }, []);
+  }, [addNotification]);
 
   return (
     <div className="w-full">

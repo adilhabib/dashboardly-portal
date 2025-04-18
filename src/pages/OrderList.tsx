@@ -13,6 +13,7 @@ import OrderStatusFilter, { OrderStatusFilter as StatusFilterType } from '@/comp
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { setupOrderNotifications } from '@/services/order/orderNotifications';
+import { supabase } from '@/integrations/supabase/client';
 
 const OrderList = () => {
   const queryClient = useQueryClient();
@@ -30,9 +31,8 @@ const OrderList = () => {
   const { data: orders, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['orders'],
     queryFn: fetchOrders,
-    // Increase the staleness time to prevent unnecessary refetching
-    staleTime: 1000 * 60, // 1 minute
-    retry: 3, // Retry 3 times before considering it an error
+    staleTime: 1000 * 60,
+    retry: 3,
   });
 
   useEffect(() => {
@@ -42,12 +42,9 @@ const OrderList = () => {
     }
   }, [orders, isError, error]);
 
-  // Force a refetch when the component mounts
   useEffect(() => {
-    // Retry fetching on component mount
     refetch();
 
-    // Check Supabase connection and tables
     const checkSupabase = async () => {
       try {
         const { data, error } = await supabase.from('orders').select('count(*)', { count: 'exact', head: true });
@@ -84,7 +81,6 @@ const OrderList = () => {
     }
   };
 
-  // Filter orders based on selected status
   const filteredOrders = React.useMemo(() => {
     if (!orders || !orders.length) return [];
     
