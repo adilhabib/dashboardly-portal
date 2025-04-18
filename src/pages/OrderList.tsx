@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,20 +7,26 @@ import { fetchOrders } from '@/services/order';
 import { OrderTable, EmptyStateMessage } from '@/components/order';
 import { getStatusColor, formatDate } from '@/services/orderUtils';
 import { useOrderRealtime } from '@/hooks/useOrderRealtime';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import OrderStatusFilter, { OrderStatusFilter as StatusFilterType } from '@/components/order/OrderStatusFilter';
 import { Badge } from '@/components/ui/badge';
+import { useNotifications } from '@/contexts/NotificationContext';
+import { setupOrderNotifications } from '@/services/order/orderNotifications';
 
 const OrderList = () => {
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilterType>('all');
   
-  // Use our enhanced custom hook for real-time updates
+  const { addNotification } = useNotifications();
   const { isConnected, lastUpdate } = useOrderRealtime();
   
+  useEffect(() => {
+    const cleanup = setupOrderNotifications(addNotification);
+    return () => cleanup();
+  }, [addNotification]);
+
   const { data: orders, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['orders'],
     queryFn: fetchOrders,

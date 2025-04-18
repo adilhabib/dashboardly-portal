@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Order } from './orderTypes';
 import { toast } from '@/hooks/use-toast';
 
-export const setupOrderNotifications = () => {
+export const setupOrderNotifications = (addNotification: (notification: any) => void) => {
   const channel = supabase
     .channel('public:orders')
     .on(
@@ -13,10 +13,19 @@ export const setupOrderNotifications = () => {
         const newOrder = payload.new as Order;
         const orderIdDisplay = newOrder.id ? String(newOrder.id).slice(0, 8) : 'Unknown';
         
+        // Show toast notification
         toast({
           title: "New Order Received",
           description: `Order #${orderIdDisplay} has been placed.`,
           duration: 5000,
+        });
+
+        // Add to notifications panel
+        addNotification({
+          title: 'New Order Received',
+          description: `Order #${orderIdDisplay} has been placed.`,
+          type: 'order',
+          link: `/order-detail?id=${newOrder.id}`
         });
       }
     )

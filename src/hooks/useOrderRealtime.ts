@@ -2,18 +2,12 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 import { Order } from '@/services/order';
 import { useNotifications } from '@/contexts/NotificationContext';
 
-/**
- * Custom hook to handle real-time updates for orders
- * @returns An object containing real-time order data and connection status
- */
 export const useOrderRealtime = () => {
   const queryClient = useQueryClient();
   const [isConnected, setIsConnected] = useState(false);
-  const { addNotification } = useNotifications();
   const [lastUpdate, setLastUpdate] = useState<{
     type: 'INSERT' | 'UPDATE' | 'DELETE' | null;
     order: Partial<Order> | null;
@@ -27,7 +21,6 @@ export const useOrderRealtime = () => {
   useEffect(() => {
     console.log('Setting up real-time subscription for orders table');
     
-    // Subscribe to real-time changes on the orders table
     const channel = supabase
       .channel('public:orders')
       .on('postgres_changes', 
@@ -36,66 +29,30 @@ export const useOrderRealtime = () => {
           console.log('Real-time update received:', payload);
           setIsConnected(true);
           
-          // Extract basic order details for display, ensuring types are handled properly
+          // Extract basic order details for display
           const newRecord = payload.new as Record<string, any> | null;
           const oldRecord = payload.old as Record<string, any> | null;
           
           // Safely access the ID
           const orderId = newRecord?.id || oldRecord?.id;
-          const orderIdDisplay = orderId ? String(orderId).slice(0, 8) : 'Unknown';
           
           if (payload.eventType === 'INSERT') {
-            toast({
-              title: 'New Order Received',
-              description: `Order #${orderIdDisplay} has been placed.`,
-            });
             setLastUpdate({
               type: 'INSERT',
               order: newRecord ? newRecord as Partial<Order> : null,
               timestamp: new Date()
             });
-            
-            // Add to notifications
-            addNotification({
-              title: 'New Order Received',
-              description: `Order #${orderIdDisplay} has been placed.`,
-              type: 'order',
-              link: `/order-detail?id=${orderId}`
-            });
           } else if (payload.eventType === 'UPDATE') {
-            toast({
-              title: 'Order Updated',
-              description: `Order #${orderIdDisplay} has been updated to "${newRecord?.status || 'unknown status'}".`,
-            });
             setLastUpdate({
               type: 'UPDATE',
               order: newRecord ? newRecord as Partial<Order> : null,
               timestamp: new Date()
             });
-            
-            // Add to notifications
-            addNotification({
-              title: 'Order Updated',
-              description: `Order #${orderIdDisplay} has been updated to "${newRecord?.status || 'unknown status'}".`,
-              type: 'update',
-              link: `/order-detail?id=${orderId}`
-            });
           } else if (payload.eventType === 'DELETE') {
-            toast({
-              title: 'Order Deleted',
-              description: `Order #${orderIdDisplay} has been removed.`,
-            });
             setLastUpdate({
               type: 'DELETE',
               order: oldRecord ? oldRecord as Partial<Order> : null,
               timestamp: new Date()
-            });
-            
-            // Add to notifications
-            addNotification({
-              title: 'Order Deleted',
-              description: `Order #${orderIdDisplay} has been removed.`,
-              type: 'alert'
             });
           }
           
@@ -109,12 +66,11 @@ export const useOrderRealtime = () => {
 
     console.log('Subscribed to real-time updates for orders table');
 
-    // Clean up subscription when component unmounts
     return () => {
       console.log('Cleaning up real-time subscription');
       supabase.removeChannel(channel);
     };
-  }, [queryClient, addNotification]);
+  }, [queryClient]);
 
   return {
     isConnected,
