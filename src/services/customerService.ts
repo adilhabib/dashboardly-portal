@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export const fetchCustomerDetail = async (customerId: string) => {
@@ -68,7 +67,6 @@ export const fetchCustomers = async () => {
   return data;
 };
 
-// New function to fetch orders for a specific customer
 export const fetchCustomerOrders = async (customerId: string) => {
   console.log('Fetching orders for customer ID:', customerId);
   
@@ -84,4 +82,23 @@ export const fetchCustomerOrders = async (customerId: string) => {
   
   console.log('Fetched orders count:', data?.length || 0);
   return data || [];
+};
+
+export const fetchCustomerDefaultAddress = async (customerId: string) => {
+  console.log('Fetching default address for customer:', customerId);
+  
+  const { data, error } = await supabase
+    .from('addresses')
+    .select('*')
+    .eq('user_id', customerId)
+    .eq('is_default', 1)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching customer default address:', error);
+    return null;
+  }
+  
+  console.log('Fetched default address:', data);
+  return data;
 };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -8,7 +7,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCustomerOrders } from '@/services/customerService';
+import { fetchCustomerOrders, fetchCustomerDefaultAddress } from '@/services/customerService';
 
 interface CustomerListProps {
   customers: any[];
@@ -35,14 +34,21 @@ const CustomerList: React.FC<CustomerListProps> = ({ customers }) => {
   );
 };
 
-// Separate component to fetch order count for each customer
 const CustomerRow = ({ customer }: { customer: any }) => {
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading: isLoadingOrders } = useQuery({
     queryKey: ['customerOrders', customer.id],
     queryFn: () => fetchCustomerOrders(customer.id),
   });
 
+  const { data: defaultAddress, isLoading: isLoadingAddress } = useQuery({
+    queryKey: ['customerDefaultAddress', customer.id],
+    queryFn: () => fetchCustomerDefaultAddress(customer.id),
+  });
+
   const orderCount = orders?.length || 0;
+  const addressDisplay = isLoadingAddress 
+    ? 'Loading address...' 
+    : defaultAddress?.address || 'No default address';
 
   return (
     <TableRow>
@@ -57,12 +63,12 @@ const CustomerRow = ({ customer }: { customer: any }) => {
       </TableCell>
       <TableCell>
         <div className="text-sm truncate max-w-[200px]">
-          {customer.address || 'No address'}
+          {addressDisplay}
         </div>
       </TableCell>
       <TableCell>
         <div className="text-sm">
-          {isLoading ? 'Loading...' : `${orderCount} orders`}
+          {isLoadingOrders ? 'Loading...' : `${orderCount} orders`}
         </div>
       </TableCell>
       <TableCell>

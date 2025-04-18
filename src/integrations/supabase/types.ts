@@ -23,7 +23,7 @@ export type Database = {
         Insert: {
           address: string
           created_at?: string | null
-          id?: never
+          id?: number
           is_default?: number | null
           latitude?: number | null
           longitude?: number | null
@@ -33,7 +33,7 @@ export type Database = {
         Update: {
           address?: string
           created_at?: string | null
-          id?: never
+          id?: number
           is_default?: number | null
           latitude?: number | null
           longitude?: number | null
