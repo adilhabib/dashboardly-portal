@@ -1,7 +1,7 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from './orderTypes';
 import { toast } from '@/hooks/use-toast';
+import { Notification } from '@/types/notification';
 
 export const setupOrderNotifications = (addNotification: (notification: any) => void) => {
   const channel = supabase
