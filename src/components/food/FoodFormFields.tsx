@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Separator } from "@/components/ui/separator";
 import { 
   Select,
   SelectContent,
@@ -16,7 +16,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { FoodFormValues } from './FoodForm';
 import FoodImageGallery from './FoodImageGallery';
 import FoodSizeManager from './FoodSizeManager';
-import { Separator } from "@/components/ui/separator";
+import FoodToppingManager from './FoodToppingManager';
 
 interface FoodFormFieldsProps {
   form: UseFormReturn<FoodFormValues>;
@@ -171,6 +171,8 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
           </FormItem>
         )}
       />
+      
+      <FoodToppingManager foodId={foodId} />
     </>
   );
 };

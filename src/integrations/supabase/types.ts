@@ -261,6 +261,44 @@ export type Database = {
           },
         ]
       }
+      food_toppings: {
+        Row: {
+          created_at: string | null
+          food_id: string
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          food_id: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          food_id?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_toppings_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       foods: {
         Row: {
           category: string | null
