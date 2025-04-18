@@ -10,19 +10,21 @@ import { format } from 'date-fns';
 
 interface ExtendedDateFilterProps extends Partial<DateFilterProps> {
   dateRange?: { from: Date; to: Date };
-  onChange?: Dispatch<SetStateAction<{ from: Date; to: Date }>>;
+  onChange?: Dispatch<SetStateAction<{ from: Date; to: Date }>> | ((range: { from: Date; to: Date }) => void);
   startDate?: string;
   endDate?: string;
+  autoClose?: boolean;
 }
 
 const DateFilter: FC<ExtendedDateFilterProps> = ({ 
   startDate, 
   endDate, 
   dateRange, 
-  onChange 
+  onChange,
+  autoClose = true
 }) => {
   if (dateRange && onChange) {
-    // For Analytics page usage
+    // For Analytics page usage with immediate data refresh
     return (
       <Popover>
         <PopoverTrigger asChild>
@@ -51,10 +53,27 @@ const DateFilter: FC<ExtendedDateFilterProps> = ({
             }}
             onSelect={(range) => {
               if (range && 'from' in range) {
-                onChange({
-                  from: range.from || dateRange.from,
-                  to: range.to || dateRange.to
-                });
+                // Only update if we have valid dates (both from and to)
+                if (range.from && range.to) {
+                  onChange({
+                    from: range.from,
+                    to: range.to
+                  });
+                  
+                  // Close the popover if autoClose is enabled
+                  if (autoClose) {
+                    // Use setTimeout to ensure state is updated before closing
+                    setTimeout(() => {
+                      const openPopover = document.querySelector('[data-state="open"]');
+                      if (openPopover) {
+                        const closeButton = openPopover.querySelector('[aria-label="Close"]');
+                        if (closeButton instanceof HTMLElement) {
+                          closeButton.click();
+                        }
+                      }
+                    }, 100);
+                  }
+                }
               }
             }}
             initialFocus

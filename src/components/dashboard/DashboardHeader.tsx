@@ -5,7 +5,7 @@ import DateFilter from '@/components/DateFilter';
 interface DashboardHeaderProps {
   userName: string;
   dateRange?: { from: Date; to: Date };
-  setDateRange?: Dispatch<SetStateAction<{ from: Date; to: Date }>>;
+  setDateRange?: Dispatch<SetStateAction<{ from: Date; to: Date }>> | ((range: { from: Date; to: Date }) => void);
 }
 
 const DashboardHeader: FC<DashboardHeaderProps> = ({ 

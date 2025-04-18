@@ -7,6 +7,8 @@ import NotificationPanel from './NotificationPanel';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import DateFilter from '@/components/DateFilter';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchAnalyticsData } from '@/services/analyticsService';
 
 interface NavbarProps {
   userName: string;
@@ -15,12 +17,21 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ userName, userAvatar }) => {
   const { state: notificationState } = useNotifications();
+  const queryClient = useQueryClient();
   const [isRinging, setIsRinging] = useState(false);
   const [prevUnreadCount, setPrevUnreadCount] = useState(0);
   const [dateRange, setDateRange] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date(),
   });
+
+  // Refresh data when date range changes
+  const handleDateRangeChange = (newRange: { from: Date; to: Date }) => {
+    setDateRange(newRange);
+    // Invalidate relevant queries to trigger a refetch
+    queryClient.invalidateQueries({ queryKey: ['dashboardAnalytics'] });
+    queryClient.invalidateQueries({ queryKey: ['analytics'] });
+  };
 
   // Effect to trigger bell animation when new notifications arrive
   useEffect(() => {
@@ -43,7 +54,7 @@ const Navbar: React.FC<NavbarProps> = ({ userName, userAvatar }) => {
       <div className="flex-1">
         <DateFilter 
           dateRange={dateRange} 
-          onChange={setDateRange} 
+          onChange={handleDateRangeChange} 
         />
       </div>
       

@@ -7,6 +7,7 @@ import AnalyticsStatsCards from '@/components/analytics/AnalyticsStatsCards';
 import AnalyticsTrendCharts from '@/components/analytics/AnalyticsTrendCharts';
 import AnalyticsDonutCharts from '@/components/analytics/AnalyticsDonutCharts';
 import { useOrderRealtime } from '@/hooks/useOrderRealtime';
+import { toast } from '@/hooks/use-toast';
 
 const Analytics = () => {
   const [dateRange, setDateRange] = useState({
@@ -22,6 +23,15 @@ const Analytics = () => {
     queryFn: () => fetchAnalyticsData(dateRange),
   });
   
+  // Handle date range changes
+  const handleDateRangeChange = (newRange: { from: Date; to: Date }) => {
+    setDateRange(newRange);
+    toast({
+      title: "Date range updated",
+      description: `Data refreshed for ${newRange.from.toLocaleDateString()} to ${newRange.to.toLocaleDateString()}`
+    });
+  };
+  
   // Refetch data when we receive a real-time update
   useEffect(() => {
     if (lastUpdate.timestamp) {
@@ -34,7 +44,7 @@ const Analytics = () => {
     <>
       <AnalyticsHeader 
         dateRange={dateRange} 
-        setDateRange={setDateRange} 
+        setDateRange={handleDateRangeChange} 
       />
       
       {isLoading ? (

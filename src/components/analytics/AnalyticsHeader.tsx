@@ -5,7 +5,7 @@ import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 interface AnalyticsHeaderProps {
   dateRange: { from: Date; to: Date };
-  setDateRange: Dispatch<SetStateAction<{ from: Date; to: Date }>>;
+  setDateRange: Dispatch<SetStateAction<{ from: Date; to: Date }>> | ((range: { from: Date; to: Date }) => void);
 }
 
 const AnalyticsHeader: FC<AnalyticsHeaderProps> = ({ dateRange, setDateRange }) => {

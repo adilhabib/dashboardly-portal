@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardStatsCards from '@/components/dashboard/DashboardStatsCards';
 import DashboardCharts from '@/components/dashboard/DashboardCharts';
 import DashboardCustomerSection from '@/components/dashboard/DashboardCustomerSection';
@@ -13,8 +15,9 @@ const Dashboard: React.FC = () => {
     to: new Date(),
   });
 
+  // Use dateRange in the query key to trigger refetches when it changes
   const { data: analyticsData, isLoading, error } = useQuery({
-    queryKey: ['dashboardAnalytics', dateRange],
+    queryKey: ['dashboardAnalytics', dateRange.from.toISOString(), dateRange.to.toISOString()],
     queryFn: () => fetchAnalyticsData(dateRange),
   });
 
@@ -62,12 +65,11 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
-          <p className="text-gray-500">Hi. Welcome to Virginia Admin!</p>
-        </div>
-      </div>
+      <DashboardHeader 
+        userName="Admin" 
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+      />
       
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
