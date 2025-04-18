@@ -1,9 +1,10 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from './orderTypes';
 import { toast } from '@/hooks/use-toast';
-import { Notification } from '@/types/notification';
+import type { Notification } from '@/types/notification';
 
-export const setupOrderNotifications = (addNotification: (notification: any) => void) => {
+export const setupOrderNotifications = (addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void) => {
   const channel = supabase
     .channel('public:orders')
     .on(

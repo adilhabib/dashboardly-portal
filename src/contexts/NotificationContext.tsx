@@ -1,14 +1,17 @@
 
 import React, { createContext, useReducer } from 'react';
-import { NotificationContextType } from '../types/notification';
+import { Notification, NotificationContextType } from '../types/notification';
 import { notificationReducer, initialState } from '../reducers/notificationReducer';
+
+// Use type import to avoid naming conflicts with browser's Notification API
+import type { Notification as AppNotification } from '../types/notification';
 
 export const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(notificationReducer, initialState);
 
-  const addNotification = (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+  const addNotification = (notification: Omit<AppNotification, 'id' | 'timestamp' | 'read'>) => {
     dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
   };
 
@@ -45,6 +48,5 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 };
 
 // Re-export the hook to maintain the same import path for existing code
-export { useNotificationContext as useNotifications } from '../hooks/useNotificationContext';
+export { useNotificationContext } from '../hooks/useNotificationContext';
 export type { Notification } from '../types/notification';
-
