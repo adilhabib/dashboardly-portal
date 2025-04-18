@@ -49,4 +49,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
 // Re-export the hook to maintain the same import path for existing code
 export { useNotificationContext } from '../hooks/useNotificationContext';
+// Also export as useNotifications for backward compatibility
+export { useNotificationContext as useNotifications } from '../hooks/useNotificationContext';
 export type { Notification } from '../types/notification';
