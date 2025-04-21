@@ -61,9 +61,32 @@ export const useOrderRealtime = () => {
         })
       .subscribe((status) => {
         console.log('Subscription status:', status);
+        // Update connection status based on subscription status
         setIsConnected(status === 'SUBSCRIBED');
       });
 
+    // Perform a test query to verify the subscription is working
+    const checkConnection = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('count(*)', { count: 'exact', head: true });
+        
+        if (error) {
+          console.error('Error checking connection:', error);
+          setIsConnected(false);
+        } else {
+          console.log('Database connection successful');
+          // The connection is established but we'll let the subscription
+          // callback handle the actual realtime connection status
+        }
+      } catch (err) {
+        console.error('Failed to check connection:', err);
+        setIsConnected(false);
+      }
+    };
+    
+    checkConnection();
     console.log('Subscribed to real-time updates for orders table');
 
     return () => {
