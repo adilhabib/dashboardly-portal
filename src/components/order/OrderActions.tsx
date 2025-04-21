@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { updateOrderStatus } from '@/services/order';
+import { updateOrderStatus, updatePaymentStatus } from '@/services/order';
 import { useQueryClient } from '@tanstack/react-query';
 import { OrderStatus } from '@/services/order/orderTypes';
 import { Check, X, Utensils, Package, Truck } from 'lucide-react';
@@ -29,12 +29,26 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
     try {
       setIsUpdating(true);
       await updateOrderStatus(orderId, newStatus);
-      
+
+      // If status is set to completed, also set payment_status to 'paid'
+      if (newStatus === 'completed') {
+        try {
+          await updatePaymentStatus(orderId, 'paid');
+        } catch (err) {
+          toast({
+            title: "Payment Update Failed",
+            description: "Order completed, but failed to update payment status. Please check manually.",
+            variant: "destructive"
+          });
+          console.error('Error setting payment status to paid:', err);
+        }
+      }
+
       toast({
         title: "Order Status Updated",
         description: `Order #${orderId.slice(0, 8)} status changed to ${newStatus}.`,
       });
-      
+
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
     } catch (error) {
@@ -149,3 +163,4 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
 };
 
 export default OrderActions;
+
