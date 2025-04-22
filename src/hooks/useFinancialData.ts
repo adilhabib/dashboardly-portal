@@ -47,7 +47,9 @@ export const useFinancialData = () => {
 
       if (error) throw error;
       return data as FinancialSummary;
-    }
+    },
+    // Ensure we always get a fresh summary
+    staleTime: 0
   });
 
   const addTransaction = useMutation({
@@ -63,8 +65,10 @@ export const useFinancialData = () => {
       return data;
     },
     onSuccess: () => {
+      // Invalidate both queries to trigger a refresh
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['financial_summary'] });
+      
       toast({
         title: "Transaction recorded",
         description: "Your transaction has been successfully recorded.",
