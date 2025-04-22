@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { WalletIcon, Plus } from 'lucide-react';
-import { DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { useFinancialData } from '@/hooks/useFinancialData';
 import WalletHeader from '@/components/wallet/WalletHeader';
 import WalletSummaryCards from '@/components/wallet/WalletSummaryCards';
@@ -67,33 +67,35 @@ const Wallet = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <WalletSummaryCards summary={summary} />
         
-        <DialogTrigger asChild>
-          <Card className="shadow-sm cursor-pointer">
-            <CardContent className="space-y-2">
-              <div className="flex items-center mt-6">
-                <WalletIcon className="h-5 w-5 mr-2 text-blue-500" />
-                <h3 className="text-lg font-semibold">Record Transaction</h3>
-              </div>
-              <Button className="w-full flex justify-between items-center">
-                <span>Add New Transaction</span>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        </DialogTrigger>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Card className="shadow-sm cursor-pointer">
+              <CardContent className="space-y-2">
+                <div className="flex items-center mt-6">
+                  <WalletIcon className="h-5 w-5 mr-2 text-blue-500" />
+                  <h3 className="text-lg font-semibold">Record Transaction</h3>
+                </div>
+                <Button className="w-full flex justify-between items-center">
+                  <span>Add New Transaction</span>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </DialogTrigger>
+          
+          <TransactionDialog
+            isOpen={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+            newTransaction={newTransaction}
+            setNewTransaction={setNewTransaction}
+            onSubmit={handleSubmitTransaction}
+            isPending={addTransaction.isPending}
+          />
+        </Dialog>
       </div>
 
       <FinancialChart chartData={chartData} />
       <TransactionList transactions={transactions || []} />
-      
-      <TransactionDialog
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        newTransaction={newTransaction}
-        setNewTransaction={setNewTransaction}
-        onSubmit={handleSubmitTransaction}
-        isPending={addTransaction.isPending}
-      />
     </div>
   );
 };
