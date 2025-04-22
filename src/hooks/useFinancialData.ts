@@ -34,28 +34,22 @@ export const useFinancialData = () => {
 
       if (error) throw error;
       return data as Transaction[];
-    },
-    staleTime: 0 // Always refetch to get fresh data
+    }
   });
 
   const { data: summary, isLoading: isLoadingSummary } = useQuery({
     queryKey: ['financial_summary'],
     queryFn: async () => {
-      console.log('Fetching financial summary');
       const { data, error } = await supabase
         .from('financial_summary')
         .select('*')
         .single();
 
-      if (error) {
-        console.error('Error fetching financial summary:', error);
-        throw error;
-      }
-      console.log('Fetched financial summary:', data);
+      if (error) throw error;
       return data as FinancialSummary;
     },
-    staleTime: 0, // Always refetch when requested
-    refetchInterval: 2000 // Auto-refetch every 2 seconds
+    // Ensure we always get a fresh summary
+    staleTime: 0
   });
 
   const addTransaction = useMutation({
@@ -71,8 +65,7 @@ export const useFinancialData = () => {
       return data;
     },
     onSuccess: () => {
-      // Force immediate refetch of both queries
-      console.log('Transaction added successfully, refreshing data');
+      // Invalidate both queries to trigger a refresh
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['financial_summary'] });
       
@@ -80,11 +73,6 @@ export const useFinancialData = () => {
         title: "Transaction recorded",
         description: "Your transaction has been successfully recorded.",
       });
-      
-      // Additional explicit refetch to ensure data is updated
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['financial_summary'] });
-      }, 500);
     },
     onError: (error) => {
       console.error('Error adding transaction:', error);

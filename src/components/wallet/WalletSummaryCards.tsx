@@ -11,10 +11,9 @@ interface WalletSummaryCardsProps {
     total_transactions: number;
     last_transaction_date: string;
   } | null;
-  isLoading?: boolean;
 }
 
-const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary, isLoading }) => {
+const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
   const formatCurrency = (amount: number) => {
     return `Rs. ${amount.toFixed(2)}`;
   };
@@ -23,31 +22,6 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary, isLoad
   const balance = summary?.balance || 0;
   const totalIncome = summary?.total_income || 0;
   const totalExpenses = summary?.total_expenses || 0;
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-primary/5 to-primary/10">
-          <CardHeader className="pb-2">
-            <CardDescription>Current Balance</CardDescription>
-            <CardTitle className="text-3xl font-bold">Loading...</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10">
-          <CardHeader className="pb-2">
-            <CardDescription>Total Income</CardDescription>
-            <CardTitle className="text-2xl font-bold text-green-600">Loading...</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card className="bg-gradient-to-br from-red-500/5 to-red-500/10">
-          <CardHeader className="pb-2">
-            <CardDescription>Total Expenses</CardDescription>
-            <CardTitle className="text-2xl font-bold text-red-600">Loading...</CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
