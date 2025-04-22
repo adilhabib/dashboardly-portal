@@ -1,16 +1,26 @@
 
 import { FC } from 'react';
-import { BarChart as RechartBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { BarChartProps } from '@/types/charts';
+import { BarChart as RechartBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface BarChartProps {
+  data: any[];
+  categoryKey: string;
+  title?: string;
+  frequency?: string;
+  series: Array<{
+    valueKey: string;
+    label: string;
+    color: string;
+  }>;
+}
 
 const BarChart: FC<BarChartProps> = ({ 
   data, 
-  valueKey, 
   categoryKey, 
-  color,
   title,
-  frequency
+  frequency,
+  series
 }) => {
   // Prevent re-rendering by safely ensuring the data is valid
   const safeData = Array.isArray(data) ? data : [];
@@ -30,7 +40,10 @@ const BarChart: FC<BarChartProps> = ({
           <XAxis dataKey={categoryKey} />
           <YAxis />
           <Tooltip />
-          <Bar dataKey={valueKey} fill={color} />
+          <Legend />
+          {series.map((s, index) => (
+            <Bar key={index} dataKey={s.valueKey} name={s.label} fill={s.color} />
+          ))}
         </RechartBarChart>
       </ResponsiveContainer>
     </div>

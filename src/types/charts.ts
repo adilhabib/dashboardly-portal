@@ -26,12 +26,15 @@ export interface DonutChartProps {
 }
 
 export interface BarChartProps {
-  data: Array<{ name: string; value: number }>;
-  valueKey: string;
+  data: any[];
   categoryKey: string;
-  color: string;
   title?: string;
   frequency?: string;
+  series: Array<{
+    valueKey: string;
+    label: string;
+    color: string;
+  }>;
 }
 
 export interface ReviewCardProps {
