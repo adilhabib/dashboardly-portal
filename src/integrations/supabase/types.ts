@@ -144,6 +144,39 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          status?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       food_details: {
         Row: {
           allergens: string | null
@@ -533,7 +566,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      financial_summary: {
+        Row: {
+          balance: number | null
+          last_transaction_date: string | null
+          total_expenses: number | null
+          total_income: number | null
+          total_transactions: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       create_order: {
@@ -559,6 +602,10 @@ export type Database = {
       make_user_admin: {
         Args: { email: string }
         Returns: undefined
+      }
+      record_financial_transaction: {
+        Args: { p_amount: number; p_type: string; p_description: string }
+        Returns: string
       }
     }
     Enums: {

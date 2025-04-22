@@ -1,127 +1,72 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BarChart from '@/components/BarChart';
-import { ArrowDown, ArrowUp, Wallet as WalletIcon, CreditCard, DollarSign, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, Wallet as WalletIcon, Plus } from 'lucide-react';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
-
-// Dummy financial data - in a real app this would come from the database
-const dummyTransactions = [
-  {
-    id: '1',
-    date: '2023-11-15',
-    description: 'Sales Revenue',
-    amount: 1256.78,
-    type: 'income',
-    status: 'completed',
-  },
-  {
-    id: '2',
-    date: '2023-11-14',
-    description: 'Supplier Payment - Fresh Produce',
-    amount: -423.50,
-    type: 'expense',
-    status: 'completed',
-  },
-  {
-    id: '3',
-    date: '2023-11-12',
-    description: 'Sales Revenue',
-    amount: 987.25,
-    type: 'income',
-    status: 'completed',
-  },
-  {
-    id: '4',
-    date: '2023-11-10',
-    description: 'Utility Bill - Electricity',
-    amount: -189.34,
-    type: 'expense',
-    status: 'completed',
-  },
-  {
-    id: '5',
-    date: '2023-11-08',
-    description: 'Sales Revenue',
-    amount: 1102.45,
-    type: 'income',
-    status: 'completed',
-  },
-  {
-    id: '6',
-    date: '2023-11-05',
-    description: 'Staff Wages',
-    amount: -2450.00,
-    type: 'expense',
-    status: 'completed',
-  },
-  {
-    id: '7',
-    date: '2023-11-03',
-    description: 'Sales Revenue',
-    amount: 896.12,
-    type: 'income',
-    status: 'completed',
-  },
-  {
-    id: '8',
-    date: '2023-11-01',
-    description: 'Equipment Maintenance',
-    amount: -157.89,
-    type: 'expense',
-    status: 'completed',
-  },
-];
-
-// Dummy chart data
-const revenueData = [
-  { name: 'Jan', value: 4500 },
-  { name: 'Feb', value: 5200 },
-  { name: 'Mar', value: 4800 },
-  { name: 'Apr', value: 5800 },
-  { name: 'May', value: 6000 },
-  { name: 'Jun', value: 6500 },
-  { name: 'Jul', value: 7200 },
-  { name: 'Aug', value: 6800 },
-  { name: 'Sep', value: 7500 },
-  { name: 'Oct', value: 8200 },
-  { name: 'Nov', value: 3500 },
-  { name: 'Dec', value: 0 },
-];
-
-const expensesData = [
-  { name: 'Jan', value: 3200 },
-  { name: 'Feb', value: 3500 },
-  { name: 'Mar', value: 3300 },
-  { name: 'Apr', value: 3600 },
-  { name: 'May', value: 3800 },
-  { name: 'Jun', value: 4200 },
-  { name: 'Jul', value: 4500 },
-  { name: 'Aug', value: 4200 },
-  { name: 'Sep', value: 4600 },
-  { name: 'Oct', value: 4800 },
-  { name: 'Nov', value: 2200 },
-  { name: 'Dec', value: 0 },
-];
+import { useFinancialData } from '@/hooks/useFinancialData';
 
 const Wallet = () => {
+  const { transactions, summary, isLoading, addTransaction } = useFinancialData();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newTransaction, setNewTransaction] = useState({
+    amount: '',
+    type: 'income',
+    description: ''
+  });
+
   const formatCurrency = (amount: number) => {
     return `Rs. ${amount.toFixed(2)}`;
   };
-  
-  const totalIncome = dummyTransactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
+
+  const handleSubmitTransaction = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTransaction.amount || !newTransaction.description) return;
+
+    addTransaction.mutate({
+      amount: parseFloat(newTransaction.amount),
+      type: newTransaction.type,
+      description: newTransaction.description
+    }, {
+      onSuccess: () => {
+        setIsDialogOpen(false);
+        setNewTransaction({ amount: '', type: 'income', description: '' });
+      }
+    });
+  };
+
+  if (isLoading) {
+    return <div className="container mx-auto px-4 py-6">Loading...</div>;
+  }
+
+  const chartData = transactions?.reduce((acc: any[], transaction) => {
+    const date = new Date(transaction.created_at).toLocaleDateString();
+    const existing = acc.find(item => item.name === date);
     
-  const totalExpenses = dummyTransactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    
-  const balance = totalIncome - totalExpenses;
-  
+    if (existing) {
+      if (transaction.type === 'income') {
+        existing.income += transaction.amount;
+      } else {
+        existing.expense += transaction.amount;
+      }
+    } else {
+      acc.push({
+        name: date,
+        income: transaction.type === 'income' ? transaction.amount : 0,
+        expense: transaction.type === 'expense' ? transaction.amount : 0
+      });
+    }
+    return acc;
+  }, []) || [];
+
   return (
     <div className="container mx-auto px-4 py-6">
       <PageBreadcrumb pageName="Financial Management" />
@@ -136,7 +81,7 @@ const Wallet = () => {
           <CardHeader className="pb-2">
             <CardDescription>Current Balance</CardDescription>
             <CardTitle className="text-3xl font-bold">
-              {formatCurrency(balance)}
+              {formatCurrency(summary?.balance || 0)}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -147,7 +92,7 @@ const Wallet = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Income</p>
-                  <p className="font-medium">{formatCurrency(totalIncome)}</p>
+                  <p className="font-medium">{formatCurrency(summary?.total_income || 0)}</p>
                 </div>
               </div>
               <div className="flex items-center">
@@ -156,174 +101,125 @@ const Wallet = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Expenses</p>
-                  <p className="font-medium">{formatCurrency(totalExpenses)}</p>
+                  <p className="font-medium">{formatCurrency(summary?.total_expenses || 0)}</p>
                 </div>
               </div>
             </div>
           </CardContent>
-          <CardFooter className="pt-0">
-            <Button variant="outline" className="w-full">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Update Balance
-            </Button>
-          </CardFooter>
         </Card>
-        
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2">
-            <div className="flex items-center">
-              <WalletIcon className="h-5 w-5 mr-2 text-blue-500" />
-              <CardTitle>Quick Actions</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button className="w-full flex justify-between items-center">
-              <span>Record Income</span>
-              <DollarSign className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="w-full flex justify-between items-center">
-              <span>Record Expense</span>
-              <CreditCard className="h-4 w-4" />
-            </Button>
-            <Button variant="secondary" className="w-full">
-              Generate Financial Report
-            </Button>
-          </CardContent>
-        </Card>
-        
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Card className="shadow-sm cursor-pointer">
+              <CardHeader className="pb-2">
+                <div className="flex items-center">
+                  <WalletIcon className="h-5 w-5 mr-2 text-blue-500" />
+                  <CardTitle>Record Transaction</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button className="w-full flex justify-between items-center">
+                  <span>Add New Transaction</span>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Record New Transaction</DialogTitle>
+              <DialogDescription>
+                Enter the details of your financial transaction below.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmitTransaction}>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="type">Type</Label>
+                  <Select
+                    value={newTransaction.type}
+                    onValueChange={(value) => setNewTransaction(prev => ({ ...prev, type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="income">Income</SelectItem>
+                      <SelectItem value="expense">Expense</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="amount">Amount</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    value={newTransaction.amount}
+                    onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
+                    placeholder="Enter amount"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Input
+                    id="description"
+                    value={newTransaction.description}
+                    onChange={(e) => setNewTransaction(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Enter description"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="mt-4">
+                <Button type="submit" disabled={addTransaction.isPending}>
+                  {addTransaction.isPending ? 'Recording...' : 'Record Transaction'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
         <Card className="shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle>Overview</CardTitle>
-            <CardDescription>Monthly Financial Summary</CardDescription>
+            <CardDescription>Transaction Summary</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-gray-500">Revenue (This Month)</p>
-              <p className="text-2xl font-bold">{formatCurrency(3500)}</p>
-              <div className="flex items-center mt-1">
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                  <ArrowUp className="h-3 w-3 mr-1" />
-                  8.2%
-                </Badge>
-                <span className="text-xs text-gray-500 ml-2">vs last month</span>
-              </div>
+              <p className="text-sm text-gray-500">Total Transactions</p>
+              <p className="text-2xl font-bold">{summary?.total_transactions || 0}</p>
             </div>
-            
             <div>
-              <p className="text-sm text-gray-500">Expenses (This Month)</p>
-              <p className="text-2xl font-bold">{formatCurrency(2200)}</p>
-              <div className="flex items-center mt-1">
-                <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-                  <ArrowUp className="h-3 w-3 mr-1" />
-                  5.4%
-                </Badge>
-                <span className="text-xs text-gray-500 ml-2">vs last month</span>
-              </div>
-            </div>
-            
-            <div>
-              <p className="text-sm text-gray-500">Profit Margin</p>
-              <p className="text-2xl font-bold">37.1%</p>
-              <div className="flex items-center mt-1">
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                  <ArrowUp className="h-3 w-3 mr-1" />
-                  2.3%
-                </Badge>
-                <span className="text-xs text-gray-500 ml-2">vs last month</span>
-              </div>
+              <p className="text-sm text-gray-500">Last Transaction</p>
+              <p className="text-base">
+                {summary?.last_transaction_date 
+                  ? new Date(summary.last_transaction_date).toLocaleDateString()
+                  : 'No transactions yet'}
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <Card className="shadow-sm lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle>Financial Performance</CardTitle>
-            <CardDescription>Yearly overview of revenue and expenses</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="revenue">
-              <TabsList className="mb-4">
-                <TabsTrigger value="revenue">Revenue</TabsTrigger>
-                <TabsTrigger value="expenses">Expenses</TabsTrigger>
-                <TabsTrigger value="profit">Profit</TabsTrigger>
-              </TabsList>
-              <TabsContent value="revenue" className="h-80">
-                <BarChart 
-                  data={revenueData} 
-                  valueKey="value" 
-                  categoryKey="name"
-                  color="#4ade80"
-                />
-              </TabsContent>
-              <TabsContent value="expenses" className="h-80">
-                <BarChart 
-                  data={expensesData} 
-                  valueKey="value" 
-                  categoryKey="name"
-                  color="#f87171"
-                />
-              </TabsContent>
-              <TabsContent value="profit" className="h-80">
-                <BarChart 
-                  data={revenueData.map((item, i) => ({
-                    name: item.name,
-                    value: item.value - expensesData[i].value,
-                  }))} 
-                  valueKey="value" 
-                  categoryKey="name"
-                  color="#60a5fa"
-                />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle>Upcoming Payments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="p-3 border rounded-lg">
-                <div className="flex justify-between">
-                  <p className="font-medium">Staff Wages</p>
-                  <Badge variant="outline">Due in 3 days</Badge>
-                </div>
-                <p className="text-gray-500 text-sm mt-1">Monthly staff salaries</p>
-                <p className="font-bold mt-2">{formatCurrency(2450)}</p>
-              </div>
-              
-              <div className="p-3 border rounded-lg">
-                <div className="flex justify-between">
-                  <p className="font-medium">Rent Payment</p>
-                  <Badge variant="outline">Due in 5 days</Badge>
-                </div>
-                <p className="text-gray-500 text-sm mt-1">Monthly restaurant space rent</p>
-                <p className="font-bold mt-2">{formatCurrency(1500)}</p>
-              </div>
-              
-              <div className="p-3 border rounded-lg">
-                <div className="flex justify-between">
-                  <p className="font-medium">Utility Bills</p>
-                  <Badge variant="outline">Due in 8 days</Badge>
-                </div>
-                <p className="text-gray-500 text-sm mt-1">Electricity, water, gas</p>
-                <p className="font-bold mt-2">{formatCurrency(350)}</p>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" className="w-full">
-              View All Upcoming Payments
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-      
+
+      <Card className="shadow-sm mb-6">
+        <CardHeader>
+          <CardTitle>Financial Performance</CardTitle>
+          <CardDescription>Income vs Expenses Overview</CardDescription>
+        </CardHeader>
+        <CardContent className="h-[300px]">
+          <BarChart
+            data={chartData}
+            categoryKey="name"
+            series={[
+              { valueKey: 'income', label: 'Income', color: '#4ade80' },
+              { valueKey: 'expense', label: 'Expenses', color: '#f87171' }
+            ]}
+          />
+        </CardContent>
+      </Card>
+
       <Card className="shadow-sm">
-        <CardHeader className="pb-2">
+        <CardHeader>
           <CardTitle>Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
@@ -338,10 +234,10 @@ const Wallet = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dummyTransactions.map((transaction) => (
+              {transactions?.map((transaction) => (
                 <TableRow key={transaction.id}>
                   <TableCell>
-                    {new Date(transaction.date).toLocaleDateString('en-US', {
+                    {new Date(transaction.created_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',
@@ -365,7 +261,7 @@ const Wallet = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className={`text-right font-medium ${
-                    transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'
+                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                   }`}>
                     {formatCurrency(transaction.amount)}
                   </TableCell>
@@ -374,9 +270,6 @@ const Wallet = () => {
             </TableBody>
           </Table>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <Button variant="outline">View All Transactions</Button>
-        </CardFooter>
       </Card>
     </div>
   );
