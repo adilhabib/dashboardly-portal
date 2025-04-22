@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,7 +15,6 @@ import { User, Mail, Phone, MapPin, Save, Loader2 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import { Separator } from "@/components/ui/separator";
 
-// Define schema for form validation
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }).optional(),
@@ -27,7 +25,6 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-// Define type for our profile data
 interface ProfileData {
   id?: string;
   username?: string;
@@ -58,14 +55,12 @@ const Profile = () => {
     },
   });
 
-  // Fetch user profile data
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
       
       setIsLoading(true);
       try {
-        // Check if profile exists in profiles table
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -76,7 +71,6 @@ const Profile = () => {
           throw profileError;
         }
 
-        // Check if user exists in customer table
         const { data: customerData, error: customerError } = await supabase
           .from('customer')
           .select('*')
@@ -87,18 +81,15 @@ const Profile = () => {
           throw customerError;
         }
 
-        // Combine data from both sources
         const combinedData: ProfileData = {
           ...profileData,
           ...customerData,
           email: user.email,
-          // Ensure bio is defined even if it's not in the database
           bio: profileData?.bio || "",
         };
 
         setProfileData(combinedData);
         
-        // Set form values
         form.reset({
           name: combinedData?.name || "",
           email: user.email || "",
@@ -126,82 +117,32 @@ const Profile = () => {
 
     setIsLoading(true);
     try {
-      // Instead of upsert, first check if profile exists then update or insert
-      const { data: existingProfile } = await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-      
-      if (existingProfile) {
-        // Update existing profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            username: values.name,
-            bio: values.bio,
-          })
-          .eq('id', user.id);
+        .update({
+          username: values.name,
+          bio: values.bio,
+        })
+        .eq('id', user.id);
 
-        if (profileError) {
-          console.error("Profile update error:", profileError);
-          throw profileError;
-        }
-      } else {
-        // Insert new profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            username: values.name,
-            bio: values.bio,
-          });
-
-        if (profileError) {
-          console.error("Profile insert error:", profileError);
-          throw profileError;
-        }
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
       }
-      
-      // Same approach for customer table
-      const { data: existingCustomer } = await supabase
+
+      const { error: customerError } = await supabase
         .from('customer')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-      
-      if (existingCustomer) {
-        // Update existing customer
-        const { error: customerError } = await supabase
-          .from('customer')
-          .update({
-            name: values.name,
-            phone_number: values.phone,
-            address: values.address,
-            email: values.email,
-          })
-          .eq('id', user.id);
+        .update({
+          name: values.name,
+          phone_number: values.phone,
+          address: values.address,
+          email: values.email,
+        })
+        .eq('id', user.id);
 
-        if (customerError) {
-          console.error("Customer update error:", customerError);
-          throw customerError;
-        }
-      } else {
-        // Insert new customer
-        const { error: customerError } = await supabase
-          .from('customer')
-          .insert({
-            id: user.id,
-            name: values.name,
-            phone_number: values.phone,
-            address: values.address,
-            email: values.email,
-          });
-
-        if (customerError) {
-          console.error("Customer insert error:", customerError);
-          throw customerError;
-        }
+      if (customerError) {
+        console.error("Customer update error:", customerError);
+        throw customerError;
       }
 
       toast({
