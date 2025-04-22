@@ -29,10 +29,11 @@ const DashboardCustomerSection: FC<DashboardCustomerSectionProps> = ({
         <BarChart 
           title="Customer Map" 
           data={transformedCustomerMapData}
-          valueKey="value"
           categoryKey="name"
-          color="#4ade80"
           frequency={currentFrequency}
+          series={[
+            { valueKey: "value", label: "Customers", color: "#4ade80" }
+          ]}
         />
       </div>
       
