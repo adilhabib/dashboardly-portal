@@ -17,11 +17,6 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
   const formatCurrency = (amount: number) => {
     return `Rs. ${amount.toFixed(2)}`;
   };
-  
-  // Default to 0 if summary is null or values are undefined
-  const balance = summary?.balance || 0;
-  const totalIncome = summary?.total_income || 0;
-  const totalExpenses = summary?.total_expenses || 0;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -29,7 +24,7 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
         <CardHeader className="pb-2">
           <CardDescription>Current Balance</CardDescription>
           <CardTitle className="text-3xl font-bold">
-            {formatCurrency(balance)}
+            {formatCurrency(summary?.balance || 0)}
           </CardTitle>
         </CardHeader>
       </Card>
@@ -38,7 +33,7 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
         <CardHeader className="pb-2">
           <CardDescription>Total Income</CardDescription>
           <CardTitle className="text-2xl font-bold text-green-600">
-            {formatCurrency(totalIncome)}
+            {formatCurrency(summary?.total_income || 0)}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -54,7 +49,7 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
         <CardHeader className="pb-2">
           <CardDescription>Total Expenses</CardDescription>
           <CardTitle className="text-2xl font-bold text-red-600">
-            {formatCurrency(totalExpenses)}
+            {formatCurrency(summary?.total_expenses || 0)}
           </CardTitle>
         </CardHeader>
         <CardContent>
