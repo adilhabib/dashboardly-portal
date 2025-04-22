@@ -61,20 +61,22 @@ const Wallet = () => {
   }, []) || [];
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 space-y-6">
       <WalletHeader />
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <WalletSummaryCards summary={summary} />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3">
+          <WalletSummaryCards summary={summary} />
+        </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Card className="shadow-sm cursor-pointer">
-              <CardContent className="space-y-2">
-                <div className="flex items-center mt-6">
-                  <WalletIcon className="h-5 w-5 mr-2 text-blue-500" />
-                  <h3 className="text-lg font-semibold">Record Transaction</h3>
+            <Card className="h-full shadow-sm cursor-pointer hover:bg-accent/5 transition-colors">
+              <CardContent className="h-full flex flex-col justify-center space-y-4">
+                <div className="flex items-center justify-center">
+                  <WalletIcon className="h-8 w-8 text-primary" />
                 </div>
+                <h3 className="text-lg font-semibold text-center">Record Transaction</h3>
                 <Button className="w-full flex justify-between items-center">
                   <span>Add New Transaction</span>
                   <Plus className="h-4 w-4" />
@@ -94,8 +96,18 @@ const Wallet = () => {
         </Dialog>
       </div>
 
-      <FinancialChart chartData={chartData} />
-      <TransactionList transactions={transactions || []} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="shadow-sm">
+          <CardContent className="pt-6">
+            <FinancialChart chartData={chartData} />
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardContent className="pt-6">
+            <TransactionList transactions={transactions || []} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

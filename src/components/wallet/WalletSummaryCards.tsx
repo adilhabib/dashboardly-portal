@@ -19,33 +19,43 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-      <Card className="shadow-sm">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <Card className="bg-gradient-to-br from-primary/5 to-primary/10">
         <CardHeader className="pb-2">
           <CardDescription>Current Balance</CardDescription>
           <CardTitle className="text-3xl font-bold">
             {formatCurrency(summary?.balance || 0)}
           </CardTitle>
         </CardHeader>
+      </Card>
+
+      <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10">
+        <CardHeader className="pb-2">
+          <CardDescription>Total Income</CardDescription>
+          <CardTitle className="text-2xl font-bold text-green-600">
+            {formatCurrency(summary?.total_income || 0)}
+          </CardTitle>
+        </CardHeader>
         <CardContent>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <div className="mr-2 p-1.5 rounded-full bg-green-100">
-                <ArrowUp className="h-4 w-4 text-green-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Income</p>
-                <p className="font-medium">{formatCurrency(summary?.total_income || 0)}</p>
-              </div>
+          <div className="flex items-center">
+            <div className="p-1.5 rounded-full bg-green-100">
+              <ArrowUp className="h-4 w-4 text-green-600" />
             </div>
-            <div className="flex items-center">
-              <div className="mr-2 p-1.5 rounded-full bg-red-100">
-                <ArrowDown className="h-4 w-4 text-red-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Expenses</p>
-                <p className="font-medium">{formatCurrency(summary?.total_expenses || 0)}</p>
-              </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-gradient-to-br from-red-500/5 to-red-500/10">
+        <CardHeader className="pb-2">
+          <CardDescription>Total Expenses</CardDescription>
+          <CardTitle className="text-2xl font-bold text-red-600">
+            {formatCurrency(summary?.total_expenses || 0)}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center">
+            <div className="p-1.5 rounded-full bg-red-100">
+              <ArrowDown className="h-4 w-4 text-red-600" />
             </div>
           </div>
         </CardContent>
