@@ -126,52 +126,82 @@ const Profile = () => {
 
     setIsLoading(true);
     try {
-      console.log("Updating profiles table with:", {
-        id: user.id,
-        username: values.name,
-        bio: values.bio,
-      });
-      
-      // Update or create profile in profiles table
-      const { error: profileError } = await supabase
+      // Instead of upsert, first check if profile exists then update or insert
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
-          username: values.name,
-          bio: values.bio,
-        }, {
-          onConflict: 'id' // Specify which column to check for conflicts
-        });
-
-      if (profileError) {
-        console.error("Profile update error:", profileError);
-        throw profileError;
-      }
-
-      console.log("Updating customer table with:", {
-        id: user.id,
-        name: values.name,
-        phone_number: values.phone,
-        address: values.address,
-        email: values.email,
-      });
+        .select('id')
+        .eq('id', user.id)
+        .single();
       
-      // Update or create customer in customer table
-      const { error: customerError } = await supabase
-        .from('customer')
-        .upsert({
-          id: user.id,
-          name: values.name,
-          phone_number: values.phone,
-          address: values.address,
-          email: values.email,
-        }, {
-          onConflict: 'id' // Specify which column to check for conflicts
-        });
+      if (existingProfile) {
+        // Update existing profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            username: values.name,
+            bio: values.bio,
+          })
+          .eq('id', user.id);
 
-      if (customerError) {
-        console.error("Customer update error:", customerError);
-        throw customerError;
+        if (profileError) {
+          console.error("Profile update error:", profileError);
+          throw profileError;
+        }
+      } else {
+        // Insert new profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            username: values.name,
+            bio: values.bio,
+          });
+
+        if (profileError) {
+          console.error("Profile insert error:", profileError);
+          throw profileError;
+        }
+      }
+      
+      // Same approach for customer table
+      const { data: existingCustomer } = await supabase
+        .from('customer')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+      
+      if (existingCustomer) {
+        // Update existing customer
+        const { error: customerError } = await supabase
+          .from('customer')
+          .update({
+            name: values.name,
+            phone_number: values.phone,
+            address: values.address,
+            email: values.email,
+          })
+          .eq('id', user.id);
+
+        if (customerError) {
+          console.error("Customer update error:", customerError);
+          throw customerError;
+        }
+      } else {
+        // Insert new customer
+        const { error: customerError } = await supabase
+          .from('customer')
+          .insert({
+            id: user.id,
+            name: values.name,
+            phone_number: values.phone,
+            address: values.address,
+            email: values.email,
+          });
+
+        if (customerError) {
+          console.error("Customer insert error:", customerError);
+          throw customerError;
+        }
       }
 
       toast({
