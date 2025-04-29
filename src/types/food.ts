@@ -7,6 +7,7 @@ export interface Food {
   image_url: string | null;
   category: string | null;
   is_available: boolean;
+  is_popular: boolean | null;
   created_at: string;
   updated_at: string;
 }
