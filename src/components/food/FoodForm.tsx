@@ -28,6 +28,7 @@ const foodFormSchema = z.object({
   image_url: z.string().optional(),
   category: z.string().optional(),
   is_available: z.boolean().default(true),
+  is_popular: z.boolean().optional().default(false),
 });
 
 // Type for the form values

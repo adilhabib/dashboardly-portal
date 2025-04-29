@@ -65,7 +65,8 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
         price: values.price,
         image_url: values.image_url,
         category: values.category,
-        is_available: values.is_available
+        is_available: values.is_available,
+        is_popular: false  // Set default value for new food items
       });
     }
   };

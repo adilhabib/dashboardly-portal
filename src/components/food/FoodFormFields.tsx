@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -156,21 +157,39 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
       
       <Separator className="my-4" />
       
-      <FormField
-        control={control}
-        name="is_available"
-        render={({ field }) => (
-          <FormItem className="flex items-center justify-between space-y-0 p-4 border rounded-md">
-            <FormLabel>Available for order</FormLabel>
-            <FormControl>
-              <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
+      <div className="space-y-4">
+        <FormField
+          control={control}
+          name="is_available"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between space-y-0 p-4 border rounded-md">
+              <FormLabel>Available for order</FormLabel>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={control}
+          name="is_popular"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between space-y-0 p-4 border rounded-md">
+              <FormLabel>Mark as popular item</FormLabel>
+              <FormControl>
+                <Switch
+                  checked={field.value || false}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </div>
       
       <FoodToppingManager foodId={foodId} />
     </>
