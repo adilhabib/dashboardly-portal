@@ -179,7 +179,12 @@ const FoodFormFields: React.FC<FoodFormFieldsProps> = ({ form, foodId }) => {
           name="is_popular"
           render={({ field }) => (
             <FormItem className="flex items-center justify-between space-y-0 p-4 border rounded-md">
-              <FormLabel>Mark as popular item</FormLabel>
+              <div className="space-y-0.5">
+                <FormLabel>Mark as popular item</FormLabel>
+                <p className="text-sm text-muted-foreground">
+                  Popular items will be featured in the "Popular Items" section
+                </p>
+              </div>
               <FormControl>
                 <Switch
                   checked={field.value || false}
