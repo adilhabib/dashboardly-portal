@@ -340,6 +340,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_available: boolean | null
+          is_popular: boolean | null
           name: string
           price: number
           subcategory: string | null
@@ -352,6 +353,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_available?: boolean | null
+          is_popular?: boolean | null
           name: string
           price: number
           subcategory?: string | null
@@ -364,6 +366,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_available?: boolean | null
+          is_popular?: boolean | null
           name?: string
           price?: number
           subcategory?: string | null
