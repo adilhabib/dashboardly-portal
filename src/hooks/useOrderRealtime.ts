@@ -87,6 +87,8 @@ export const useOrderRealtime = () => {
             setIsConnected(false);
             setTimeout(attemptReconnect, 5000);
           } else {
+            // This is the line that was causing the error
+            // We need to check if the status is SUBSCRIBED, not compare two different enum values
             setIsConnected(status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED);
           }
         });
