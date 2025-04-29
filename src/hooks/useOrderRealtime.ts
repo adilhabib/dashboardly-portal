@@ -75,21 +75,21 @@ export const useOrderRealtime = () => {
           })
         .subscribe((status) => {
           console.log('Subscription status:', status);
-          if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+          if (status === 'SUBSCRIBED') {
             console.log('Successfully subscribed to realtime updates');
             setIsConnected(true);
-          } else if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
+          } else if (status === 'CHANNEL_ERROR') {
             console.error('Channel error, will attempt reconnect');
             setIsConnected(false);
             setTimeout(attemptReconnect, 5000);
-          } else if (status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT) {
+          } else if (status === 'TIMED_OUT') {
             console.error('Connection timed out, will attempt reconnect');
             setIsConnected(false);
             setTimeout(attemptReconnect, 5000);
           } else {
             // This is the line that was causing the error
-            // We need to check if the status is SUBSCRIBED, not compare two different enum values
-            setIsConnected(status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED);
+            // We need to use string literals for status comparison, not enum values
+            setIsConnected(status === 'SUBSCRIBED');
           }
         });
 
