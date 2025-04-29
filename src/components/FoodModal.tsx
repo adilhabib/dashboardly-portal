@@ -25,6 +25,7 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
     image_url: food?.image_url || '',
     category: food?.category || '',
     is_available: food?.is_available ?? true,
+    is_popular: food?.is_popular ?? false,  // Include is_popular from existing food
   };
 
   const createMutation = useMutation({
@@ -56,7 +57,18 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
 
   const onSubmit = (values: FoodFormValues) => {
     if (isEditing && food) {
-      updateMutation.mutate({ id: food.id, data: values });
+      updateMutation.mutate({ 
+        id: food.id, 
+        data: {
+          name: values.name,
+          description: values.description,
+          price: values.price,
+          image_url: values.image_url,
+          category: values.category,
+          is_available: values.is_available,
+          is_popular: values.is_popular,  // Make sure is_popular is included when updating
+        }
+      });
     } else {
       // Ensure required fields are present for creating a new food item
       createMutation.mutate({
@@ -66,7 +78,7 @@ const FoodModal: React.FC<FoodModalProps> = ({ isOpen, onClose, food }) => {
         image_url: values.image_url,
         category: values.category,
         is_available: values.is_available,
-        is_popular: false  // Set default value for new food items
+        is_popular: values.is_popular || false  // Use the form value or default to false
       });
     }
   };
