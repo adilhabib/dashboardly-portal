@@ -107,7 +107,7 @@ const CustomerCreditHistory = () => {
                 <TableCell>{transaction.description}</TableCell>
                 <TableCell>{formatCurrency(transaction.amount)}</TableCell>
                 <TableCell>
-                  <Badge variant={transaction.status === 'completed' ? 'success' : 'secondary'}>
+                  <Badge variant={transaction.status === 'completed' ? 'secondary' : 'outline'}>
                     {transaction.status}
                   </Badge>
                 </TableCell>
