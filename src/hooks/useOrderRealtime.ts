@@ -73,7 +73,7 @@ export const useOrderRealtime = () => {
             // Invalidate the orders query to trigger a refetch
             queryClient.invalidateQueries({ queryKey: ['orders'] });
           })
-        .subscribe((status) => {
+        .subscribe((status: string) => {
           console.log('Subscription status:', status);
           if (status === 'SUBSCRIBED') {
             console.log('Successfully subscribed to realtime updates');
@@ -88,7 +88,7 @@ export const useOrderRealtime = () => {
             setTimeout(attemptReconnect, 5000);
           } else {
             // This is the line that was causing the error
-            // We need to use string literals for status comparison, not enum values
+            // We need to use string literals for status comparison
             setIsConnected(status === 'SUBSCRIBED');
           }
         });
