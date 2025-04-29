@@ -34,6 +34,8 @@ const formSchema = z.object({
     message: "Amount must be greater than 0",
   }),
   orderId: z.string().optional(),
+  creditorName: z.string().min(2, { message: "Creditor name must be at least 2 characters" }),
+  creditorContact: z.string().optional(),
   description: z.string().min(3, { message: "Description must be at least 3 characters" }),
 });
 
@@ -49,6 +51,8 @@ const CreditRecordingForm = () => {
       customerId: "",
       amount: "",
       orderId: "",
+      creditorName: "",
+      creditorContact: "",
       description: "",
     },
   });
@@ -70,7 +74,7 @@ const CreditRecordingForm = () => {
         {
           p_amount: amount,
           p_type: 'income',
-          p_description: `Credit from customer: ${data.description} ${data.orderId ? `- Order #${data.orderId}` : ''}`
+          p_description: `Credit from customer: ${data.description} ${data.orderId ? `- Order #${data.orderId}` : ''} - Authorized by: ${data.creditorName} ${data.creditorContact ? `(${data.creditorContact})` : ''}`
         }
       );
       
@@ -147,6 +151,36 @@ const CreditRecordingForm = () => {
             </FormItem>
           )}
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="creditorName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Creditor Name</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Name of who authorized credit" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="creditorContact"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Creditor Contact (Optional)</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Phone or email" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         
         <FormField
           control={form.control}
