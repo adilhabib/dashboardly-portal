@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/utils';
@@ -11,15 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { fetchCustomers } from '@/services/customerService';
 import { Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -34,18 +25,9 @@ interface CreditTransaction {
 }
 
 const CustomerCreditHistory = () => {
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
-  
-  const { data: customers, isLoading: isLoadingCustomers } = useQuery({
-    queryKey: ['customers'],
-    queryFn: fetchCustomers,
-  });
-
   const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
-    queryKey: ['customer-credits', selectedCustomerId],
+    queryKey: ['customer-credits'],
     queryFn: async () => {
-      if (!selectedCustomerId) return [];
-      
       const { data, error } = await supabase
         .from('financial_transactions')
         .select('*')
@@ -56,34 +38,10 @@ const CustomerCreditHistory = () => {
       if (error) throw error;
       return data as CreditTransaction[];
     },
-    enabled: !!selectedCustomerId,
   });
-  
-  const handleCustomerChange = (customerId: string) => {
-    setSelectedCustomerId(customerId);
-  };
   
   return (
     <div className="space-y-4">
-      <div className="mb-4">
-        <Label htmlFor="customer-filter">Filter by Customer</Label>
-        <Select 
-          onValueChange={handleCustomerChange} 
-          disabled={isLoadingCustomers}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a customer" />
-          </SelectTrigger>
-          <SelectContent>
-            {customers?.map((customer) => (
-              <SelectItem key={customer.id} value={customer.id}>
-                {customer.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
       {isLoadingTransactions ? (
         <div className="flex justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -115,13 +73,9 @@ const CustomerCreditHistory = () => {
             ))}
           </TableBody>
         </Table>
-      ) : selectedCustomerId ? (
-        <div className="text-center py-8 text-gray-500">
-          No credit transactions found for this customer
-        </div>
       ) : (
         <div className="text-center py-8 text-gray-500">
-          Select a customer to view credit history
+          No credit transactions found
         </div>
       )}
     </div>

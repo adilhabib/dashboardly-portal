@@ -1,11 +1,9 @@
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
-import { fetchCustomers } from '@/services/customerService';
 import { supabase } from '@/integrations/supabase/client';
 
 import {
@@ -16,20 +14,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
-  customerId: z.string().uuid({ message: "Please select a customer" }),
+  customerName: z.string().min(2, { message: "Customer name must be at least 2 characters" }),
+  customerEmail: z.string().email({ message: "Please enter a valid email address" }),
   amount: z.string().refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
     message: "Amount must be greater than 0",
   }),
@@ -48,7 +40,8 @@ const CreditRecordingForm = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      customerId: "",
+      customerName: "",
+      customerEmail: "",
       amount: "",
       orderId: "",
       creditorName: "",
@@ -57,11 +50,6 @@ const CreditRecordingForm = () => {
     },
   });
   
-  const { data: customers, isLoading: isLoadingCustomers } = useQuery({
-    queryKey: ['customers'],
-    queryFn: fetchCustomers,
-  });
-
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     
@@ -74,23 +62,15 @@ const CreditRecordingForm = () => {
         {
           p_amount: amount,
           p_type: 'income',
-          p_description: `Credit from customer: ${data.description} ${data.orderId ? `- Order #${data.orderId}` : ''} - Authorized by: ${data.creditorName} ${data.creditorContact ? `(${data.creditorContact})` : ''}`
+          p_description: `Credit for ${data.customerName} (${data.customerEmail}): ${data.description} ${data.orderId ? `- Order #${data.orderId}` : ''} - Authorized by: ${data.creditorName} ${data.creditorContact ? `(${data.creditorContact})` : ''}`
         }
       );
       
       if (transactionError) throw transactionError;
       
-      // Update customer credit in the customer table
-      const { error: customerError } = await supabase
-        .from('customer')
-        .update({ loyalty_points: amount }) // Just update with the direct amount value
-        .eq('id', data.customerId);
-      
-      if (customerError) throw customerError;
-      
       toast({
         title: "Credit recorded successfully",
-        description: `Credit of ${amount.toFixed(2)} has been recorded`,
+        description: `Credit of ${amount.toFixed(2)} has been recorded for ${data.customerName}`,
       });
       
       form.reset();
@@ -109,34 +89,35 @@ const CreditRecordingForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="customerId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Customer</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value}
-                disabled={isLoadingCustomers}
-              >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="customerName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Customer Name</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a customer" />
-                  </SelectTrigger>
+                  <Input {...field} placeholder="Enter customer name" />
                 </FormControl>
-                <SelectContent>
-                  {customers?.map((customer) => (
-                    <SelectItem key={customer.id} value={customer.id}>
-                      {customer.name} ({customer.email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="customerEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Customer Email</FormLabel>
+                <FormControl>
+                  <Input {...field} type="email" placeholder="customer@example.com" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         
         <FormField
           control={form.control}
