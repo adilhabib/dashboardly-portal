@@ -13,7 +13,8 @@ import {
   Plus,
   Tag,
   Bell,
-  UserCircle
+  UserCircle,
+  CreditCard
 } from 'lucide-react';
 import { useNotifications } from '@/contexts/NotificationContext';
 
@@ -27,6 +28,7 @@ const Sidebar: FC = () => {
     { path: '/order-list', icon: <ListOrdered size={18} />, label: 'Order List' },
     { path: '/order-detail', icon: <FileText size={18} />, label: 'Order Detail' },
     { path: '/customer', icon: <User size={18} />, label: 'Customer' },
+    { path: '/customer-credit', icon: <CreditCard size={18} />, label: 'Customer Credit' },
     { path: '/analytics', icon: <BarChart2 size={18} />, label: 'Analytics' },
     { path: '/reviews', icon: <MessageSquare size={18} />, label: 'Reviews' },
     { path: '/foods', icon: <Pizza size={18} />, label: 'Foods' },

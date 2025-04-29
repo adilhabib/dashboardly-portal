@@ -23,6 +23,7 @@ import Wallet from "./pages/Wallet";
 import Categories from "./pages/Categories";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
+import CustomerCredit from "./pages/CustomerCredit";
 
 const App = () => (
   <TooltipProvider>
@@ -72,6 +73,16 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Customer />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer-credit" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <CustomerCredit />
                   </Layout>
                 </ProtectedRoute>
               } 
