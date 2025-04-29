@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from '@/services/order';
-import { useNotifications } from '@/contexts/NotificationContext';
+import { toast } from '@/hooks/use-toast';
 
 export const useOrderRealtime = () => {
   const queryClient = useQueryClient();
@@ -21,51 +21,82 @@ export const useOrderRealtime = () => {
   useEffect(() => {
     console.log('Setting up real-time subscription for orders table');
     
-    const channel = supabase
-      .channel('public:orders')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'orders' }, 
-        (payload) => {
-          console.log('Real-time update received:', payload);
-          setIsConnected(true);
-          
-          // Extract basic order details for display
-          const newRecord = payload.new as Record<string, any> | null;
-          const oldRecord = payload.old as Record<string, any> | null;
-          
-          // Safely access the ID
-          const orderId = newRecord?.id || oldRecord?.id;
-          
-          if (payload.eventType === 'INSERT') {
-            setLastUpdate({
-              type: 'INSERT',
-              order: newRecord ? newRecord as Partial<Order> : null,
-              timestamp: new Date()
-            });
-          } else if (payload.eventType === 'UPDATE') {
-            setLastUpdate({
-              type: 'UPDATE',
-              order: newRecord ? newRecord as Partial<Order> : null,
-              timestamp: new Date()
-            });
-          } else if (payload.eventType === 'DELETE') {
-            setLastUpdate({
-              type: 'DELETE',
-              order: oldRecord ? oldRecord as Partial<Order> : null,
-              timestamp: new Date()
-            });
+    // Handle reconnection
+    const attemptReconnect = () => {
+      console.log('Attempting to reconnect to Supabase realtime');
+      setIsConnected(false);
+      setupSubscription();
+    };
+    
+    // Setup the subscription
+    const setupSubscription = () => {
+      const channel = supabase
+        .channel('public:orders')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'orders' }, 
+          (payload) => {
+            console.log('Real-time update received:', payload);
+            setIsConnected(true);
+            
+            // Extract basic order details for display
+            const newRecord = payload.new as Record<string, any> | null;
+            const oldRecord = payload.old as Record<string, any> | null;
+            
+            // Safely access the ID
+            const orderId = newRecord?.id || oldRecord?.id;
+            
+            if (payload.eventType === 'INSERT') {
+              setLastUpdate({
+                type: 'INSERT',
+                order: newRecord ? newRecord as Partial<Order> : null,
+                timestamp: new Date()
+              });
+              toast({
+                title: "New Order",
+                description: `Order #${orderId ? String(orderId).slice(0, 8) : 'Unknown'} has been created`,
+              });
+            } else if (payload.eventType === 'UPDATE') {
+              setLastUpdate({
+                type: 'UPDATE',
+                order: newRecord ? newRecord as Partial<Order> : null,
+                timestamp: new Date()
+              });
+            } else if (payload.eventType === 'DELETE') {
+              setLastUpdate({
+                type: 'DELETE',
+                order: oldRecord ? oldRecord as Partial<Order> : null,
+                timestamp: new Date()
+              });
+            }
+            
+            // Invalidate the orders query to trigger a refetch
+            queryClient.invalidateQueries({ queryKey: ['orders'] });
+          })
+        .subscribe((status) => {
+          console.log('Subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            console.log('Successfully subscribed to realtime updates');
+            setIsConnected(true);
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('Channel error, will attempt reconnect');
+            setIsConnected(false);
+            setTimeout(attemptReconnect, 5000);
+          } else if (status === 'TIMED_OUT') {
+            console.error('Connection timed out, will attempt reconnect');
+            setIsConnected(false);
+            setTimeout(attemptReconnect, 5000);
+          } else {
+            setIsConnected(status === 'SUBSCRIBED');
           }
-          
-          // Invalidate the orders query to trigger a refetch
-          queryClient.invalidateQueries({ queryKey: ['orders'] });
-        })
-      .subscribe((status) => {
-        console.log('Subscription status:', status);
-        // Update connection status based on subscription status
-        setIsConnected(status === 'SUBSCRIBED');
-      });
+        });
 
-    // Perform a test query to verify the subscription is working
+      return channel;
+    };
+    
+    // Initial setup
+    const channel = setupSubscription();
+    
+    // Perform a test query to verify the connection
     const checkConnection = async () => {
       try {
         const { data, error } = await supabase
@@ -74,21 +105,17 @@ export const useOrderRealtime = () => {
         
         if (error) {
           console.error('Error checking connection:', error);
-          setIsConnected(false);
         } else {
           console.log('Database connection successful');
-          // The connection is established but we'll let the subscription
-          // callback handle the actual realtime connection status
         }
       } catch (err) {
         console.error('Failed to check connection:', err);
-        setIsConnected(false);
       }
     };
     
     checkConnection();
-    console.log('Subscribed to real-time updates for orders table');
-
+    
+    // Cleanup function
     return () => {
       console.log('Cleaning up real-time subscription');
       supabase.removeChannel(channel);

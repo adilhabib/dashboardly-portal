@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,23 +44,44 @@ const OrderList = () => {
   }, [orders, isError, error]);
 
   useEffect(() => {
+    // Initial data load
     refetch();
 
-    const checkSupabase = async () => {
+    // Connection status check
+    const checkSupabaseConnection = async () => {
       try {
+        console.log('Checking Supabase connection...');
         const { data, error } = await supabase.from('orders').select('count(*)', { count: 'exact', head: true });
+        
         if (error) {
           console.error('Supabase connection check error:', error);
+          toast({
+            title: "Connection Error",
+            description: "Unable to connect to the database. Please refresh the page.",
+            variant: "destructive"
+          });
         } else {
-          console.log('Supabase connection successful, count result:', data);
+          console.log('Supabase connection successful');
         }
       } catch (err) {
         console.error('Failed to check Supabase connection:', err);
       }
     };
 
-    checkSupabase();
-  }, [refetch]);
+    checkSupabaseConnection();
+    
+    // Set up periodic connection checks
+    const connectionCheckInterval = setInterval(() => {
+      if (!isConnected) {
+        console.log('Periodic connection check: Realtime is disconnected');
+        checkSupabaseConnection();
+      }
+    }, 30000); // Check every 30 seconds if disconnected
+
+    return () => {
+      clearInterval(connectionCheckInterval);
+    };
+  }, [refetch, isConnected]);
 
   const handleRefreshOrders = async () => {
     setIsRefreshing(true);
@@ -79,6 +101,19 @@ const OrderList = () => {
     } finally {
       setIsRefreshing(false);
     }
+  };
+
+  // Connection recovery handler
+  const handleReconnect = async () => {
+    toast({
+      title: "Reconnecting...",
+      description: "Attempting to reconnect to realtime updates"
+    });
+    
+    // Force a refresh of the component
+    refetch();
+    
+    // We'll let the useOrderRealtime hook handle the actual reconnection
   };
 
   const filteredOrders = React.useMemo(() => {
@@ -133,9 +168,13 @@ const OrderList = () => {
                       <span>Realtime Connected</span>
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="bg-amber-50 text-amber-600 flex items-center gap-1 py-1">
+                    <Badge 
+                      variant="outline" 
+                      className="bg-amber-50 text-amber-600 flex items-center gap-1 py-1 cursor-pointer hover:bg-amber-100"
+                      onClick={handleReconnect}
+                    >
                       <WifiOff size={14} className="text-amber-600" />
-                      <span>Realtime Disconnected</span>
+                      <span>Realtime Disconnected (click to reconnect)</span>
                     </Badge>
                   )}
                 </div>
