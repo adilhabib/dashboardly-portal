@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { ArrowUp, ArrowDown, Wallet } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface WalletSummaryCardsProps {
   summary: {
@@ -14,15 +15,14 @@ interface WalletSummaryCardsProps {
 }
 
 const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
-  const formatCurrency = (amount: number) => {
-    return `Rs. ${amount.toFixed(2)}`;
-  };
-
   // Default values in case summary is null
   const balance = summary?.balance || 0;
   const totalIncome = summary?.total_income || 0;
   const totalExpenses = summary?.total_expenses || 0;
   const transactionCount = summary?.total_transactions || 0;
+  const lastTransactionDate = summary?.last_transaction_date 
+    ? new Date(summary.last_transaction_date).toLocaleDateString() 
+    : 'No transactions yet';
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -39,6 +39,9 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
               <Wallet className="h-4 w-4 text-primary" />
             </div>
             <span className="text-sm text-gray-600">{transactionCount} transactions</span>
+          </div>
+          <div className="text-xs text-gray-500 mt-2">
+            Last updated: {lastTransactionDate}
           </div>
         </CardContent>
       </Card>
