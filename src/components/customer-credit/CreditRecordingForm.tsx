@@ -80,16 +80,16 @@ const CreditRecordingForm = () => {
       
       if (transactionError) throw transactionError;
       
-      // Update customer loyalty points in the customer table
-      const { error: customerError } = await supabase
-        .from('customer')
-        .update({ loyalty_points: supabase.rpc('increment_loyalty_points', { 
+      // First call RPC function to increment loyalty points, then update the customer record
+      const { data: newPoints, error: incrementError } = await supabase.rpc(
+        'increment_loyalty_points', 
+        { 
           customer_id: data.customerId, 
           points_to_add: amount 
-        }) })
-        .eq('id', data.customerId);
+        }
+      );
       
-      if (customerError) throw customerError;
+      if (incrementError) throw incrementError;
       
       toast({
         title: "Credit recorded successfully",
