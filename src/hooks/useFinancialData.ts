@@ -18,6 +18,7 @@ interface FinancialSummary {
   balance: number;
   total_transactions: number;
   last_transaction_date: string;
+  total_credits: number;
 }
 
 export const useFinancialData = () => {
@@ -37,6 +38,21 @@ export const useFinancialData = () => {
     }
   });
 
+  // Calculate total customer credits
+  const { data: totalCredits, isLoading: isLoadingCredits } = useQuery({
+    queryKey: ['customer-credits-sum'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .select('amount')
+        .eq('type', 'income')
+        .like('description', '%Credit from customer%');
+        
+      if (error) throw error;
+      return data.reduce((sum, transaction) => sum + transaction.amount, 0) || 0;
+    }
+  });
+
   const { data: summary, isLoading: isLoadingSummary } = useQuery({
     queryKey: ['financial_summary'],
     queryFn: async () => {
@@ -46,8 +62,18 @@ export const useFinancialData = () => {
         .single();
 
       if (error) throw error;
-      return data as FinancialSummary;
-    }
+      
+      // Add total credits to the summary
+      const summaryWithCredits = {
+        ...data,
+        total_credits: totalCredits || 0,
+        // Adjust balance by subtracting credits
+        balance: (data.balance || 0) - (totalCredits || 0)
+      } as FinancialSummary;
+      
+      return summaryWithCredits;
+    },
+    enabled: !isLoadingCredits,
   });
 
   const addTransaction = useMutation({
@@ -65,6 +91,7 @@ export const useFinancialData = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['financial_summary'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-credits-sum'] });
       toast({
         title: "Transaction recorded",
         description: "Your transaction has been successfully recorded.",
@@ -83,7 +110,7 @@ export const useFinancialData = () => {
   return {
     transactions,
     summary,
-    isLoading: isLoadingTransactions || isLoadingSummary,
+    isLoading: isLoadingTransactions || isLoadingSummary || isLoadingCredits,
     addTransaction
   };
 };

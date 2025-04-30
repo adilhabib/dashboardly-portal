@@ -10,6 +10,7 @@ import WalletSummaryCards from '@/components/wallet/WalletSummaryCards';
 import TransactionDialog from '@/components/wallet/TransactionDialog';
 import TransactionList from '@/components/wallet/TransactionList';
 import FinancialChart from '@/components/wallet/FinancialChart';
+import WalletCreditSummaryCard from '@/components/wallet/WalletCreditSummaryCard';
 
 const Wallet = () => {
   const { transactions, summary, isLoading, addTransaction } = useFinancialData();
@@ -94,6 +95,12 @@ const Wallet = () => {
             isPending={addTransaction.isPending}
           />
         </Dialog>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="md:col-span-2">
+          <WalletCreditSummaryCard />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

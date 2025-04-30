@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { ArrowUp, ArrowDown, Wallet } from 'lucide-react';
+import { ArrowUp, ArrowDown, Wallet, CreditCard } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 interface WalletSummaryCardsProps {
@@ -10,6 +10,7 @@ interface WalletSummaryCardsProps {
     total_income: number;
     total_expenses: number;
     total_transactions: number;
+    total_credits?: number;
     last_transaction_date: string;
   } | null;
 }
@@ -19,10 +20,14 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
   const balance = summary?.balance || 0;
   const totalIncome = summary?.total_income || 0;
   const totalExpenses = summary?.total_expenses || 0;
+  const totalCredits = summary?.total_credits || 0;
   const transactionCount = summary?.total_transactions || 0;
   const lastTransactionDate = summary?.last_transaction_date 
     ? new Date(summary.last_transaction_date).toLocaleDateString() 
     : 'No transactions yet';
+
+  // Adjusted balance after subtracting credits
+  const adjustedBalance = balance - totalCredits;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -30,7 +35,7 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
         <CardHeader className="pb-2">
           <CardDescription>Current Balance</CardDescription>
           <CardTitle className="text-3xl font-bold">
-            {formatCurrency(balance)}
+            {formatCurrency(adjustedBalance)}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -43,6 +48,12 @@ const WalletSummaryCards: React.FC<WalletSummaryCardsProps> = ({ summary }) => {
           <div className="text-xs text-gray-500 mt-2">
             Last updated: {lastTransactionDate}
           </div>
+          {totalCredits > 0 && (
+            <div className="flex items-center mt-2 text-xs text-purple-600">
+              <CreditCard className="h-3 w-3 mr-1" />
+              <span>{formatCurrency(totalCredits)} in customer credits deducted</span>
+            </div>
+          )}
         </CardContent>
       </Card>
 

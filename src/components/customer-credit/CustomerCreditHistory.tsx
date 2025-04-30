@@ -50,6 +50,7 @@ const CustomerCreditHistory = () => {
         .from('financial_transactions')
         .select('*')
         .eq('type', 'income')
+        .like('description', '%Credit from customer%')
         .order('created_at', { ascending: false })
         .limit(50);
         
@@ -58,6 +59,8 @@ const CustomerCreditHistory = () => {
     },
     enabled: !!selectedCustomerId,
   });
+
+  const totalCredit = transactions?.reduce((sum, transaction) => sum + transaction.amount, 0) || 0;
   
   const handleCustomerChange = (customerId: string) => {
     setSelectedCustomerId(customerId);
@@ -83,6 +86,13 @@ const CustomerCreditHistory = () => {
           </SelectContent>
         </Select>
       </div>
+
+      {selectedCustomerId && (
+        <div className="mb-4 p-4 bg-purple-50 rounded-md border border-purple-100">
+          <h3 className="text-lg font-medium text-purple-800">Total Credit</h3>
+          <p className="text-2xl font-bold text-purple-700">{formatCurrency(totalCredit)}</p>
+        </div>
+      )}
       
       {isLoadingTransactions ? (
         <div className="flex justify-center py-8">
