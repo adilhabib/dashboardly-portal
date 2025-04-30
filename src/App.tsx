@@ -24,6 +24,7 @@ import Categories from "./pages/Categories";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import CustomerCredit from "./pages/CustomerCredit";
+import Banners from "./pages/Banners";
 
 const App = () => (
   <TooltipProvider>
@@ -173,6 +174,16 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Profile />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/banners" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Banners />
                   </Layout>
                 </ProtectedRoute>
               } 

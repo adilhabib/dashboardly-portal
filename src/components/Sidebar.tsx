@@ -1,4 +1,3 @@
-
 import { FC } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -14,7 +13,8 @@ import {
   Tag,
   Bell,
   UserCircle,
-  CreditCard
+  CreditCard,
+  Banner
 } from 'lucide-react';
 import { useNotifications } from '@/contexts/NotificationContext';
 
@@ -33,6 +33,7 @@ const Sidebar: FC = () => {
     { path: '/reviews', icon: <MessageSquare size={18} />, label: 'Reviews' },
     { path: '/foods', icon: <Pizza size={18} />, label: 'Foods' },
     { path: '/categories', icon: <Tag size={18} />, label: 'Categories' },
+    { path: '/banners', icon: <Banner size={18} />, label: 'Banners' },
     { path: '/food-detail', icon: <FileText size={18} />, label: 'Food Detail' },
     { path: '/customer-detail', icon: <User size={18} />, label: 'Customer Detail' },
     { path: '/notifications', icon: <Bell size={18} />, label: 'Notifications', badge: notificationState.unreadCount },
