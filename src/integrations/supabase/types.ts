@@ -42,6 +42,33 @@ export type Database = {
         }
         Relationships: []
       }
+      banners: {
+        Row: {
+          created_at: string | null
+          id: number
+          image_url: string
+          is_active: boolean
+          target_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          image_url: string
+          is_active?: boolean
+          target_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          image_url?: string
+          is_active?: boolean
+          target_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
