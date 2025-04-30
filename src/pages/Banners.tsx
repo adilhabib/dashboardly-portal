@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Banner } from 'lucide-react';
+import { ImageIcon } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -119,17 +118,14 @@ const Banners = () => {
     <div className="p-4 md:p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <PageBreadcrumb items={[
-            { label: 'Dashboard', link: '/' },
-            { label: 'Banners', link: '/banners' }
-          ]} />
+          <PageBreadcrumb pageName="Banners" />
           <h1 className="text-2xl font-bold mt-2">Banner Management</h1>
         </div>
         <Button 
           onClick={() => setIsModalOpen(true)} 
           className="flex items-center gap-2"
         >
-          <Banner size={16} />
+          <ImageIcon size={16} />
           Add New Banner
         </Button>
       </div>
@@ -158,7 +154,7 @@ const Banners = () => {
             ))
           ) : (
             <div className="col-span-full flex flex-col items-center justify-center py-16 bg-gray-50 rounded-lg">
-              <Banner size={48} className="text-gray-300 mb-4" />
+              <ImageIcon size={48} className="text-gray-300 mb-4" />
               <h3 className="text-xl font-medium text-gray-600 mb-2">No Banners Found</h3>
               <p className="text-gray-500 mb-4 text-center">Start by creating a new promotional banner.</p>
               <Button onClick={() => setIsModalOpen(true)}>Add First Banner</Button>

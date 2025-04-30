@@ -1,4 +1,3 @@
-
 import { FC, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { Banner, ImageIcon } from 'lucide-react';
+import { ImageIcon } from 'lucide-react';
 
 interface BannerModalProps {
   isOpen: boolean;
@@ -117,7 +116,7 @@ const BannerModal: FC<BannerModalProps> = ({ isOpen, onClose, banner }) => {
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Banner className="h-5 w-5" />
+            <ImageIcon className="h-5 w-5" />
             {banner ? 'Edit Banner' : 'Add New Banner'}
           </DialogTitle>
           <DialogDescription>
