@@ -5,7 +5,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
-import { ProfileCard, OrderHistoryCard, SummaryCard } from '@/components/customer-detail';
+import { ProfileCard, OrderHistoryCard, SummaryCard, CreditSummaryCard } from '@/components/customer-detail';
 import { fetchCustomerDetail } from '@/services/customerService';
 
 const CustomerDetail = () => {
@@ -57,6 +57,7 @@ const CustomerDetail = () => {
         
         <div>
           <SummaryCard customer={customer} orders={orders} />
+          <CreditSummaryCard customer={customer} />
         </div>
       </div>
     </>

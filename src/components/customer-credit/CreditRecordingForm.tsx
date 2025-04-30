@@ -80,15 +80,13 @@ const CreditRecordingForm = () => {
       
       if (transactionError) throw transactionError;
       
-      // Update customer credit in the customer table
+      // Update customer loyalty points in the customer table
       const { error: customerError } = await supabase
         .from('customer')
-        .update({ 
-          loyalty_points: supabase.rpc('increment_loyalty_points', { 
-            customer_id: data.customerId, 
-            points_to_add: amount 
-          })
-        })
+        .update({ loyalty_points: supabase.rpc('increment_loyalty_points', { 
+          customer_id: data.customerId, 
+          points_to_add: amount 
+        }) })
         .eq('id', data.customerId);
       
       if (customerError) throw customerError;

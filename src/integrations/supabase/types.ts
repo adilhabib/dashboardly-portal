@@ -629,6 +629,10 @@ export type Database = {
         Args: { requested_role: string }
         Returns: boolean
       }
+      increment_loyalty_points: {
+        Args: { customer_id: string; points_to_add: number }
+        Returns: number
+      }
       make_user_admin: {
         Args: { email: string }
         Returns: undefined
