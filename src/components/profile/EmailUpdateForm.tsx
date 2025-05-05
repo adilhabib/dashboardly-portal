@@ -78,7 +78,9 @@ const EmailUpdateForm: React.FC<EmailUpdateFormProps> = ({ currentEmail }) => {
         email: data.newEmail,
       });
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        throw updateError;
+      }
 
       toast({
         title: "Verification email sent",
@@ -87,6 +89,7 @@ const EmailUpdateForm: React.FC<EmailUpdateFormProps> = ({ currentEmail }) => {
       
       form.reset();
     } catch (error: any) {
+      console.error("Email update error:", error);
       toast({
         title: "Error updating email",
         description: error.message || "An unexpected error occurred",
@@ -113,6 +116,7 @@ const EmailUpdateForm: React.FC<EmailUpdateFormProps> = ({ currentEmail }) => {
                     className="pl-10" 
                     placeholder="Enter your new email address" 
                     {...field} 
+                    type="email"
                   />
                 </div>
               </FormControl>
