@@ -6,6 +6,7 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import ProfileForm from "@/components/profile/ProfileForm";
 import PasswordUpdateForm from "@/components/profile/PasswordUpdateForm";
+import EmailUpdateForm from "@/components/profile/EmailUpdateForm";
 import { useProfileData } from "@/hooks/useProfileData";
 
 const Profile = () => {
@@ -31,6 +32,16 @@ const Profile = () => {
                   userId={user.id}
                   userEmail={user.email || ''}
                 />}
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Email Address</CardTitle>
+                <CardDescription>Update your email address</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <EmailUpdateForm currentEmail={user?.email} />
               </CardContent>
             </Card>
             
