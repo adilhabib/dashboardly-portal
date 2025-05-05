@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,13 +13,14 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
-  const [email, setEmail] = useState('test@test.com'); // Pre-filled for testing
-  const [password, setPassword] = useState('123456789'); // Pre-filled for testing
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResetSubmitting, setIsResetSubmitting] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
   const [adminError, setAdminError] = useState('');
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState('signin');
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -97,11 +99,37 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Notice",
-      description: "Sign-up is disabled in the admin panel. Please contact your administrator.",
-      variant: "destructive",
-    });
+    if (!email || !password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const { error, data } = await signUp(email, password);
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Account created successfully. Please sign in.",
+      });
+      
+      // Automatically switch to sign in tab after successful signup
+      setActiveTab('signin');
+    } catch (error: any) {
+      toast({
+        title: "Error signing up",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -149,9 +177,10 @@ const Auth = () => {
             Sign in to manage your restaurant
           </CardDescription>
         </CardHeader>
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-1">
-            <TabsTrigger value="signin">Admin Sign In</TabsTrigger>
+        <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
           <TabsContent value="signin">
             {adminError && (
@@ -241,6 +270,45 @@ const Auth = () => {
                 </CardFooter>
               </form>
             )}
+          </TabsContent>
+          <TabsContent value="signup">
+            <form onSubmit={handleSignUp}>
+              <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input 
+                    id="signup-email" 
+                    type="email" 
+                    placeholder="Enter your email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password</Label>
+                  <Input 
+                    id="signup-password" 
+                    type="password" 
+                    placeholder="Choose a strong password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Password must be at least 8 characters
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : "Create Account"}
+                </Button>
+              </CardFooter>
+            </form>
           </TabsContent>
         </Tabs>
       </Card>
