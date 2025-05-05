@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,8 +15,10 @@ const Auth = () => {
   const [email, setEmail] = useState('test@test.com'); // Pre-filled for testing
   const [password, setPassword] = useState('123456789'); // Pre-filled for testing
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResetSubmitting, setIsResetSubmitting] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
   const [adminError, setAdminError] = useState('');
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -103,6 +104,42 @@ const Auth = () => {
     });
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsResetSubmitting(true);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Password reset email sent",
+        description: "Check your inbox for the password reset link",
+      });
+      setShowResetPassword(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset password email",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResetSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
@@ -122,40 +159,88 @@ const Auth = () => {
                 <AlertDescription>{adminError}</AlertDescription>
               </Alert>
             )}
-            <form onSubmit={handleSignIn}>
-              <CardContent className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="Enter your email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    placeholder="Enter your password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" className="w-full" disabled={isSubmitting || isCheckingAdmin}>
-                  {(isSubmitting || isCheckingAdmin) ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : "Sign In"}
-                </Button>
-              </CardFooter>
-            </form>
+            {!showResetPassword ? (
+              <form onSubmit={handleSignIn}>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="Enter your email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="Enter your password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <div className="text-right">
+                    <Button 
+                      type="button" 
+                      variant="link" 
+                      className="p-0 h-auto font-normal text-sm"
+                      onClick={() => setShowResetPassword(true)}
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button type="submit" className="w-full" disabled={isSubmitting || isCheckingAdmin}>
+                    {(isSubmitting || isCheckingAdmin) ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : "Sign In"}
+                  </Button>
+                </CardFooter>
+              </form>
+            ) : (
+              <form onSubmit={handleResetPassword}>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="reset-email">Email</Label>
+                    <Input 
+                      id="reset-email" 
+                      type="email" 
+                      placeholder="Enter your email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <p className="text-sm text-muted-foreground mt-2">
+                      We'll send you a link to reset your password.
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-2">
+                  <Button type="submit" className="w-full" disabled={isResetSubmitting}>
+                    {isResetSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : "Send Reset Link"}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setShowResetPassword(false)}
+                  >
+                    Back to Sign In
+                  </Button>
+                </CardFooter>
+              </form>
+            )}
           </TabsContent>
         </Tabs>
       </Card>
