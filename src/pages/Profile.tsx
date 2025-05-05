@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import ProfileForm from "@/components/profile/ProfileForm";
+import PasswordUpdateForm from "@/components/profile/PasswordUpdateForm";
 import { useProfileData } from "@/hooks/useProfileData";
 
 const Profile = () => {
@@ -30,6 +31,16 @@ const Profile = () => {
                   userId={user.id}
                   userEmail={user.email || ''}
                 />}
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Security</CardTitle>
+                <CardDescription>Update your password</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PasswordUpdateForm userEmail={user?.email} />
               </CardContent>
             </Card>
           </div>
