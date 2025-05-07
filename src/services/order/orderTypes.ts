@@ -8,6 +8,27 @@ export interface FoodItem {
   image_url: string | null;
 }
 
+export interface SizeOption {
+  id: string;
+  name: string;
+  price: number;
+  food_id?: string;
+  is_default: boolean;
+  display_order?: number;
+  nutritional_info?: string | null;
+}
+
+export interface ProductData {
+  id: string;
+  name: string;
+  price: number;
+  sizes?: SizeOption[];
+  image_url?: string | null;
+  category?: string;
+  description?: string;
+  [key: string]: any;
+}
+
 export interface OrderItem {
   id: string;
   order_id: string;
@@ -19,7 +40,7 @@ export interface OrderItem {
   special_instructions?: string | null;
   created_at?: string;
   product_id?: string;
-  product_data?: Record<string, any> | null;
+  product_data?: ProductData | null;
 }
 
 export interface CustomerDetails {
