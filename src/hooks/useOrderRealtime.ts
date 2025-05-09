@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from '@/services/order';
 import { toast } from '@/hooks/use-toast';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { RealtimeChannel, REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js';
 
 export const useOrderRealtime = () => {
   const queryClient = useQueryClient();
@@ -77,25 +78,20 @@ export const useOrderRealtime = () => {
           .subscribe((status) => {
             console.log('Subscription status:', status);
             
-            // Handle status with type safety
-            switch (status) {
-              case 'SUBSCRIBED':
-                console.log('Successfully subscribed to realtime updates');
-                setIsConnected(true);
-                break;
-              case 'CHANNEL_ERROR':
-                console.error('Channel error, will attempt reconnect');
-                setIsConnected(false);
-                setTimeout(attemptReconnect, 5000);
-                break;
-              case 'TIMED_OUT':
-                console.error('Connection timed out, will attempt reconnect');
-                setIsConnected(false);
-                setTimeout(attemptReconnect, 5000);
-                break;
-              default:
-                setIsConnected(status === 'SUBSCRIBED');
-                break;
+            // Handle status with type safety - Fix the TypeScript error by using string comparison
+            if (status === 'SUBSCRIBED') {
+              console.log('Successfully subscribed to realtime updates');
+              setIsConnected(true);
+            } else if (status === 'CHANNEL_ERROR') {
+              console.error('Channel error, will attempt reconnect');
+              setIsConnected(false);
+              setTimeout(attemptReconnect, 5000);
+            } else if (status === 'TIMED_OUT') {
+              console.error('Connection timed out, will attempt reconnect');
+              setIsConnected(false);
+              setTimeout(attemptReconnect, 5000);
+            } else {
+              setIsConnected(status === 'SUBSCRIBED');
             }
           });
 
@@ -113,6 +109,7 @@ export const useOrderRealtime = () => {
     // Perform a test query to verify the connection
     const checkConnection = async () => {
       try {
+        console.log('Checking Supabase connection...');
         const { data, error } = await supabase
           .from('orders')
           .select('count(*)', { count: 'exact', head: true });
@@ -121,7 +118,7 @@ export const useOrderRealtime = () => {
           console.error('Error checking connection:', error);
           toast({
             title: "Connection Error",
-            description: "Unable to connect to the database. Retrying in background...",
+            description: `Unable to connect to the database: ${error.message}`,
             variant: "destructive"
           });
           setTimeout(checkConnection, 10000); // Retry after 10 seconds
@@ -130,6 +127,7 @@ export const useOrderRealtime = () => {
           setIsConnected(true);
         }
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown connection error';
         console.error('Failed to check connection:', err);
         setTimeout(checkConnection, 10000); // Retry after 10 seconds
       }

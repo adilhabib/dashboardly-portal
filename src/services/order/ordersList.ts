@@ -11,7 +11,20 @@ export const fetchOrders = async () => {
   console.log('Fetching orders...');
   
   try {
-    // First check the connection to Supabase
+    // First check the connection to Supabase and authentication status
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    
+    if (authError) {
+      console.error('Authentication error in fetchOrders:', authError);
+      throw new Error(`Authentication error: ${authError.message}`);
+    }
+    
+    if (!authData || !authData.user) {
+      console.error('No authenticated user found');
+      throw new Error('Authentication required: Please log in to access orders');
+    }
+    
+    // Then check the connection to the database
     const connectionCheck = await supabase.from('orders').select('id', { count: 'exact', head: true });
     
     if (connectionCheck.error) {
@@ -66,7 +79,17 @@ export const fetchOrders = async () => {
     return ordersWithCustomers;
   } catch (error) {
     console.error('Unexpected error in fetchOrders:', error);
-    // Re-throw the error to allow proper handling at the component level
-    throw error;
+    // Re-throw the error with a more specific message depending on the type of error
+    if (error instanceof Error) {
+      if (error.message.includes('Authentication')) {
+        throw new Error(`Authentication error: ${error.message}`);
+      } else if (error.message.includes('connection')) {
+        throw new Error(`Connection error: ${error.message}`);
+      } else {
+        throw error; // Re-throw the original error
+      }
+    } else {
+      throw new Error('Unknown error occurred while fetching orders');
+    }
   }
 };
