@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client'; 
-import { RealtimeChannel, REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client'; // Restore original import
+import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'; // Import enum
 import { Order } from '@/services/order';
 import { toast } from '@/hooks/use-toast';
 
@@ -74,21 +73,19 @@ export const useOrderRealtime = () => {
           )
           .subscribe((status) => {
             console.log('Subscription status:', status);
-            
-            // Fix the comparison to use proper string values instead of enum comparisons
-            if (status === 'SUBSCRIBED') {
+            if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
               console.log('Successfully subscribed to realtime updates');
               setIsConnected(true);
-            } else if (status === 'CHANNEL_ERROR') {
+            } else if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
               console.error('Channel error, will attempt reconnect');
               setIsConnected(false);
               setTimeout(attemptReconnect, 5000);
-            } else if (status === 'TIMED_OUT') {
+            } else if (status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT) {
               console.error('Connection timed out, will attempt reconnect');
               setIsConnected(false);
               setTimeout(attemptReconnect, 5000);
             } else {
-              setIsConnected(status === 'SUBSCRIBED');
+              setIsConnected(status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED);
             }
           });
 
@@ -105,7 +102,7 @@ export const useOrderRealtime = () => {
     const checkConnection = async () => {
       try {
         const { data, error } = await supabase
-          .from('orders')
+          .from('orders') // Fixed typo from '-orders'
           .select('count(*)', { count: 'exact', head: true });
 
         if (error) {
