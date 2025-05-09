@@ -20,6 +20,7 @@ const OrderList = () => {
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilterType>('all');
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
   
   const { addNotification } = useNotifications();
   const { isConnected, lastUpdate } = useOrderRealtime();
@@ -34,6 +35,14 @@ const OrderList = () => {
     queryFn: fetchOrders,
     staleTime: 1000 * 60,
     retry: 3,
+    onError: (err) => {
+      console.error('Error fetching orders:', err);
+      toast({
+        title: "Error Loading Orders",
+        description: "Could not load orders. Please try refreshing.",
+        variant: "destructive"
+      });
+    }
   });
 
   useEffect(() => {
@@ -55,16 +64,24 @@ const OrderList = () => {
         
         if (error) {
           console.error('Supabase connection check error:', error);
+          setConnectionAttempts(prev => prev + 1);
+          
           toast({
             title: "Connection Error",
             description: "Unable to connect to the database. Please refresh the page.",
             variant: "destructive"
           });
+          
+          // If we've tried more than 3 times, wait longer before trying again
+          const waitTime = connectionAttempts > 3 ? 30000 : 10000;
+          setTimeout(checkSupabaseConnection, waitTime);
         } else {
           console.log('Supabase connection successful');
+          setConnectionAttempts(0);
         }
       } catch (err) {
         console.error('Failed to check Supabase connection:', err);
+        setTimeout(checkSupabaseConnection, 10000);
       }
     };
 
@@ -81,7 +98,7 @@ const OrderList = () => {
     return () => {
       clearInterval(connectionCheckInterval);
     };
-  }, [refetch, isConnected]);
+  }, [refetch, isConnected, connectionAttempts]);
 
   const handleRefreshOrders = async () => {
     setIsRefreshing(true);
@@ -112,8 +129,31 @@ const OrderList = () => {
     
     // Force a refresh of the component
     refetch();
+    setConnectionAttempts(0);
     
-    // We'll let the useOrderRealtime hook handle the actual reconnection
+    try {
+      // Test connection with a simple query
+      const { error } = await supabase
+        .from('orders')
+        .select('count(*)', { count: 'exact', head: true });
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Successful connection
+      toast({
+        title: "Connected",
+        description: "Successfully reconnected to the database"
+      });
+    } catch (err) {
+      console.error('Reconnection failed:', err);
+      toast({
+        title: "Reconnection Failed",
+        description: "Could not reconnect. Will retry automatically.",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredOrders = React.useMemo(() => {

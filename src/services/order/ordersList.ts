@@ -48,8 +48,14 @@ export const fetchOrders = async () => {
             : order.delivery_address as unknown as Record<string, any> | null
         };
         
-        const customer = formattedOrder.customer_id ? 
-          await fetchCustomerData(formattedOrder.customer_id) : null;
+        let customer = null;
+        try {
+          if (formattedOrder.customer_id) {
+            customer = await fetchCustomerData(formattedOrder.customer_id);
+          }
+        } catch (customerError) {
+          console.error(`Error fetching customer for order ${order.id}:`, customerError);
+        }
         
         return { ...formattedOrder, customer };
       })
@@ -58,6 +64,6 @@ export const fetchOrders = async () => {
     return ordersWithCustomers;
   } catch (error) {
     console.error('Unexpected error in fetchOrders:', error);
-    return [];
+    throw error; // Re-throw the error so it can be caught by the React Query hook
   }
 };
