@@ -43,6 +43,21 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
           console.error('Error setting payment status to paid:', err);
         }
       }
+      
+      // If status is set to cancelled, also set payment_status to 'cancelled'
+      if (newStatus === 'cancelled') {
+        try {
+          await updatePaymentStatus(orderId, 'cancelled');
+          console.log('Payment status set to cancelled for rejected order');
+        } catch (err) {
+          toast({
+            title: "Payment Update Failed",
+            description: "Order cancelled, but failed to cancel payment. Please check manually.",
+            variant: "destructive"
+          });
+          console.error('Error setting payment status to cancelled:', err);
+        }
+      }
 
       toast({
         title: "Order Status Updated",
@@ -163,4 +178,3 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
 };
 
 export default OrderActions;
-

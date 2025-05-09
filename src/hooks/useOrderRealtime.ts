@@ -75,7 +75,7 @@ export const useOrderRealtime = () => {
             })
           .subscribe((status) => {
             console.log('Subscription status:', status);
-            // Use string literals for status comparison instead of enum
+            
             if (status === 'SUBSCRIBED') {
               console.log('Successfully subscribed to realtime updates');
               setIsConnected(true);
