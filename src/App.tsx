@@ -28,10 +28,10 @@ import Banners from "./pages/Banners";
 
 const App = () => (
   <TooltipProvider>
-    <Toaster />
-    <Sonner />
     <BrowserRouter>
       <AuthProvider>
+        <Toaster />
+        <Sonner />
         <NotificationProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />

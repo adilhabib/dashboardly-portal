@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { Loader2 } from 'lucide-react';
@@ -12,8 +12,16 @@ type ProtectedRouteProps = {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, isLoading: authLoading } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useAdmin();
+  const navigate = useNavigate();
   
   const isLoading = authLoading || adminLoading;
+
+  useEffect(() => {
+    // Handle case where admin status changes while on page
+    if (!isLoading && !isAdmin && user) {
+      navigate('/unauthorized');
+    }
+  }, [isAdmin, isLoading, user, navigate]);
 
   if (isLoading) {
     return (
