@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase, REALTIME_SUBSCRIBE_STATES } from '@/integrations/supabase/client'; // Import REALTIME_SUBSCRIBE_STATES
+import { supabase, REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js'; // Import REALTIME_SUBSCRIBE_STATES
 import { Order } from '@/services/order';
 import { toast } from '@/hooks/use-toast';
 
