@@ -35,13 +35,15 @@ const OrderList = () => {
     queryFn: fetchOrders,
     staleTime: 1000 * 60,
     retry: 3,
-    onError: (err) => {
-      console.error('Error fetching orders:', err);
-      toast({
-        title: "Error Loading Orders",
-        description: "Could not load orders. Please try refreshing.",
-        variant: "destructive"
-      });
+    meta: {
+      onError: (err: any) => {
+        console.error('Error fetching orders:', err);
+        toast({
+          title: "Error Loading Orders",
+          description: "Could not load orders. Please try refreshing.",
+          variant: "destructive"
+        });
+      }
     }
   });
 
@@ -80,7 +82,7 @@ const OrderList = () => {
           setConnectionAttempts(0);
         }
       } catch (err) {
-        console.error('Failed to check Supabase connection:', err);
+        console.error('Failed to check connection:', err);
         setTimeout(checkSupabaseConnection, 10000);
       }
     };

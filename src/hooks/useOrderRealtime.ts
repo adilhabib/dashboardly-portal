@@ -88,7 +88,7 @@ export const useOrderRealtime = () => {
               setIsConnected(false);
               setTimeout(attemptReconnect, 5000);
             } else {
-              // Use string literals for status comparison
+              // Use string comparison instead of using REALTIME_SUBSCRIBE_STATES enum
               setIsConnected(status === 'SUBSCRIBED');
             }
           });
