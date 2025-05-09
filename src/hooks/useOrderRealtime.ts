@@ -1,7 +1,6 @@
-
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase, REALTIME_SUBSCRIBE_STATES } from '@/integrations/supabase/client';
+import { supabase, REALTIME_SUBSCRIBE_STATES } from '@/integrations/supabase/client'; // Import REALTIME_SUBSCRIBE_STATES
 import { Order } from '@/services/order';
 import { toast } from '@/hooks/use-toast';
 
@@ -73,7 +72,7 @@ export const useOrderRealtime = () => {
           )
           .subscribe((status) => {
             console.log('Subscription status:', status);
-            
+            // Compare with enum values instead of string literals
             if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
               console.log('Successfully subscribed to realtime updates');
               setIsConnected(true);
