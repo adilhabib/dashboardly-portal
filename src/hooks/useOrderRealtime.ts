@@ -1,10 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from '@/services/order';
 import { toast } from '@/hooks/use-toast';
-import { REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export const useOrderRealtime = () => {
   const queryClient = useQueryClient();
@@ -21,6 +20,7 @@ export const useOrderRealtime = () => {
 
   useEffect(() => {
     console.log('Setting up real-time subscription for orders table');
+    let channel: RealtimeChannel | null = null;
 
     // Handle reconnection
     const attemptReconnect = () => {
@@ -32,7 +32,7 @@ export const useOrderRealtime = () => {
     // Setup the subscription
     const setupSubscription = () => {
       try {
-        const channel = supabase
+        channel = supabase
           .channel('public:orders')
           .on('postgres_changes', 
             { event: '*', schema: 'public', table: 'orders' }, 
@@ -77,20 +77,25 @@ export const useOrderRealtime = () => {
           .subscribe((status) => {
             console.log('Subscription status:', status);
             
-            // Fix: Use string literals for status comparison instead of enum values
-            if (status === 'SUBSCRIBED') {
-              console.log('Successfully subscribed to realtime updates');
-              setIsConnected(true);
-            } else if (status === 'CHANNEL_ERROR') {
-              console.error('Channel error, will attempt reconnect');
-              setIsConnected(false);
-              setTimeout(attemptReconnect, 5000);
-            } else if (status === 'TIMED_OUT') {
-              console.error('Connection timed out, will attempt reconnect');
-              setIsConnected(false);
-              setTimeout(attemptReconnect, 5000);
-            } else {
-              setIsConnected(status === 'SUBSCRIBED');
+            // Handle status with type safety
+            switch (status) {
+              case 'SUBSCRIBED':
+                console.log('Successfully subscribed to realtime updates');
+                setIsConnected(true);
+                break;
+              case 'CHANNEL_ERROR':
+                console.error('Channel error, will attempt reconnect');
+                setIsConnected(false);
+                setTimeout(attemptReconnect, 5000);
+                break;
+              case 'TIMED_OUT':
+                console.error('Connection timed out, will attempt reconnect');
+                setIsConnected(false);
+                setTimeout(attemptReconnect, 5000);
+                break;
+              default:
+                setIsConnected(status === 'SUBSCRIBED');
+                break;
             }
           });
 
@@ -103,7 +108,7 @@ export const useOrderRealtime = () => {
     };
 
     // Initial setup
-    const channel = setupSubscription();
+    channel = setupSubscription();
 
     // Perform a test query to verify the connection
     const checkConnection = async () => {
