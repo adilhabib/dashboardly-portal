@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from '@/services/order';
 import { toast } from '@/hooks/use-toast';
+import { REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js';
 
 export const useOrderRealtime = () => {
   const queryClient = useQueryClient();
@@ -87,7 +88,7 @@ export const useOrderRealtime = () => {
               setIsConnected(false);
               setTimeout(attemptReconnect, 5000);
             } else {
-              // Compare with string literals directly instead of using enum
+              // Use string literals for status comparison
               setIsConnected(status === 'SUBSCRIBED');
             }
           });
