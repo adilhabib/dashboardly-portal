@@ -1,10 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, REALTIME_SUBSCRIBE_STATES } from '@/integrations/supabase/client'; // Add REALTIME_SUBSCRIBE_STATES import
 import { Order } from '@/services/order';
 import { toast } from '@/hooks/use-toast';
-import type { RealtimeChannel, REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js';
 
 export const useOrderRealtime = () => {
   const queryClient = useQueryClient();
@@ -16,82 +14,78 @@ export const useOrderRealtime = () => {
   }>({
     type: null,
     order: null,
-    timestamp: null
+    timestamp: null,
   });
 
   useEffect(() => {
     console.log('Setting up real-time subscription for orders table');
-    let channel: RealtimeChannel | null = null;
 
-    // Handle reconnection
     const attemptReconnect = () => {
       console.log('Attempting to reconnect to Supabase realtime');
       setIsConnected(false);
       setupSubscription();
     };
 
-    // Setup the subscription
     const setupSubscription = () => {
       try {
-        channel = supabase
+        const channel = supabase
           .channel('public:orders')
-          .on('postgres_changes', 
-            { event: '*', schema: 'public', table: 'orders' }, 
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'orders' },
             (payload) => {
               console.log('Real-time update received:', payload);
               setIsConnected(true);
-              
-              // Extract basic order details for display
+
               const newRecord = payload.new as Record<string, any> | null;
               const oldRecord = payload.old as Record<string, any> | null;
-              
-              // Safely access the ID
               const orderId = newRecord?.id || oldRecord?.id;
-              
+
               if (payload.eventType === 'INSERT') {
                 setLastUpdate({
                   type: 'INSERT',
-                  order: newRecord ? newRecord as Partial<Order> : null,
-                  timestamp: new Date()
+                  order: newRecord ? (newRecord as Partial<Order>) : null,
+                  timestamp: new Date(),
                 });
                 toast({
-                  title: "New Order",
-                  description: `Order #${orderId ? String(orderId).slice(0, 8) : 'Unknown'} has been created`,
+                  title: 'New Order',
+                  description: `Order #${
+                    orderId ? String(orderId).slice(0, 8) : 'Unknown'
+                  } has been created`,
                 });
               } else if (payload.eventType === 'UPDATE') {
                 setLastUpdate({
                   type: 'UPDATE',
-                  order: newRecord ? newRecord as Partial<Order> : null,
-                  timestamp: new Date()
+                  order: newRecord ? (newRecord as Partial<Order>) : null,
+                  timestamp: new Date(),
                 });
               } else if (payload.eventType === 'DELETE') {
                 setLastUpdate({
                   type: 'DELETE',
-                  order: oldRecord ? oldRecord as Partial<Order> : null,
-                  timestamp: new Date()
+                  order: oldRecord ? (oldRecord as Partial<Order>) : null,
+                  timestamp: new Date(),
                 });
               }
-              
-              // Invalidate the orders query to trigger a refetch
+
               queryClient.invalidateQueries({ queryKey: ['orders'] });
-            })
+            }
+          )
           .subscribe((status) => {
             console.log('Subscription status:', status);
-            
-            // Handle status with type safety - Fix the TypeScript error by using string comparison
-            if (status === 'SUBSCRIBED') {
+            // Compare with enum values
+            if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
               console.log('Successfully subscribed to realtime updates');
               setIsConnected(true);
-            } else if (status === 'CHANNEL_ERROR') {
+            } else if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
               console.error('Channel error, will attempt reconnect');
               setIsConnected(false);
               setTimeout(attemptReconnect, 5000);
-            } else if (status === 'TIMED_OUT') {
+            } else if (status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT) {
               console.error('Connection timed out, will attempt reconnect');
               setIsConnected(false);
               setTimeout(attemptReconnect, 5000);
             } else {
-              setIsConnected(status === 'SUBSCRIBED');
+              setIsConnected(status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED);
             }
           });
 
@@ -103,39 +97,35 @@ export const useOrderRealtime = () => {
       }
     };
 
-    // Initial setup
-    channel = setupSubscription();
+    const channel = setupSubscription();
 
-    // Perform a test query to verify the connection
     const checkConnection = async () => {
       try {
-        console.log('Checking Supabase connection...');
         const { data, error } = await supabase
           .from('orders')
           .select('count(*)', { count: 'exact', head: true });
-        
+
         if (error) {
           console.error('Error checking connection:', error);
           toast({
-            title: "Connection Error",
-            description: `Unable to connect to the database: ${error.message}`,
-            variant: "destructive"
+            title: 'Connection Error',
+            description:
+              'Unable to connect to the database. Retrying in background...',
+            variant: 'destructive',
           });
-          setTimeout(checkConnection, 10000); // Retry after 10 seconds
+          setTimeout(checkConnection, 10000);
         } else {
           console.log('Database connection successful');
           setIsConnected(true);
         }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown connection error';
         console.error('Failed to check connection:', err);
-        setTimeout(checkConnection, 10000); // Retry after 10 seconds
+        setTimeout(checkConnection, 10000);
       }
     };
 
     checkConnection();
 
-    // Cleanup function
     return () => {
       console.log('Cleaning up real-time subscription');
       if (channel) {
@@ -146,6 +136,6 @@ export const useOrderRealtime = () => {
 
   return {
     isConnected,
-    lastUpdate
+    lastUpdate,
   };
 };
