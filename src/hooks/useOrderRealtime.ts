@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,74 +31,75 @@ export const useOrderRealtime = () => {
     
     // Setup the subscription
     const setupSubscription = () => {
-      try {
-        const channel = supabase
-          .channel('public:orders')
-          .on('postgres_changes', 
-            { event: '*', schema: 'public', table: 'orders' }, 
-            (payload) => {
-              console.log('Real-time update received:', payload);
-              setIsConnected(true);
-              
-              const newRecord = payload.new as Record<string, any> | null;
-              const oldRecord = payload.old as Record<string, any> | null;
-              const orderId = newRecord?.id || oldRecord?.id;
-              
-              if (payload.eventType === 'INSERT') {
-                setLastUpdate({
-                  type: 'INSERT',
-                  order: newRecord ? newRecord as Partial<Order> : null,
-                  timestamp: new Date()
-                });
-                toast({
-                  title: "New Order",
-                  description: `Order #${orderId ? String(orderId).slice(0, 8) : 'Unknown'} has been created`,
-                });
-              } else if (payload.eventType === 'UPDATE') {
-                setLastUpdate({
-                  type: 'UPDATE',
-                  order: newRecord ? newRecord as Partial<Order> : null,
-                  timestamp: new Date()
-                });
-              } else if (payload.eventType === 'DELETE') {
-                setLastUpdate({
-                  type: 'DELETE',
-                  order: oldRecord ? oldRecord as Partial<Order> : null,
-                  timestamp: new Date()
-                });
-              }
-
-              queryClient.invalidateQueries({ queryKey: ['orders'] });
-            })
-          .subscribe((status) => {
-            console.log('Subscription status:', status);
-
-            if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
-              console.log('Successfully subscribed to realtime updates');
-              setIsConnected(true);
-            } else if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
-              console.error('Channel error, will attempt reconnect');
-              setIsConnected(false);
-              setTimeout(attemptReconnect, 5000);
-            } else if (status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT) {
-              console.error('Connection timed out, will attempt reconnect');
-              setIsConnected(false);
-              setTimeout(attemptReconnect, 5000);
-            } else {
-              setIsConnected(status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED);
+      const channel = supabase
+        .channel('public:orders')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'orders' }, 
+          (payload) => {
+            console.log('Real-time update received:', payload);
+            setIsConnected(true);
+            
+            // Extract basic order details for display
+            const newRecord = payload.new as Record<string, any> | null;
+            const oldRecord = payload.old as Record<string, any> | null;
+            
+            // Safely access the ID
+            const orderId = newRecord?.id || oldRecord?.id;
+            
+            if (payload.eventType === 'INSERT') {
+              setLastUpdate({
+                type: 'INSERT',
+                order: newRecord ? newRecord as Partial<Order> : null,
+                timestamp: new Date()
+              });
+              toast({
+                title: "New Order",
+                description: `Order #${orderId ? String(orderId).slice(0, 8) : 'Unknown'} has been created`,
+              });
+            } else if (payload.eventType === 'UPDATE') {
+              setLastUpdate({
+                type: 'UPDATE',
+                order: newRecord ? newRecord as Partial<Order> : null,
+                timestamp: new Date()
+              });
+            } else if (payload.eventType === 'DELETE') {
+              setLastUpdate({
+                type: 'DELETE',
+                order: oldRecord ? oldRecord as Partial<Order> : null,
+                timestamp: new Date()
+              });
             }
-          });
+            
+            // Invalidate the orders query to trigger a refetch
+            queryClient.invalidateQueries({ queryKey: ['orders'] });
+          })
+        .subscribe((status: string) => {
+          console.log('Subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            console.log('Successfully subscribed to realtime updates');
+            setIsConnected(true);
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('Channel error, will attempt reconnect');
+            setIsConnected(false);
+            setTimeout(attemptReconnect, 5000);
+          } else if (status === 'TIMED_OUT') {
+            console.error('Connection timed out, will attempt reconnect');
+            setIsConnected(false);
+            setTimeout(attemptReconnect, 5000);
+          } else {
+            // This is the line that was causing the error
+            // We need to use string literals for status comparison
+            setIsConnected(status === 'SUBSCRIBED');
+          }
+        });
 
-        return channel;
-      } catch (error) {
-        console.error('Error setting up Supabase realtime:', error);
-        setTimeout(attemptReconnect, 5000);
-        return null;
-      }
+      return channel;
     };
     
+    // Initial setup
     const channel = setupSubscription();
     
+    // Perform a test query to verify the connection
     const checkConnection = async () => {
       try {
         const { data, error } = await supabase
@@ -106,29 +108,20 @@ export const useOrderRealtime = () => {
         
         if (error) {
           console.error('Error checking connection:', error);
-          toast({
-            title: "Connection Error",
-            description: "Unable to connect to the database. Retrying in background...",
-            variant: "destructive"
-          });
-          setTimeout(checkConnection, 10000);
         } else {
           console.log('Database connection successful');
-          setIsConnected(true);
         }
       } catch (err) {
         console.error('Failed to check connection:', err);
-        setTimeout(checkConnection, 10000);
       }
     };
     
     checkConnection();
     
+    // Cleanup function
     return () => {
       console.log('Cleaning up real-time subscription');
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
+      supabase.removeChannel(channel);
     };
   }, [queryClient]);
 
