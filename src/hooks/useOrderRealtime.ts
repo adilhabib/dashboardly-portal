@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,19 +77,20 @@ export const useOrderRealtime = () => {
           .subscribe((status) => {
             console.log('Subscription status:', status);
             
-            if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+            // Fix: Use string literals for status comparison instead of enum values
+            if (status === 'SUBSCRIBED') {
               console.log('Successfully subscribed to realtime updates');
               setIsConnected(true);
-            } else if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
+            } else if (status === 'CHANNEL_ERROR') {
               console.error('Channel error, will attempt reconnect');
               setIsConnected(false);
               setTimeout(attemptReconnect, 5000);
-            } else if (status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT) {
+            } else if (status === 'TIMED_OUT') {
               console.error('Connection timed out, will attempt reconnect');
               setIsConnected(false);
               setTimeout(attemptReconnect, 5000);
             } else {
-              setIsConnected(status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED);
+              setIsConnected(status === 'SUBSCRIBED');
             }
           });
 

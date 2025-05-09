@@ -11,6 +11,14 @@ export const fetchOrders = async () => {
   console.log('Fetching orders...');
   
   try {
+    // First check the connection to Supabase
+    const connectionCheck = await supabase.from('orders').select('id', { count: 'exact', head: true });
+    
+    if (connectionCheck.error) {
+      console.error('Connection error in fetchOrders:', connectionCheck.error);
+      throw new Error(`Database connection error: ${connectionCheck.error.message}`);
+    }
+    
     const { count, error: countError } = await supabase
       .from('orders')
       .select('*', { count: 'exact', head: true });
@@ -58,6 +66,7 @@ export const fetchOrders = async () => {
     return ordersWithCustomers;
   } catch (error) {
     console.error('Unexpected error in fetchOrders:', error);
-    return [];
+    // Re-throw the error to allow proper handling at the component level
+    throw error;
   }
 };

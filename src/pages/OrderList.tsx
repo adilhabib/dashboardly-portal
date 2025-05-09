@@ -9,18 +9,21 @@ import { OrderTable, EmptyStateMessage } from '@/components/order';
 import { getStatusColor, formatDate } from '@/services/orderUtils';
 import { useOrderRealtime } from '@/hooks/useOrderRealtime';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import OrderStatusFilter, { OrderStatusFilter as StatusFilterType } from '@/components/order/OrderStatusFilter';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { setupOrderNotifications } from '@/services/order/orderNotifications';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const OrderList = () => {
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilterType>('all');
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
+  const { user } = useAuth();
   const { addNotification } = useNotifications();
   const { isConnected, lastUpdate } = useOrderRealtime();
   
@@ -40,6 +43,7 @@ const OrderList = () => {
     console.log('Orders data in component:', orders);
     if (isError) {
       console.error('Error in useQuery:', error);
+      setConnectionError(error instanceof Error ? error.message : 'Unknown error fetching orders');
     }
   }, [orders, isError, error]);
 
@@ -49,22 +53,31 @@ const OrderList = () => {
 
     // Connection status check
     const checkSupabaseConnection = async () => {
+      if (!user) {
+        console.log('User not authenticated, skipping connection check');
+        return;
+      }
+      
       try {
         console.log('Checking Supabase connection...');
         const { data, error } = await supabase.from('orders').select('count(*)', { count: 'exact', head: true });
         
         if (error) {
           console.error('Supabase connection check error:', error);
+          setConnectionError(`Database connection error: ${error.message}`);
           toast({
             title: "Connection Error",
-            description: "Unable to connect to the database. Please refresh the page.",
+            description: "Unable to connect to the database. Please refresh the page or check your network.",
             variant: "destructive"
           });
         } else {
           console.log('Supabase connection successful');
+          setConnectionError(null);
         }
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown connection error';
         console.error('Failed to check Supabase connection:', err);
+        setConnectionError(`Failed to connect to Supabase: ${errorMessage}`);
       }
     };
 
@@ -81,10 +94,11 @@ const OrderList = () => {
     return () => {
       clearInterval(connectionCheckInterval);
     };
-  }, [refetch, isConnected]);
+  }, [refetch, isConnected, user]);
 
   const handleRefreshOrders = async () => {
     setIsRefreshing(true);
+    setConnectionError(null);
     try {
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
@@ -92,7 +106,9 @@ const OrderList = () => {
         description: "Checking for new orders..."
       });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error refreshing orders:', error);
+      setConnectionError(`Error refreshing orders: ${errorMessage}`);
       toast({
         title: "Error Refreshing",
         description: "Failed to refresh orders. Please try again.",
@@ -105,15 +121,35 @@ const OrderList = () => {
 
   // Connection recovery handler
   const handleReconnect = async () => {
+    setConnectionError(null);
     toast({
       title: "Reconnecting...",
-      description: "Attempting to reconnect to realtime updates"
+      description: "Attempting to reconnect to database"
     });
     
     // Force a refresh of the component
-    refetch();
+    await refetch();
     
-    // We'll let the useOrderRealtime hook handle the actual reconnection
+    // Check the connection explicitly
+    try {
+      const { error } = await supabase.from('orders').select('count(*)', { count: 'exact', head: true });
+      if (error) {
+        setConnectionError(`Database connection error: ${error.message}`);
+        throw error;
+      }
+      toast({
+        title: "Connection Restored",
+        description: "Successfully reconnected to the database",
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Reconnection failed:', err);
+      toast({
+        title: "Reconnection Failed",
+        description: `Could not reconnect: ${errorMessage}`,
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredOrders = React.useMemo(() => {
@@ -128,21 +164,6 @@ const OrderList = () => {
 
   if (isLoading) {
     return <div className="text-center py-10">Loading orders...</div>;
-  }
-
-  if (isError) {
-    return (
-      <div className="text-center py-10 text-red-500">
-        <p>Error loading orders</p>
-        <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error'}</p>
-        <button 
-          onClick={() => refetch()} 
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Retry
-        </button>
-      </div>
-    );
   }
 
   return (
@@ -191,6 +212,23 @@ const OrderList = () => {
             </div>
           </div>
           
+          {connectionError && (
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md flex items-start gap-2 text-sm text-red-700">
+              <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium">Connection Error</p>
+                <p>{connectionError}</p>
+                <Button 
+                  variant="link" 
+                  onClick={handleReconnect} 
+                  className="h-auto p-0 text-red-700 underline"
+                >
+                  Retry Connection
+                </Button>
+              </div>
+            </div>
+          )}
+          
           {lastUpdate.timestamp && (
             <div className="text-xs text-gray-500 mt-2">
               Last update: {lastUpdate.type} - {lastUpdate.timestamp.toLocaleTimeString()}
@@ -201,7 +239,19 @@ const OrderList = () => {
           )}
         </CardHeader>
         <CardContent>
-          {filteredOrders.length > 0 ? (
+          {isError ? (
+            <div className="text-center py-10 text-red-500">
+              <p>Error loading orders</p>
+              <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error'}</p>
+              <Button 
+                onClick={() => refetch()} 
+                className="mt-4"
+                variant="outline"
+              >
+                Retry
+              </Button>
+            </div>
+          ) : filteredOrders.length > 0 ? (
             <OrderTable 
               orders={filteredOrders} 
               getStatusColor={getStatusColor} 
