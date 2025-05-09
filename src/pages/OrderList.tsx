@@ -1,20 +1,20 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { toast } from '@/hooks/use-toast';
 import { fetchOrders } from '@/services/order';
-import { OrderTable, EmptyStateMessage } from '@/components/order';
-import { getStatusColor, formatDate } from '@/services/orderUtils';
 import { useOrderRealtime } from '@/hooks/useOrderRealtime';
-import { Button } from '@/components/ui/button';
-import { RefreshCw, Wifi, WifiOff } from 'lucide-react';
-import OrderStatusFilter, { OrderStatusFilter as StatusFilterType } from '@/components/order/OrderStatusFilter';
-import { Badge } from '@/components/ui/badge';
+import { OrderStatusFilter as StatusFilterType } from '@/components/order/OrderStatusFilter';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { setupOrderNotifications } from '@/services/order/orderNotifications';
 import { supabase } from '@/integrations/supabase/client';
+import OrderHeader from '@/components/order/OrderHeader';
+import OrderContent from '@/components/order/OrderContent';
+import OrderErrorState from '@/components/order/OrderErrorState';
+import OrderLoading from '@/components/order/OrderLoading';
+import OrderConnectionChecker from '@/components/order/OrderConnectionChecker';
 
 const OrderList = () => {
   const queryClient = useQueryClient();
@@ -25,7 +25,7 @@ const OrderList = () => {
   const { addNotification } = useNotifications();
   const { isConnected, lastUpdate } = useOrderRealtime();
   
-  useEffect(() => {
+  React.useEffect(() => {
     const cleanup = setupOrderNotifications(addNotification);
     return () => cleanup();
   }, [addNotification]);
@@ -47,60 +47,22 @@ const OrderList = () => {
     }
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     console.log('Orders data in component:', orders);
     if (isError) {
       console.error('Error in useQuery:', error);
     }
   }, [orders, isError, error]);
 
-  useEffect(() => {
-    // Initial data load
-    refetch();
-
-    // Connection status check
-    const checkSupabaseConnection = async () => {
-      try {
-        console.log('Checking Supabase connection...');
-        const { data, error } = await supabase.from('orders').select('count(*)', { count: 'exact', head: true });
-        
-        if (error) {
-          console.error('Supabase connection check error:', error);
-          setConnectionAttempts(prev => prev + 1);
-          
-          toast({
-            title: "Connection Error",
-            description: "Unable to connect to the database. Please refresh the page.",
-            variant: "destructive"
-          });
-          
-          // If we've tried more than 3 times, wait longer before trying again
-          const waitTime = connectionAttempts > 3 ? 30000 : 10000;
-          setTimeout(checkSupabaseConnection, waitTime);
-        } else {
-          console.log('Supabase connection successful');
-          setConnectionAttempts(0);
-        }
-      } catch (err) {
-        console.error('Failed to check connection:', err);
-        setTimeout(checkSupabaseConnection, 10000);
-      }
-    };
-
-    checkSupabaseConnection();
-    
-    // Set up periodic connection checks
-    const connectionCheckInterval = setInterval(() => {
-      if (!isConnected) {
-        console.log('Periodic connection check: Realtime is disconnected');
-        checkSupabaseConnection();
-      }
-    }, 30000); // Check every 30 seconds if disconnected
-
-    return () => {
-      clearInterval(connectionCheckInterval);
-    };
-  }, [refetch, isConnected, connectionAttempts]);
+  // Connection checker component
+  const connectionChecker = (
+    <OrderConnectionChecker 
+      isConnected={isConnected}
+      connectionAttempts={connectionAttempts}
+      setConnectionAttempts={setConnectionAttempts}
+      refetch={refetch}
+    />
+  );
 
   const handleRefreshOrders = async () => {
     setIsRefreshing(true);
@@ -122,7 +84,6 @@ const OrderList = () => {
     }
   };
 
-  // Connection recovery handler
   const handleReconnect = async () => {
     toast({
       title: "Reconnecting...",
@@ -169,89 +130,35 @@ const OrderList = () => {
   }, [orders, statusFilter]);
 
   if (isLoading) {
-    return <div className="text-center py-10">Loading orders...</div>;
+    return <OrderLoading />;
   }
 
   if (isError) {
-    return (
-      <div className="text-center py-10 text-red-500">
-        <p>Error loading orders</p>
-        <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error'}</p>
-        <button 
-          onClick={() => refetch()} 
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Retry
-        </button>
-      </div>
-    );
+    return <OrderErrorState error={error} onRetry={refetch} />;
   }
 
   return (
     <div className="container mx-auto px-4 py-6">
       <PageBreadcrumb pageName="Order List" />
+      {connectionChecker}
       
       <Card className="shadow-sm">
         <CardHeader className="pb-2">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <CardTitle className="text-2xl font-bold">Order List</CardTitle>
-            
-            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-              <OrderStatusFilter 
-                value={statusFilter} 
-                onChange={setStatusFilter} 
-              />
-              
-              <div className="flex items-center gap-2 ml-auto">
-                <div className="flex items-center text-sm text-gray-500 mr-2">
-                  {isConnected ? (
-                    <Badge variant="outline" className="bg-green-50 text-green-600 flex items-center gap-1 py-1">
-                      <Wifi size={14} className="text-green-600" />
-                      <span>Realtime Connected</span>
-                    </Badge>
-                  ) : (
-                    <Badge 
-                      variant="outline" 
-                      className="bg-amber-50 text-amber-600 flex items-center gap-1 py-1 cursor-pointer hover:bg-amber-100"
-                      onClick={handleReconnect}
-                    >
-                      <WifiOff size={14} className="text-amber-600" />
-                      <span>Realtime Disconnected (click to reconnect)</span>
-                    </Badge>
-                  )}
-                </div>
-                <Button 
-                  variant="outline"
-                  onClick={handleRefreshOrders} 
-                  disabled={isRefreshing}
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
-                  Refresh
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          {lastUpdate.timestamp && (
-            <div className="text-xs text-gray-500 mt-2">
-              Last update: {lastUpdate.type} - {lastUpdate.timestamp.toLocaleTimeString()}
-              {lastUpdate.order && lastUpdate.order.id && 
-                <span> - Order #{(lastUpdate.order.id as string).slice(0, 8)}</span>
-              }
-            </div>
-          )}
+          <OrderHeader
+            statusFilter={statusFilter}
+            onFilterChange={setStatusFilter}
+            isConnected={isConnected}
+            handleReconnect={handleReconnect}
+            isRefreshing={isRefreshing}
+            onRefresh={handleRefreshOrders}
+            lastUpdate={lastUpdate}
+          />
         </CardHeader>
         <CardContent>
-          {filteredOrders.length > 0 ? (
-            <OrderTable 
-              orders={filteredOrders} 
-              getStatusColor={getStatusColor} 
-              formatDate={formatDate} 
-            />
-          ) : (
-            <EmptyStateMessage onRefresh={handleRefreshOrders} />
-          )}
+          <OrderContent 
+            filteredOrders={filteredOrders}
+            onRefresh={handleRefreshOrders} 
+          />
         </CardContent>
       </Card>
     </div>
