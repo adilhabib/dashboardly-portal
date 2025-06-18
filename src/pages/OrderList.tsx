@@ -9,18 +9,17 @@ import { OrderTable, EmptyStateMessage } from '@/components/order';
 import { getStatusColor, formatDate } from '@/services/orderUtils';
 import { useOrderRealtime } from '@/hooks/useOrderRealtime';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import OrderStatusFilter, { OrderStatusFilter as StatusFilterType } from '@/components/order/OrderStatusFilter';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { setupOrderNotifications } from '@/services/order/orderNotifications';
-import { checkSupabaseConnection } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 const OrderList = () => {
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilterType>('all');
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
   
   const { addNotification } = useNotifications();
   const { isConnected, lastUpdate } = useOrderRealtime();
@@ -35,8 +34,6 @@ const OrderList = () => {
     queryFn: fetchOrders,
     staleTime: 1000 * 60,
     retry: 3,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 
   useEffect(() => {
@@ -47,65 +44,48 @@ const OrderList = () => {
   }, [orders, isError, error]);
 
   useEffect(() => {
+    // Initial data load
+    refetch();
+
     // Connection status check
-    const checkConnection = async () => {
-      setConnectionStatus('checking');
+    const checkSupabaseConnection = async () => {
       try {
         console.log('Checking Supabase connection...');
-        const isConnected = await checkSupabaseConnection();
+        const { data, error } = await supabase.from('orders').select('count(*)', { count: 'exact', head: true });
         
-        if (isConnected) {
-          console.log('Supabase connection successful');
-          setConnectionStatus('connected');
-        } else {
-          console.error('Supabase connection failed');
-          setConnectionStatus('disconnected');
+        if (error) {
+          console.error('Supabase connection check error:', error);
           toast({
             title: "Connection Error",
-            description: "Unable to connect to the database. Please check your internet connection.",
+            description: "Unable to connect to the database. Please refresh the page.",
             variant: "destructive"
           });
+        } else {
+          console.log('Supabase connection successful');
         }
       } catch (err) {
         console.error('Failed to check Supabase connection:', err);
-        setConnectionStatus('disconnected');
-        toast({
-          title: "Connection Error", 
-          description: "Database connection check failed. Please try refreshing the page.",
-          variant: "destructive"
-        });
       }
     };
 
-    checkConnection();
+    checkSupabaseConnection();
     
-    // Set up periodic connection checks only if disconnected
+    // Set up periodic connection checks
     const connectionCheckInterval = setInterval(() => {
-      if (connectionStatus === 'disconnected' || !isConnected) {
-        console.log('Periodic connection check: Checking connection status');
-        checkConnection();
+      if (!isConnected) {
+        console.log('Periodic connection check: Realtime is disconnected');
+        checkSupabaseConnection();
       }
     }, 30000); // Check every 30 seconds if disconnected
 
     return () => {
       clearInterval(connectionCheckInterval);
     };
-  }, [connectionStatus, isConnected]);
+  }, [refetch, isConnected]);
 
   const handleRefreshOrders = async () => {
     setIsRefreshing(true);
     try {
-      // First check connection
-      const connectionOk = await checkSupabaseConnection();
-      if (!connectionOk) {
-        toast({
-          title: "Connection Error",
-          description: "Unable to connect to database. Please check your connection.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
         title: "Refreshing orders",
@@ -127,19 +107,13 @@ const OrderList = () => {
   const handleReconnect = async () => {
     toast({
       title: "Reconnecting...",
-      description: "Attempting to reconnect to the database"
+      description: "Attempting to reconnect to realtime updates"
     });
     
-    setConnectionStatus('checking');
-    const connectionOk = await checkSupabaseConnection();
+    // Force a refresh of the component
+    refetch();
     
-    if (connectionOk) {
-      setConnectionStatus('connected');
-      // Force a refresh of the component
-      refetch();
-    } else {
-      setConnectionStatus('disconnected');
-    }
+    // We'll let the useOrderRealtime hook handle the actual reconnection
   };
 
   const filteredOrders = React.useMemo(() => {
@@ -159,23 +133,14 @@ const OrderList = () => {
   if (isError) {
     return (
       <div className="text-center py-10 text-red-500">
-        <AlertTriangle className="mx-auto mb-4" size={48} />
-        <p className="text-lg font-semibold">Error loading orders</p>
-        <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error occurred'}</p>
-        <div className="flex gap-4 justify-center mt-4">
-          <button 
-            onClick={() => refetch()} 
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Retry
-          </button>
-          <button 
-            onClick={handleReconnect}
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            Check Connection
-          </button>
-        </div>
+        <p>Error loading orders</p>
+        <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error'}</p>
+        <button 
+          onClick={() => refetch()} 
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -197,31 +162,26 @@ const OrderList = () => {
               
               <div className="flex items-center gap-2 ml-auto">
                 <div className="flex items-center text-sm text-gray-500 mr-2">
-                  {connectionStatus === 'connected' && isConnected ? (
+                  {isConnected ? (
                     <Badge variant="outline" className="bg-green-50 text-green-600 flex items-center gap-1 py-1">
                       <Wifi size={14} className="text-green-600" />
-                      <span>Connected</span>
-                    </Badge>
-                  ) : connectionStatus === 'checking' ? (
-                    <Badge variant="outline" className="bg-blue-50 text-blue-600 flex items-center gap-1 py-1">
-                      <RefreshCw size={14} className="text-blue-600 animate-spin" />
-                      <span>Checking...</span>
+                      <span>Realtime Connected</span>
                     </Badge>
                   ) : (
                     <Badge 
                       variant="outline" 
-                      className="bg-red-50 text-red-600 flex items-center gap-1 py-1 cursor-pointer hover:bg-red-100"
+                      className="bg-amber-50 text-amber-600 flex items-center gap-1 py-1 cursor-pointer hover:bg-amber-100"
                       onClick={handleReconnect}
                     >
-                      <WifiOff size={14} className="text-red-600" />
-                      <span>Disconnected (click to reconnect)</span>
+                      <WifiOff size={14} className="text-amber-600" />
+                      <span>Realtime Disconnected (click to reconnect)</span>
                     </Badge>
                   )}
                 </div>
                 <Button 
                   variant="outline"
                   onClick={handleRefreshOrders} 
-                  disabled={isRefreshing || connectionStatus === 'checking'}
+                  disabled={isRefreshing}
                   className="flex items-center gap-2"
                 >
                   <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />

@@ -609,10 +609,6 @@ export type Database = {
       }
     }
     Functions: {
-      assign_admin_to_email: {
-        Args: { email: string }
-        Returns: undefined
-      }
       create_order: {
         Args: { order_data: Json }
         Returns: Json
@@ -622,15 +618,11 @@ export type Database = {
         Returns: undefined
       }
       create_orders_table: {
-        Args:
-          | Record<PropertyKey, never>
-          | { table_name: string; table_schema: Json }
+        Args: { table_name: string; table_schema: Json }
         Returns: undefined
       }
       create_user_with_log: {
-        Args:
-          | Record<PropertyKey, never>
-          | { user_email: string; user_name: string }
+        Args: { user_email: string; user_name: string }
         Returns: undefined
       }
       has_role: {
@@ -638,13 +630,11 @@ export type Database = {
         Returns: boolean
       }
       increment_loyalty_points: {
-        Args:
-          | { customer_id: string; points_to_add: number }
-          | { user_id: number; points: number }
+        Args: { customer_id: string; points_to_add: number }
         Returns: number
       }
       make_user_admin: {
-        Args: Record<PropertyKey, never> | { email: string }
+        Args: { email: string }
         Returns: undefined
       }
       record_financial_transaction: {
