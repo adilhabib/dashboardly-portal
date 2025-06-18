@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, checkSupabaseConnection } from '@/integrations/supabase/client';
 import { Order } from '@/services/order';
 import { toast } from '@/hooks/use-toast';
 
@@ -21,11 +21,44 @@ export const useOrderRealtime = () => {
   useEffect(() => {
     console.log('Setting up real-time subscription for orders table');
     
-    // Handle reconnection
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    let reconnectTimeout: NodeJS.Timeout;
+    
+    // Check initial connection
+    const checkInitialConnection = async () => {
+      const connectionOk = await checkSupabaseConnection();
+      if (!connectionOk) {
+        console.warn('Initial Supabase connection failed');
+        toast({
+          title: "Connection Warning",
+          description: "Unable to establish database connection. Retrying...",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    // Handle reconnection with exponential backoff
     const attemptReconnect = () => {
-      console.log('Attempting to reconnect to Supabase realtime');
+      if (reconnectAttempts >= maxReconnectAttempts) {
+        console.error('Max reconnection attempts reached');
+        toast({
+          title: "Connection Failed",
+          description: "Unable to establish realtime connection after multiple attempts.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      reconnectAttempts++;
+      const delay = Math.pow(2, reconnectAttempts) * 1000; // Exponential backoff
+      
+      console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts}) in ${delay}ms`);
       setIsConnected(false);
-      setupSubscription();
+      
+      reconnectTimeout = setTimeout(() => {
+        setupSubscription();
+      }, delay);
     };
     
     // Setup the subscription
@@ -38,6 +71,7 @@ export const useOrderRealtime = () => {
             (payload) => {
               console.log('Real-time update received:', payload);
               setIsConnected(true);
+              reconnectAttempts = 0; // Reset on successful message
               
               // Extract basic order details for display
               const newRecord = payload.new as Record<string, any> | null;
@@ -79,12 +113,19 @@ export const useOrderRealtime = () => {
             if (status === 'SUBSCRIBED') {
               console.log('Successfully subscribed to realtime updates');
               setIsConnected(true);
+              reconnectAttempts = 0; // Reset on successful subscription
             } else if (status === 'CHANNEL_ERROR') {
               console.error('Channel error, will attempt reconnect');
               setIsConnected(false);
-              setTimeout(attemptReconnect, 5000);
+              attemptReconnect();
+            } else if (status === 'TIMED_OUT') {
+              console.error('Subscription timed out, will attempt reconnect');
+              setIsConnected(false);
+              attemptReconnect();
+            } else if (status === 'CLOSED') {
+              console.log('Channel closed');
+              setIsConnected(false);
             } else {
-              // Use string literals for status comparison
               setIsConnected(status === 'SUBSCRIBED');
             }
           });
@@ -92,44 +133,21 @@ export const useOrderRealtime = () => {
         return channel;
       } catch (error) {
         console.error('Error setting up Supabase realtime:', error);
-        setTimeout(attemptReconnect, 5000);
+        attemptReconnect();
         return null;
       }
     };
     
-    // Initial setup
+    // Initialize
+    checkInitialConnection();
     const channel = setupSubscription();
-    
-    // Perform a test query to verify the connection
-    const checkConnection = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('orders')
-          .select('count(*)', { count: 'exact', head: true });
-        
-        if (error) {
-          console.error('Error checking connection:', error);
-          toast({
-            title: "Connection Error",
-            description: "Unable to connect to the database. Retrying in background...",
-            variant: "destructive"
-          });
-          setTimeout(checkConnection, 10000); // Retry after 10 seconds
-        } else {
-          console.log('Database connection successful');
-          setIsConnected(true);
-        }
-      } catch (err) {
-        console.error('Failed to check connection:', err);
-        setTimeout(checkConnection, 10000); // Retry after 10 seconds
-      }
-    };
-    
-    checkConnection();
     
     // Cleanup function
     return () => {
       console.log('Cleaning up real-time subscription');
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
       if (channel) {
         supabase.removeChannel(channel);
       }
