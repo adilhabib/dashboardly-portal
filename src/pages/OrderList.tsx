@@ -51,13 +51,16 @@ const OrderList = () => {
     const checkSupabaseConnection = async () => {
       try {
         console.log('Checking Supabase connection...');
-        const { data, error } = await supabase.from('orders').select('count(*)', { count: 'exact', head: true });
+        const { data, error } = await supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .limit(1);
         
         if (error) {
           console.error('Supabase connection check error:', error);
           toast({
             title: "Connection Error",
-            description: "Unable to connect to the database. Please refresh the page.",
+            description: "Unable to connect to the database. Please check your connection.",
             variant: "destructive"
           });
         } else {
@@ -65,6 +68,11 @@ const OrderList = () => {
         }
       } catch (err) {
         console.error('Failed to check Supabase connection:', err);
+        toast({
+          title: "Connection Error",
+          description: "Network error. Please check your internet connection.",
+          variant: "destructive"
+        });
       }
     };
 

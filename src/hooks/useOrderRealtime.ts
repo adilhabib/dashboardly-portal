@@ -83,9 +83,12 @@ export const useOrderRealtime = () => {
               console.error('Channel error, will attempt reconnect');
               setIsConnected(false);
               setTimeout(attemptReconnect, 5000);
+            } else if (status === 'CLOSED' || status === 'TIMED_OUT') {
+              console.error('Connection closed or timed out, will attempt reconnect');
+              setIsConnected(false);
+              setTimeout(attemptReconnect, 5000);
             } else {
-              // Use string literals for status comparison
-              setIsConnected(status === 'SUBSCRIBED');
+              setIsConnected(false);
             }
           });
 
