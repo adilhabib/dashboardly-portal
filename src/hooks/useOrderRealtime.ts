@@ -106,25 +106,20 @@ export const useOrderRealtime = () => {
     // Perform a test query to verify the connection
     const checkConnection = async () => {
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('orders')
-          .select('count(*)', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true });
         
         if (error) {
           console.error('Error checking connection:', error);
-          toast({
-            title: "Connection Error",
-            description: "Unable to connect to the database. Retrying in background...",
-            variant: "destructive"
-          });
-          setTimeout(checkConnection, 10000); // Retry after 10 seconds
+          setIsConnected(false);
         } else {
           console.log('Database connection successful');
           setIsConnected(true);
         }
       } catch (err) {
         console.error('Failed to check connection:', err);
-        setTimeout(checkConnection, 10000); // Retry after 10 seconds
+        setIsConnected(false);
       }
     };
     
