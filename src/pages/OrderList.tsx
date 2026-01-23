@@ -143,49 +143,47 @@ const OrderList = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-2 md:px-4 py-4 md:py-6">
       <PageBreadcrumb pageName="Order List" />
       
       <Card className="shadow-sm">
-        <CardHeader className="pb-2">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <CardTitle className="text-2xl font-bold">Order List</CardTitle>
-            
-            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-              <OrderStatusFilter 
-                value={statusFilter} 
-                onChange={setStatusFilter} 
-              />
-              
-              <div className="flex items-center gap-2 ml-auto">
-                <div className="flex items-center text-sm text-gray-500 mr-2">
-                  {isConnected ? (
-                    <Badge variant="outline" className="bg-green-50 text-green-600 flex items-center gap-1 py-1">
-                      <Wifi size={14} className="text-green-600" />
-                      <span>Realtime Connected</span>
-                    </Badge>
-                  ) : (
-                    <Badge 
-                      variant="outline" 
-                      className="bg-amber-50 text-amber-600 flex items-center gap-1 py-1 cursor-pointer hover:bg-amber-100"
-                      onClick={handleReconnect}
-                    >
-                      <WifiOff size={14} className="text-amber-600" />
-                      <span>Realtime Disconnected (click to reconnect)</span>
-                    </Badge>
-                  )}
-                </div>
+        <CardHeader className="pb-2 px-3 md:px-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl md:text-2xl font-bold">Order List</CardTitle>
+              <div className="flex items-center gap-2">
+                {isConnected ? (
+                  <Badge variant="outline" className="bg-green-50 text-green-600 flex items-center gap-1 py-1 text-xs">
+                    <Wifi size={12} className="text-green-600" />
+                    <span className="hidden sm:inline">Connected</span>
+                  </Badge>
+                ) : (
+                  <Badge 
+                    variant="outline" 
+                    className="bg-amber-50 text-amber-600 flex items-center gap-1 py-1 cursor-pointer hover:bg-amber-100 text-xs"
+                    onClick={handleReconnect}
+                  >
+                    <WifiOff size={12} className="text-amber-600" />
+                    <span className="hidden sm:inline">Reconnect</span>
+                  </Badge>
+                )}
                 <Button 
                   variant="outline"
+                  size="sm"
                   onClick={handleRefreshOrders} 
                   disabled={isRefreshing}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1"
                 >
-                  <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
-                  Refresh
+                  <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+                  <span className="hidden sm:inline">Refresh</span>
                 </Button>
               </div>
             </div>
+            
+            <OrderStatusFilter 
+              value={statusFilter} 
+              onChange={setStatusFilter} 
+            />
           </div>
           
           {lastUpdate.timestamp && (
@@ -197,7 +195,7 @@ const OrderList = () => {
             </div>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 md:px-6">
           {filteredOrders.length > 0 ? (
             <OrderTable 
               orders={filteredOrders} 
