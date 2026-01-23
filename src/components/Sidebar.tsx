@@ -15,11 +15,18 @@ import {
   Bell,
   UserCircle,
   CreditCard,
-  ImageIcon
+  ImageIcon,
+  X
 } from 'lucide-react';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { Button } from '@/components/ui/button';
 
-const Sidebar: FC = () => {
+interface SidebarProps {
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+const Sidebar: FC<SidebarProps> = ({ onClose, isMobile }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { state: notificationState } = useNotifications();
@@ -44,12 +51,22 @@ const Sidebar: FC = () => {
 
   const handleAddMenu = () => {
     navigate('/foods', { state: { openAddModal: true } });
+    onClose?.();
+  };
+
+  const handleNavClick = () => {
+    onClose?.();
   };
   
   return (
     <aside className="bg-white border-r w-[220px] h-screen flex flex-col p-5 fixed left-0 top-0 overflow-y-auto animate-slide-in-left">
-      <div className="flex items-center mb-8">
+      <div className="flex items-center justify-between mb-8">
         <span className="text-2xl font-bold text-gray-800">VIRGINIA<span className="text-emerald-500">.</span></span>
+        {isMobile && (
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X size={20} />
+          </Button>
+        )}
       </div>
       <p className="text-xs text-gray-500 mb-6">Virginia Admin Dashboard</p>
       
@@ -58,6 +75,7 @@ const Sidebar: FC = () => {
           <Link 
             key={item.path} 
             to={item.path}
+            onClick={handleNavClick}
             className={`sidebar-link flex items-center gap-2 p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors ${location.pathname === item.path ? 'bg-emerald-50 text-emerald-600 font-medium' : ''}`}
           >
             {item.icon}

@@ -1,6 +1,7 @@
 
 import { FC, Dispatch, SetStateAction } from 'react';
 import DateFilter from '@/components/DateFilter';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DashboardHeaderProps {
   userName: string;
@@ -13,11 +14,13 @@ const DashboardHeader: FC<DashboardHeaderProps> = ({
   dateRange,
   setDateRange
 }) => {
+  const isMobile = useIsMobile();
+
   return (
-    <div className="flex items-center justify-between mb-8">
+    <div className={`flex ${isMobile ? 'flex-col gap-4' : 'items-center justify-between'} mb-6 md:mb-8`}>
       <div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
-        <p className="text-gray-500">Hi, {userName}. Welcome back to Virginia Admin!</p>
+        <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-gray-800 mb-1 md:mb-2`}>Dashboard</h1>
+        <p className={`text-gray-500 ${isMobile ? 'text-sm' : ''}`}>Hi, {userName}. Welcome back to Virginia Admin!</p>
       </div>
       
       {dateRange && setDateRange ? (

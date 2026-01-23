@@ -7,17 +7,19 @@ import NotificationPanel from './NotificationPanel';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import DateFilter from '@/components/DateFilter';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchAnalyticsData } from '@/services/analyticsService';
+import { useQueryClient } from '@tanstack/react-query';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NavbarProps {
   userName: string;
   userAvatar: string;
+  children?: React.ReactNode;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ userName, userAvatar }) => {
+const Navbar: React.FC<NavbarProps> = ({ userName, userAvatar, children }) => {
   const { state: notificationState } = useNotifications();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [isRinging, setIsRinging] = useState(false);
   const [prevUnreadCount, setPrevUnreadCount] = useState(0);
   const [dateRange, setDateRange] = useState({
@@ -50,15 +52,21 @@ const Navbar: React.FC<NavbarProps> = ({ userName, userAvatar }) => {
   }, [notificationState.unreadCount, prevUnreadCount]);
 
   return (
-    <div className="border-b bg-white py-4 px-6 flex items-center justify-between">
-      <div className="flex-1">
-        <DateFilter 
-          dateRange={dateRange} 
-          onChange={handleDateRangeChange} 
-        />
+    <div className={`border-b bg-white py-4 ${isMobile ? 'px-3' : 'px-6'} flex items-center justify-between`}>
+      <div className="flex items-center flex-1">
+        {children}
+        {!isMobile && (
+          <DateFilter 
+            dateRange={dateRange} 
+            onChange={handleDateRangeChange} 
+          />
+        )}
+        {isMobile && (
+          <span className="text-lg font-bold text-gray-800">VIRGINIA<span className="text-emerald-500">.</span></span>
+        )}
       </div>
       
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         <Popover>
           <PopoverTrigger asChild>
             <button className="p-2 rounded-full hover:bg-gray-100 transition-colors relative">
