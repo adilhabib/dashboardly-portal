@@ -19,7 +19,7 @@ const DashboardStatsCards: FC<DashboardStatsCardsProps> = ({ analyticsData }) =>
   const revenueChange = 12.5; // placeholder for now
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
       <StatsCard 
         title="Total Orders" 
         value={analyticsData?.totalOrders.toString() || '0'} 

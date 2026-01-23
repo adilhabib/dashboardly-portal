@@ -24,8 +24,8 @@ const DashboardCustomerSection: FC<DashboardCustomerSectionProps> = ({
   }, [customerMapData]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <div className="chart-container h-[300px]">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+      <div className="chart-container h-[250px] md:h-[300px]">
         <BarChart 
           title="Customer Map" 
           data={transformedCustomerMapData}
@@ -40,8 +40,8 @@ const DashboardCustomerSection: FC<DashboardCustomerSectionProps> = ({
       <div className="chart-container">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">Customer Review</h3>
-            <p className="text-sm text-gray-500">Eum fuga consequuntur utadipi et.</p>
+            <h3 className="text-base md:text-lg font-semibold text-gray-800">Customer Review</h3>
+            <p className="text-xs md:text-sm text-gray-500">Eum fuga consequuntur utadipi et.</p>
           </div>
           <div className="flex gap-2">
             <button 

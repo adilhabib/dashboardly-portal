@@ -16,12 +16,12 @@ const DashboardCharts: FC<DashboardChartsProps> = ({
 }) => {
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
         <DonutChartsCollection data={donutChartsData} />
         <AreaChartComponent title="Daily Orders" data={orderData} />
       </div>
       
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         <DoubleLineChart title="Revenue Trends" data={revenueData} />
       </div>
     </>

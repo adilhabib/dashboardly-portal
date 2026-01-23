@@ -29,16 +29,18 @@ const StatsCard: FC<Partial<StatsCardProps>> = ({
   
   return (
     <Card>
-      <CardContent className="pt-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <p className="text-sm text-gray-500">{title}</p>
-            <p className="text-2xl font-bold mt-1">{value}</p>
-            {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
-            {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+      <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+        <div className="flex justify-between items-start mb-2 md:mb-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs md:text-sm text-gray-500 truncate">{title}</p>
+            <p className="text-lg md:text-2xl font-bold mt-1 truncate">{value}</p>
+            {description && <p className="text-xs md:text-sm text-gray-500 mt-1 truncate">{description}</p>}
+            {subtitle && <p className="text-xs md:text-sm text-gray-500 mt-1 truncate">{subtitle}</p>}
           </div>
-          <div className={`p-2 rounded-full ${iconBgColor || defaultBgColor}`}>
-            {icon || defaultIcon}
+          <div className={`p-1.5 md:p-2 rounded-full ${iconBgColor || defaultBgColor} shrink-0 ml-2`}>
+            <div className="[&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-6 md:[&>svg]:h-6">
+              {icon || defaultIcon}
+            </div>
           </div>
         </div>
         
@@ -51,7 +53,7 @@ const StatsCard: FC<Partial<StatsCardProps>> = ({
             )}
           </div>
           <span className={`text-xs font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {Math.abs(trendValue || 0)}% {trendText || (isPositive ? 'increase' : 'decrease')}
+            {Math.abs(trendValue || 0)}% <span className="hidden sm:inline">{trendText || (isPositive ? 'increase' : 'decrease')}</span>
           </span>
         </div>
       </CardContent>
