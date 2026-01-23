@@ -21,20 +21,20 @@ const AnalyticsTrendCharts: FC<AnalyticsTrendChartsProps> = ({ dailyRevenue }) =
   }));
 
   return (
-    <Tabs defaultValue="revenue" className="mb-6">
-      <TabsList className="mb-4">
-        <TabsTrigger value="revenue">Revenue</TabsTrigger>
-        <TabsTrigger value="orders">Orders</TabsTrigger>
+    <Tabs defaultValue="revenue" className="mb-4 md:mb-6">
+      <TabsList className="mb-3 md:mb-4 w-full md:w-auto">
+        <TabsTrigger value="revenue" className="flex-1 md:flex-none">Revenue</TabsTrigger>
+        <TabsTrigger value="orders" className="flex-1 md:flex-none">Orders</TabsTrigger>
       </TabsList>
 
       <TabsContent value="revenue">
         <Card className="shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle>Revenue Trend</CardTitle>
-            <CardDescription>Daily revenue for the selected period</CardDescription>
+          <CardHeader className="pb-2 px-3 md:px-6">
+            <CardTitle className="text-lg md:text-xl">Revenue Trend</CardTitle>
+            <CardDescription className="text-xs md:text-sm">Daily revenue for the selected period</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="h-80">
+          <CardContent className="px-2 md:px-6">
+            <div className="h-60 md:h-80">
               <AnalyticsChart
                 data={formattedData}
                 xKey="date"
@@ -48,12 +48,12 @@ const AnalyticsTrendCharts: FC<AnalyticsTrendChartsProps> = ({ dailyRevenue }) =
 
       <TabsContent value="orders">
         <Card className="shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle>Order Trend</CardTitle>
-            <CardDescription>Daily orders for the selected period</CardDescription>
+          <CardHeader className="pb-2 px-3 md:px-6">
+            <CardTitle className="text-lg md:text-xl">Order Trend</CardTitle>
+            <CardDescription className="text-xs md:text-sm">Daily orders for the selected period</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="h-80">
+          <CardContent className="px-2 md:px-6">
+            <div className="h-60 md:h-80">
               <AnalyticsChart
                 data={formattedData}
                 xKey="date"

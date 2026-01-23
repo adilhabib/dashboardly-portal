@@ -8,29 +8,47 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCustomerOrders, fetchCustomerDefaultAddress } from '@/services/customerService';
+import { useIsMobile } from '@/hooks/use-mobile';
+import CustomerCard from './CustomerCard';
 
 interface CustomerListProps {
   customers: any[];
 }
 
 const CustomerList: React.FC<CustomerListProps> = ({ customers }) => {
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Contact</TableHead>
-          <TableHead>Address</TableHead>
-          <TableHead>Orders</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
+  const isMobile = useIsMobile();
+
+  // Mobile view - card layout
+  if (isMobile) {
+    return (
+      <div className="space-y-3">
         {customers.map((customer) => (
-          <CustomerRow key={customer.id} customer={customer} />
+          <CustomerCard key={customer.id} customer={customer} />
         ))}
-      </TableBody>
-    </Table>
+      </div>
+    );
+  }
+
+  // Desktop view - table layout
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Contact</TableHead>
+            <TableHead>Address</TableHead>
+            <TableHead>Orders</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {customers.map((customer) => (
+            <CustomerRow key={customer.id} customer={customer} />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 
@@ -83,3 +101,4 @@ const CustomerRow = ({ customer }: { customer: any }) => {
 };
 
 export default CustomerList;
+

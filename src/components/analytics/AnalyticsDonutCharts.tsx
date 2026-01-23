@@ -38,38 +38,38 @@ const AnalyticsDonutCharts: FC<AnalyticsDonutChartsProps> = ({ categoryData, sta
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
       <Card className="shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle>Revenue by Category</CardTitle>
-          <CardDescription>Distribution of revenue across food categories</CardDescription>
+        <CardHeader className="pb-2 px-3 md:px-6">
+          <CardTitle className="text-lg md:text-xl">Revenue by Category</CardTitle>
+          <CardDescription className="text-xs md:text-sm">Distribution of revenue across food categories</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 md:px-6">
           {categoryData.length === 0 ? (
-            <div className="flex justify-center items-center h-64">
-              <p className="text-gray-500">No category data available</p>
+            <div className="flex justify-center items-center h-48 md:h-64">
+              <p className="text-gray-500 text-sm">No category data available</p>
             </div>
           ) : (
             <>
-              <div className="h-64">
+              <div className="h-48 md:h-64">
                 <DonutCharts 
                   data={categoryData} 
                   colors={categoryColors} 
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mt-4">
                 {categoryData.map((item, index) => (
                   <div key={index} className="flex flex-col">
                     <div className="flex items-center mb-1">
                       <div 
-                        className="w-3 h-3 rounded-full mr-2" 
+                        className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full mr-2 shrink-0" 
                         style={{ 
                           backgroundColor: categoryColors[index % categoryColors.length] 
                         }}
                       />
-                      <span className="text-sm font-medium truncate">{item.name}</span>
+                      <span className="text-xs md:text-sm font-medium truncate">{item.name}</span>
                     </div>
-                    <span className="text-lg font-bold">{formatCurrency(item.value)}</span>
+                    <span className="text-sm md:text-lg font-bold">{formatCurrency(item.value)}</span>
                   </div>
                 ))}
               </div>
@@ -79,36 +79,36 @@ const AnalyticsDonutCharts: FC<AnalyticsDonutChartsProps> = ({ categoryData, sta
       </Card>
       
       <Card className="shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle>Orders by Status</CardTitle>
-          <CardDescription>Distribution of orders by their current status</CardDescription>
+        <CardHeader className="pb-2 px-3 md:px-6">
+          <CardTitle className="text-lg md:text-xl">Orders by Status</CardTitle>
+          <CardDescription className="text-xs md:text-sm">Distribution of orders by their current status</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 md:px-6">
           {statusData.length === 0 ? (
-            <div className="flex justify-center items-center h-64">
-              <p className="text-gray-500">No status data available</p>
+            <div className="flex justify-center items-center h-48 md:h-64">
+              <p className="text-gray-500 text-sm">No status data available</p>
             </div>
           ) : (
             <>
-              <div className="h-64">
+              <div className="h-48 md:h-64">
                 <DonutCharts 
                   data={statusData} 
                   colors={statusColorsArray} 
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div className="grid grid-cols-2 gap-3 md:gap-4 mt-4">
                 {statusData.map((item, index) => (
                   <div key={index} className="flex flex-col">
                     <div className="flex items-center mb-1">
                       <div 
-                        className="w-3 h-3 rounded-full mr-2" 
+                        className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full mr-2 shrink-0" 
                         style={{ 
                           backgroundColor: getStatusColor(item.name, index)
                         }}
                       />
-                      <span className="text-sm font-medium">{item.name}</span>
+                      <span className="text-xs md:text-sm font-medium">{item.name}</span>
                     </div>
-                    <span className="text-lg font-bold">{item.value}</span>
+                    <span className="text-sm md:text-lg font-bold">{item.value}</span>
                   </div>
                 ))}
               </div>

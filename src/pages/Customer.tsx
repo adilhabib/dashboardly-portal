@@ -39,10 +39,10 @@ const Customer = () => {
   return (
     <>
       <Card className="shadow-sm">
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 px-3 md:px-6">
           <CustomerHeader onAddCustomer={handleOpenAddModal} />
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 md:px-6">
           <CustomerSearch 
             searchTerm={searchTerm} 
             setSearchTerm={setSearchTerm} 

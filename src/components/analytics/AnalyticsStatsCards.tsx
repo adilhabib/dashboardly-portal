@@ -25,7 +25,7 @@ const AnalyticsStatsCards: FC<AnalyticsStatsCardsProps> = ({
   const foodsTrend = totalFoods > 0 ? 2.1 : 0;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
       <StatsCard
         title="Total Revenue"
         value={formatCurrency(totalRevenue)}
@@ -45,7 +45,7 @@ const AnalyticsStatsCards: FC<AnalyticsStatsCardsProps> = ({
       />
       
       <StatsCard
-        title="Average Order Value"
+        title="Avg Order Value"
         value={formatCurrency(avgOrderValue)}
         icon={<BarChart3 className="h-6 w-6 text-white" />}
         change={avgValueTrend}
