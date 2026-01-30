@@ -50,26 +50,38 @@ export type Database = {
       banners: {
         Row: {
           created_at: string | null
+          cta_text: string | null
+          description: string | null
           id: number
-          image_url: string
+          image_url: string | null
           is_active: boolean
           target_url: string | null
+          title: string | null
+          type: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          cta_text?: string | null
+          description?: string | null
           id?: never
-          image_url: string
+          image_url?: string | null
           is_active?: boolean
           target_url?: string | null
+          title?: string | null
+          type?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          cta_text?: string | null
+          description?: string | null
           id?: never
-          image_url?: string
+          image_url?: string | null
           is_active?: boolean
           target_url?: string | null
+          title?: string | null
+          type?: string | null
           updated_at?: string | null
         }
         Relationships: []
