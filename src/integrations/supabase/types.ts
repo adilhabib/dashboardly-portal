@@ -127,6 +127,7 @@ export type Database = {
           loyalty_points: number | null
           name: string
           phone_number: string | null
+          pri_key: number
           updated_at: string | null
         }
         Insert: {
@@ -139,6 +140,7 @@ export type Database = {
           loyalty_points?: number | null
           name: string
           phone_number?: string | null
+          pri_key?: number
           updated_at?: string | null
         }
         Update: {
@@ -151,6 +153,7 @@ export type Database = {
           loyalty_points?: number | null
           name?: string
           phone_number?: string | null
+          pri_key?: number
           updated_at?: string | null
         }
         Relationships: []
@@ -453,6 +456,109 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      marketing_notification_reads: {
+        Row: {
+          notification_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          notification_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          notification_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_notification_reads_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          message: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          message: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          message?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          additional_data: Json | null
+          created_at: string
+          id: string
+          image_url: string | null
+          is_read: boolean | null
+          message: string
+          order_id: string | null
+          order_status: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          additional_data?: Json | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_read?: boolean | null
+          message: string
+          order_id?: string | null
+          order_status?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          additional_data?: Json | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_read?: boolean | null
+          message?: string
+          order_id?: string | null
+          order_status?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_items: {
         Row: {
