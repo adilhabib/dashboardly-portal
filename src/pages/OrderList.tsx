@@ -44,41 +44,8 @@ const OrderList = () => {
   }, [orders, isError, error]);
 
   useEffect(() => {
-    // Initial data load
     refetch();
-
-    // Connection status check
-    const checkSupabaseConnection = async () => {
-      try {
-        console.log('Checking Supabase connection...');
-        const { error } = await supabase
-          .from('orders')
-          .select('*', { count: 'exact', head: true });
-        
-        if (error) {
-          console.error('Supabase connection check error:', error);
-        } else {
-          console.log('Supabase connection successful');
-        }
-      } catch (err) {
-        console.error('Failed to check Supabase connection:', err);
-      }
-    };
-
-    checkSupabaseConnection();
-    
-    // Set up periodic connection checks
-    const connectionCheckInterval = setInterval(() => {
-      if (!isConnected) {
-        console.log('Periodic connection check: Realtime is disconnected');
-        checkSupabaseConnection();
-      }
-    }, 30000); // Check every 30 seconds if disconnected
-
-    return () => {
-      clearInterval(connectionCheckInterval);
-    };
-  }, [refetch, isConnected]);
+  }, [refetch]);
 
   const handleRefreshOrders = async () => {
     setIsRefreshing(true);
