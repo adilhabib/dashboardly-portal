@@ -457,6 +457,106 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_items: {
+        Row: {
+          cost_per_unit: number | null
+          created_at: string
+          food_id: string | null
+          id: string
+          last_restocked: string | null
+          name: string
+          quantity: number
+          reorder_level: number
+          sku: string | null
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          cost_per_unit?: number | null
+          created_at?: string
+          food_id?: string | null
+          id?: string
+          last_restocked?: string | null
+          name: string
+          quantity?: number
+          reorder_level?: number
+          sku?: string | null
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          cost_per_unit?: number | null
+          created_at?: string
+          food_id?: string | null
+          id?: string
+          last_restocked?: string | null
+          name?: string
+          quantity?: number
+          reorder_level?: number
+          sku?: string | null
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_purchases: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_item_id: string
+          notes: string | null
+          purchase_date: string
+          purchase_month: string
+          quantity: number
+          supplier: string | null
+          total_cost: number
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_item_id: string
+          notes?: string | null
+          purchase_date: string
+          purchase_month: string
+          quantity: number
+          supplier?: string | null
+          total_cost: number
+          unit_cost: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_item_id?: string
+          notes?: string | null
+          purchase_date?: string
+          purchase_month?: string
+          quantity?: number
+          supplier?: string | null
+          total_cost?: number
+          unit_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_purchases_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_notification_reads: {
         Row: {
           notification_id: string

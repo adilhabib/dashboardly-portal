@@ -26,6 +26,7 @@ import Profile from "./pages/Profile";
 import CustomerCredit from "./pages/CustomerCredit";
 import Banners from "./pages/Banners";
 import MarketingNotifications from "./pages/MarketingNotifications";
+import Inventory from "./pages/Inventory";
 
 const App = () => (
   <TooltipProvider>
@@ -195,6 +196,16 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <MarketingNotifications />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/inventory" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Inventory />
                   </Layout>
                 </ProtectedRoute>
               } 
