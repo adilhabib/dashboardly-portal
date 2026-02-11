@@ -16,7 +16,8 @@ import {
   UserCircle,
   CreditCard,
   ImageIcon,
-  X
+  X,
+  Megaphone
 } from 'lucide-react';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ const Sidebar: FC<SidebarProps> = ({ onClose, isMobile }) => {
     { path: '/foods', icon: <Pizza size={18} />, label: 'Foods' },
     { path: '/categories', icon: <Tag size={18} />, label: 'Categories' },
     { path: '/banners', icon: <ImageIcon size={18} />, label: 'Banners' },
+    { path: '/marketing-notifications', icon: <Megaphone size={18} />, label: 'Promotions' },
     { path: '/food-detail', icon: <FileText size={18} />, label: 'Food Detail' },
     { path: '/customer-detail', icon: <User size={18} />, label: 'Customer Detail' },
     { path: '/notifications', icon: <Bell size={18} />, label: 'Notifications', badge: notificationState.unreadCount },
