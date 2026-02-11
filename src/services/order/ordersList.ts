@@ -1,27 +1,13 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from './orderTypes';
-import { fetchCustomerData } from './customerQueries';
 import { validateOrderStatus } from './orderUtils';
 
 /**
- * Fetches all orders with customer data
+ * Fetches all orders with customer data (batch-loaded)
  */
 export const fetchOrders = async () => {
-  console.log('Fetching orders...');
-  
   try {
-    const { count, error: countError } = await supabase
-      .from('orders')
-      .select('*', { count: 'exact', head: true });
-    
-    if (countError) {
-      console.error('Error checking orders count:', countError);
-      throw countError;
-    }
-    
-    console.log('Orders count:', count);
-    
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
       .select('*')
@@ -36,26 +22,27 @@ export const fetchOrders = async () => {
       return [];
     }
     
-    const ordersWithCustomers = await Promise.all(
-      orders.map(async (order) => {
-        const validOrderStatus = validateOrderStatus(order.status);
-        
-        const formattedOrder = {
-          ...order,
-          status: validOrderStatus,
-          delivery_address: typeof order.delivery_address === 'string' 
-            ? order.delivery_address 
-            : order.delivery_address as unknown as Record<string, any> | null
-        };
-        
-        const customer = formattedOrder.customer_id ? 
-          await fetchCustomerData(formattedOrder.customer_id) : null;
-        
-        return { ...formattedOrder, customer };
-      })
-    );
+    // Batch-fetch all unique customers in one query
+    const uniqueCustomerIds = [...new Set(orders.map(o => o.customer_id).filter(Boolean))];
     
-    return ordersWithCustomers;
+    let customerMap: Record<string, any> = {};
+    if (uniqueCustomerIds.length > 0) {
+      const { data: customers } = await supabase
+        .from('customer')
+        .select('*')
+        .in('id', uniqueCustomerIds);
+      
+      if (customers) {
+        customerMap = Object.fromEntries(customers.map(c => [c.id, c]));
+      }
+    }
+    
+    return orders.map(order => ({
+      ...order,
+      status: validateOrderStatus(order.status),
+      delivery_address: order.delivery_address,
+      customer: customerMap[order.customer_id] || null,
+    }));
   } catch (error) {
     console.error('Unexpected error in fetchOrders:', error);
     return [];
