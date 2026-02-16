@@ -191,6 +191,30 @@ export type Database = {
         }
         Relationships: []
       }
+      devices: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       early_access_signups: {
         Row: {
           company: string
@@ -507,56 +531,6 @@ export type Database = {
           },
         ]
       }
-      inventory_purchases: {
-        Row: {
-          created_at: string
-          id: string
-          inventory_item_id: string
-          notes: string | null
-          purchase_date: string
-          purchase_month: string
-          quantity: number
-          supplier: string | null
-          total_cost: number
-          unit_cost: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          inventory_item_id: string
-          notes?: string | null
-          purchase_date: string
-          purchase_month: string
-          quantity: number
-          supplier?: string | null
-          total_cost: number
-          unit_cost: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          inventory_item_id?: string
-          notes?: string | null
-          purchase_date?: string
-          purchase_month?: string
-          quantity?: number
-          supplier?: string | null
-          total_cost?: number
-          unit_cost?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inventory_purchases_inventory_item_id_fkey"
-            columns: ["inventory_item_id"]
-            isOneToOne: false
-            referencedRelation: "inventory_items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       marketing_notification_reads: {
         Row: {
           notification_id: string
@@ -835,6 +809,42 @@ export type Database = {
           id?: string
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      push_queue: {
+        Row: {
+          body: string
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json | null
+          processed_at: string | null
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          status?: string
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }

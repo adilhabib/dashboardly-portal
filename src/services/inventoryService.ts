@@ -119,7 +119,7 @@ const getMonthBounds = (month: string) => {
 export const fetchInventoryPurchases = async (
   month?: string
 ): Promise<InventoryPurchase[]> => {
-  let query = supabase
+  let query = (supabase as any)
     .from("inventory_purchases")
     .select(
       `
@@ -166,7 +166,7 @@ export const createInventoryPurchase = async (
     notes: purchase.notes || null,
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("inventory_purchases")
     .insert(payload)
     .select(
