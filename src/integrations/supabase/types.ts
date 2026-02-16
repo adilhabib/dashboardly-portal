@@ -531,6 +531,56 @@ export type Database = {
           },
         ]
       }
+      inventory_purchases: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_item_id: string
+          notes: string | null
+          purchase_date: string
+          purchase_month: string
+          quantity: number
+          supplier: string | null
+          total_cost: number
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_item_id: string
+          notes?: string | null
+          purchase_date?: string
+          purchase_month: string
+          quantity: number
+          supplier?: string | null
+          total_cost: number
+          unit_cost: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_item_id?: string
+          notes?: string | null
+          purchase_date?: string
+          purchase_month?: string
+          quantity?: number
+          supplier?: string | null
+          total_cost?: number
+          unit_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_purchases_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_notification_reads: {
         Row: {
           notification_id: string
