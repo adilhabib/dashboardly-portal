@@ -68,9 +68,22 @@ Deno.serve(async (req) => {
       }),
     });
 
-    const fcmResult = await fcmResponse.json();
+    const responseText = await fcmResponse.text();
+    console.log("FCM status:", fcmResponse.status, "response:", responseText);
 
-    console.log("FCM response:", JSON.stringify(fcmResult));
+    if (!fcmResponse.ok) {
+      return new Response(
+        JSON.stringify({ error: `FCM error (${fcmResponse.status}): ${responseText}` }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    let fcmResult;
+    try {
+      fcmResult = JSON.parse(responseText);
+    } catch {
+      fcmResult = { raw: responseText };
+    }
 
     return new Response(
       JSON.stringify({
