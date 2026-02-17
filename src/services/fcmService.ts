@@ -1,0 +1,68 @@
+import { getToken, onMessage, Messaging } from "firebase/messaging";
+import { messaging, VAPID_KEY } from "@/lib/firebase";
+import { supabase } from "@/integrations/supabase/client";
+
+export const requestNotificationPermission = async (userId?: string) => {
+    if (!messaging) return null;
+
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+            console.log("Notification permission granted.");
+            const token = await getToken(messaging as Messaging, {
+                vapidKey: VAPID_KEY,
+            });
+
+            if (token && userId) {
+                await saveTokenToSupabase(userId, token);
+            }
+            return token;
+        } else {
+            console.warn("Notification permission denied.");
+            return null;
+        }
+    } catch (error) {
+        console.error("An error occurred while requesting permission:", error);
+        return null;
+    }
+};
+
+const saveTokenToSupabase = async (userId: string, token: string) => {
+    try {
+        const { error } = await (supabase as any)
+            .from("user_fcm_tokens")
+            .upsert(
+                {
+                    user_id: userId,
+                    token: token,
+                    device_type: 'web',
+                    last_seen: new Date().toISOString()
+                },
+                { onConflict: 'token' }
+            );
+
+        if (error) throw error;
+        console.log("FCM Token saved to Supabase successfully.");
+    } catch (error) {
+        console.error("Error saving FCM token to Supabase:", error);
+    }
+};
+
+export const onMessageListener = (addNotification: (notif: any) => void) => {
+    if (!messaging) return;
+
+    return onMessage(messaging as Messaging, (payload) => {
+        console.log("Foreground message received:", payload);
+
+        // Add to local notification state
+        addNotification({
+            title: payload.notification?.title || "New Message",
+            description: payload.notification?.body || "",
+            type: 'system', // Default type
+            link: payload.data?.link
+        });
+
+        // You can also show a browser notification here if you want
+        // But usually better to use the app's UI (toast/panel) for foreground
+    });
+};
