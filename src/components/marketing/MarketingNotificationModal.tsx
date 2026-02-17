@@ -71,9 +71,27 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
         return 'created';
       }
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ['marketing-notifications'] });
       toast({ title: `Notification ${result}`, description: `Successfully ${result}.` });
+      
+      // Send push notification immediately on create
+      if (result === 'created') {
+        try {
+          const { data, error } = await supabase.functions.invoke('send-push-notification', {
+            body: { title, message, image_url: imageUrl || undefined },
+          });
+          if (error) {
+            console.error('Push notification error:', error);
+            toast({ title: "Push notification failed", description: "Notification created but push delivery failed.", variant: "destructive" });
+          } else {
+            toast({ title: "Push sent", description: `Delivered to ${data?.sent || 0} devices.` });
+          }
+        } catch (e) {
+          console.error('Push notification error:', e);
+        }
+      }
+      
       onClose();
     },
     onError: () => {
