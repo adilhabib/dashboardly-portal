@@ -1,6 +1,7 @@
 import { getToken, onMessage, Messaging } from "firebase/messaging";
 import { messaging, VAPID_KEY } from "@/lib/firebase";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export const requestNotificationPermission = async (userId?: string) => {
     if (!messaging) return null;
@@ -54,15 +55,22 @@ export const onMessageListener = (addNotification: (notif: any) => void) => {
     return onMessage(messaging as Messaging, (payload) => {
         console.log("Foreground message received:", payload);
 
-        // Add to local notification state
-        addNotification({
-            title: payload.notification?.title || "New Message",
-            description: payload.notification?.body || "",
-            type: 'system', // Default type
-            link: payload.data?.link
+        const title = payload.notification?.title || "New Message";
+        const body = payload.notification?.body || "";
+
+        // Show toast notification
+        toast({
+            title: title,
+            description: body,
+            duration: 5000,
         });
 
-        // You can also show a browser notification here if you want
-        // But usually better to use the app's UI (toast/panel) for foreground
+        // Add to local notification state
+        addNotification({
+            title: title,
+            description: body,
+            type: 'system',
+            link: payload.data?.link
+        });
     });
 };

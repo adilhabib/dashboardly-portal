@@ -76,7 +76,8 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
       toast({ title: `Notification ${result}`, description: `Successfully ${result}.` });
       onClose();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Supabase Save Error:", error);
       toast({ title: "Error", description: "Failed to save notification.", variant: "destructive" });
     }
   });
