@@ -219,6 +219,7 @@ export type Database = {
         Row: {
           company: string
           created_at: string
+          customer_id: string | null
           dashboard_tool: string | null
           email: string
           id: string
@@ -230,6 +231,7 @@ export type Database = {
         Insert: {
           company: string
           created_at?: string
+          customer_id?: string | null
           dashboard_tool?: string | null
           email: string
           id?: string
@@ -241,6 +243,7 @@ export type Database = {
         Update: {
           company?: string
           created_at?: string
+          customer_id?: string | null
           dashboard_tool?: string | null
           email?: string
           id?: string
@@ -614,6 +617,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           message: string
+          target_topic: string | null
           title: string
         }
         Insert: {
@@ -622,6 +626,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           message: string
+          target_topic?: string | null
           title: string
         }
         Update: {
@@ -630,6 +635,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           message?: string
+          target_topic?: string | null
           title?: string
         }
         Relationships: []
@@ -864,10 +870,13 @@ export type Database = {
       }
       push_queue: {
         Row: {
+          attempts: number | null
           body: string
           created_at: string
           error: string | null
           id: string
+          last_error: string | null
+          notification_id: string | null
           payload: Json | null
           processed_at: string | null
           status: string
@@ -875,10 +884,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          attempts?: number | null
           body: string
           created_at?: string
           error?: string | null
           id?: string
+          last_error?: string | null
+          notification_id?: string | null
           payload?: Json | null
           processed_at?: string | null
           status?: string
@@ -886,15 +898,45 @@ export type Database = {
           user_id: string
         }
         Update: {
+          attempts?: number | null
           body?: string
           created_at?: string
           error?: string | null
           id?: string
+          last_error?: string | null
+          notification_id?: string | null
           payload?: Json | null
           processed_at?: string | null
           status?: string
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_fcm_tokens: {
+        Row: {
+          created_at: string | null
+          device_type: string | null
+          id: string
+          last_seen: string | null
+          token: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          last_seen?: string | null
+          token: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          last_seen?: string | null
+          token?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -959,9 +1001,16 @@ export type Database = {
       make_user_admin:
         | { Args: never; Returns: undefined }
         | { Args: { email: string }; Returns: undefined }
+      me: { Args: never; Returns: string }
+      my_new_function: { Args: never; Returns: undefined }
+      process_push_queue: { Args: never; Returns: undefined }
       record_financial_transaction: {
         Args: { p_amount: number; p_description: string; p_type: string }
         Returns: string
+      }
+      update_user_fcm_token: {
+        Args: { p_device_type: string; p_token: string; p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
