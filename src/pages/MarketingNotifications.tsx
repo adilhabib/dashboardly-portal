@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Megaphone, Plus, Trash2, Edit, ToggleLeft, ToggleRight, Send, Loader2 } from 'lucide-react';
+import { Megaphone, Plus, Trash2, Edit, ToggleLeft, ToggleRight, Send, Loader2, CalendarClock } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -18,6 +17,10 @@ type MarketingNotification = {
   message: string;
   image_url: string | null;
   is_active: boolean | null;
+  scheduled_for: string | null;
+  sent_at: string | null;
+  send_status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
+  last_error: string | null;
   created_at: string;
 };
 
@@ -40,10 +43,26 @@ const sendPushNotification = async (notification: MarketingNotification) => {
   };
 };
 
+const processScheduledNotifications = async () => {
+  const { data, error } = await supabase.functions.invoke('process-scheduled-marketing-notifications', {
+    body: {},
+  });
+  if (error) throw error;
+
+  return data as {
+    processed: number;
+    sent: number;
+    failed: number;
+    errors?: string[];
+    message?: string;
+  };
+};
+
 const MarketingNotifications = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selected, setSelected] = useState<MarketingNotification | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [isProcessingScheduled, setIsProcessingScheduled] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: notifications, isLoading, error } = useQuery({
@@ -115,6 +134,7 @@ const MarketingNotifications = () => {
         title: "Push notification sent!",
         description: `Delivered to ${result.sent} device${result.sent !== 1 ? 's' : ''}${result.failed > 0 ? `, ${result.failed} failed` : ''}.${warningDetails ? ` ${warningDetails}` : ''}`,
       });
+      queryClient.invalidateQueries({ queryKey: ['marketing-notifications'] });
     } catch (err) {
       console.error("Push send error:", err);
       const message =
@@ -131,9 +151,40 @@ const MarketingNotifications = () => {
     }
   };
 
+  const handleProcessScheduled = async () => {
+    setIsProcessingScheduled(true);
+    try {
+      const result = await processScheduledNotifications();
+      toast({
+        title: "Scheduled notifications processed",
+        description: result.message
+          ? result.message
+          : `Processed ${result.processed}, sent ${result.sent}${result.failed > 0 ? `, failed ${result.failed}` : ''}.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['marketing-notifications'] });
+    } catch (err) {
+      console.error("Process scheduled error:", err);
+      toast({
+        title: "Failed to process scheduled notifications",
+        description: "Could not process due scheduled notifications.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingScheduled(false);
+    }
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
     setSelected(null);
+  };
+
+  const getStatusBadge = (n: MarketingNotification) => {
+    if (n.send_status === 'sent') return <Badge variant="secondary" className="shrink-0">Sent</Badge>;
+    if (n.send_status === 'scheduled') return <Badge variant="outline" className="shrink-0">Scheduled</Badge>;
+    if (n.send_status === 'sending') return <Badge className="shrink-0">Sending</Badge>;
+    if (n.send_status === 'failed') return <Badge variant="destructive" className="shrink-0">Failed</Badge>;
+    return <Badge variant="outline" className="shrink-0">Draft</Badge>;
   };
 
   if (error) {
@@ -155,6 +206,17 @@ const MarketingNotifications = () => {
         <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2">
           <Plus size={16} />
           New Notification
+        </Button>
+      </div>
+
+      <div className="mb-4">
+        <Button variant="outline" onClick={handleProcessScheduled} disabled={isProcessingScheduled}>
+          {isProcessingScheduled ? (
+            <Loader2 size={14} className="mr-2 animate-spin" />
+          ) : (
+            <CalendarClock size={14} className="mr-2" />
+          )}
+          Process Scheduled
         </Button>
       </div>
 
@@ -188,14 +250,30 @@ const MarketingNotifications = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <Megaphone size={16} className="text-muted-foreground shrink-0" />
                   <h3 className="font-semibold text-base truncate">{n.title}</h3>
-                  <Badge variant={n.is_active ? "default" : "outline"} className="ml-auto text-xs shrink-0">
+                  <Badge variant={n.is_active ? "default" : "outline"} className="text-xs shrink-0">
                     {n.is_active ? 'Active' : 'Inactive'}
                   </Badge>
+                  <div className="ml-auto">{getStatusBadge(n)}</div>
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-3 mb-2">{n.message}</p>
                 <p className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                 </p>
+                {n.scheduled_for && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Scheduled for {new Date(n.scheduled_for).toLocaleString()}
+                  </p>
+                )}
+                {n.sent_at && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Sent at {new Date(n.sent_at).toLocaleString()}
+                  </p>
+                )}
+                {n.last_error && n.send_status === 'failed' && (
+                  <p className="text-xs text-destructive mt-1 line-clamp-2">
+                    Last error: {n.last_error}
+                  </p>
+                )}
               </CardContent>
               <CardFooter className="flex flex-wrap justify-between gap-2 pt-0 pb-3 px-4">
                 <div className="flex gap-1 flex-wrap">
@@ -216,7 +294,7 @@ const MarketingNotifications = () => {
                     variant="default"
                     size="sm"
                     onClick={() => handleSendPush(n)}
-                    disabled={sendingId === n.id}
+                    disabled={sendingId === n.id || n.send_status === 'sending'}
                     title="Send push notification to all registered devices"
                   >
                     {sendingId === n.id ? (
@@ -224,7 +302,7 @@ const MarketingNotifications = () => {
                     ) : (
                       <Send size={14} className="mr-1" />
                     )}
-                    {sendingId === n.id ? 'Sending…' : 'Send Push'}
+                    {sendingId === n.id ? 'Sending...' : 'Send Push'}
                   </Button>
                   <Button
                     variant="ghost"
@@ -259,6 +337,10 @@ const MarketingNotifications = () => {
           message: selected.message,
           image_url: selected.image_url,
           is_active: selected.is_active,
+          scheduled_for: selected.scheduled_for,
+          sent_at: selected.sent_at,
+          send_status: selected.send_status,
+          last_error: selected.last_error,
         } : null}
         onPushSent={sendPushNotification}
       />

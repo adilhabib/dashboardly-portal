@@ -298,6 +298,8 @@ function sanitizeImageUrl(rawImageUrl: unknown): { imageUrl: string | null; warn
 }
 
 Deno.serve(async (req) => {
+  let requestNotificationId: string | null = null;
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -318,6 +320,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const { title, message, image_url, notification_id } = body;
+    requestNotificationId = typeof notification_id === "string" ? notification_id : null;
 
     if (!title || !message) {
       return new Response(
@@ -328,8 +331,18 @@ Deno.serve(async (req) => {
 
     const { imageUrl: safeImageUrl, warning: imageWarning } = sanitizeImageUrl(image_url);
 
-    // Use service role to fetch all FCM tokens
+    // Use service role for reads/writes in push pipeline
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    if (requestNotificationId) {
+      await supabase
+        .from("marketing_notifications")
+        .update({
+          send_status: "sending",
+          last_error: null,
+        })
+        .eq("id", requestNotificationId);
+    }
     const { data: tokens, error: tokensError } = await supabase
       .from("user_fcm_tokens")
       .select("token, user_id");
@@ -362,7 +375,7 @@ Deno.serve(async (req) => {
       const batch = tokens.slice(i, i + batchSize);
       const results = await Promise.all(
         batch.map((t) =>
-          sendFcmToToken(accessToken, projectId, t.token, title, message, safeImageUrl, notification_id)
+          sendFcmToToken(accessToken, projectId, t.token, title, message, safeImageUrl, requestNotificationId ?? undefined)
         )
       );
       results.forEach((r) => {
@@ -381,6 +394,19 @@ Deno.serve(async (req) => {
 
     console.log(`Push notification sent: ${sent} success, ${failed} failed`);
 
+    const aggregatedError = errors.length > 0 ? errors.slice(0, 10).join(" | ") : null;
+    if (requestNotificationId) {
+      const status = failed > 0 && sent === 0 ? "failed" : "sent";
+      await supabase
+        .from("marketing_notifications")
+        .update({
+          send_status: status,
+          sent_at: sent > 0 ? new Date().toISOString() : null,
+          last_error: aggregatedError,
+        })
+        .eq("id", requestNotificationId);
+    }
+
     return new Response(
       JSON.stringify({
         sent,
@@ -393,6 +419,24 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     console.error("Error in send-push-notification:", err);
+
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (requestNotificationId && supabaseUrl && supabaseServiceKey) {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        await supabase
+          .from("marketing_notifications")
+          .update({
+            send_status: "failed",
+            last_error: String(err),
+          })
+          .eq("id", requestNotificationId);
+      }
+    } catch {
+      // swallow status update failure on error path
+    }
+
     return new Response(
       JSON.stringify({ error: String(err) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

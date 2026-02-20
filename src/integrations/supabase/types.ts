@@ -616,7 +616,11 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          last_error: string | null
           message: string
+          scheduled_for: string | null
+          send_status: string
+          sent_at: string | null
           target_topic: string | null
           title: string
         }
@@ -625,7 +629,11 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          last_error?: string | null
           message: string
+          scheduled_for?: string | null
+          send_status?: string
+          sent_at?: string | null
           target_topic?: string | null
           title: string
         }
@@ -634,7 +642,11 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          last_error?: string | null
           message?: string
+          scheduled_for?: string | null
+          send_status?: string
+          sent_at?: string | null
           target_topic?: string | null
           title?: string
         }

@@ -17,6 +17,10 @@ type MarketingNotification = {
   message: string;
   image_url: string | null;
   is_active: boolean | null;
+  scheduled_for: string | null;
+  sent_at: string | null;
+  send_status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
+  last_error: string | null;
   created_at: string;
 };
 
@@ -29,6 +33,10 @@ interface MarketingNotificationModalProps {
     message: string;
     image_url: string | null;
     is_active: boolean | null;
+    scheduled_for: string | null;
+    sent_at?: string | null;
+    send_status?: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
+    last_error?: string | null;
   } | null;
   onPushSent?: (notification: MarketingNotification) => Promise<{
     sent: number;
@@ -43,9 +51,17 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [scheduledFor, setScheduledFor] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [sendPushOnCreate, setSendPushOnCreate] = useState(true);
   const queryClient = useQueryClient();
+
+  const toLocalDateTimeInputValue = (iso: string) => {
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
 
   useEffect(() => {
     if (notification) {
@@ -53,17 +69,31 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
       setMessage(notification.message);
       setImageUrl(notification.image_url || '');
       setIsActive(notification.is_active ?? true);
+      setIsScheduled(Boolean(notification.scheduled_for));
+      setScheduledFor(notification.scheduled_for ? toLocalDateTimeInputValue(notification.scheduled_for) : '');
+      setSendPushOnCreate(false);
     } else {
       setTitle('');
       setMessage('');
       setImageUrl('');
+      setIsScheduled(false);
+      setScheduledFor('');
       setIsActive(true);
       setSendPushOnCreate(true);
     }
   }, [notification, isOpen]);
 
   const saveMutation = useMutation({
-    mutationFn: async (data: { title: string; message: string; image_url?: string; is_active: boolean }) => {
+    mutationFn: async (data: {
+      title: string;
+      message: string;
+      image_url?: string;
+      is_active: boolean;
+      scheduled_for?: string | null;
+      send_status: 'draft' | 'scheduled';
+      sent_at: null;
+      last_error: null;
+    }) => {
       if (notification) {
         const { error } = await supabase
           .from('marketing_notifications')
@@ -72,6 +102,10 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
             message: data.message,
             image_url: data.image_url || null,
             is_active: data.is_active,
+            scheduled_for: data.scheduled_for ?? null,
+            send_status: data.send_status,
+            sent_at: data.sent_at,
+            last_error: data.last_error,
           })
           .eq('id', notification.id);
         if (error) throw error;
@@ -84,6 +118,10 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
             message: data.message,
             image_url: data.image_url || null,
             is_active: data.is_active,
+            scheduled_for: data.scheduled_for ?? null,
+            send_status: data.send_status,
+            sent_at: data.sent_at,
+            last_error: data.last_error,
           })
           .select()
           .single();
@@ -96,7 +134,7 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
       toast({ title: `Notification ${action}`, description: `Successfully ${action}.` });
 
       // Auto-send push notification after creation if enabled
-      if (action === 'created' && record && sendPushOnCreate && onPushSent) {
+      if (action === 'created' && record && sendPushOnCreate && !isScheduled && onPushSent) {
         try {
           const result = await onPushSent(record);
           toast({
@@ -126,7 +164,28 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
       toast({ title: "Validation error", description: "Title and message are required.", variant: "destructive" });
       return;
     }
-    saveMutation.mutate({ title, message, image_url: imageUrl || undefined, is_active: isActive });
+
+    if (isScheduled && !scheduledFor) {
+      toast({ title: "Validation error", description: "Please select a schedule date and time.", variant: "destructive" });
+      return;
+    }
+
+    const scheduleIso = isScheduled && scheduledFor ? new Date(scheduledFor).toISOString() : null;
+    if (isScheduled && scheduleIso && new Date(scheduleIso).getTime() <= Date.now()) {
+      toast({ title: "Validation error", description: "Scheduled time must be in the future.", variant: "destructive" });
+      return;
+    }
+
+    saveMutation.mutate({
+      title,
+      message,
+      image_url: imageUrl || undefined,
+      is_active: isActive,
+      scheduled_for: scheduleIso,
+      send_status: isScheduled ? 'scheduled' : 'draft',
+      sent_at: null,
+      last_error: null,
+    });
   };
 
   const isCreating = !notification;
@@ -162,6 +221,26 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
             <Input id="notif_image" placeholder="https://example.com/promo.jpg" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
           </div>
 
+          <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2">
+            <div>
+              <Label htmlFor="schedule_toggle" className="text-sm font-medium">Schedule notification</Label>
+              <p className="text-xs text-muted-foreground">Send later at a specific date and time</p>
+            </div>
+            <Switch id="schedule_toggle" checked={isScheduled} onCheckedChange={setIsScheduled} />
+          </div>
+
+          {isScheduled && (
+            <div className="space-y-2">
+              <Label htmlFor="scheduled_for">Scheduled date & time</Label>
+              <Input
+                id="scheduled_for"
+                type="datetime-local"
+                value={scheduledFor}
+                onChange={(e) => setScheduledFor(e.target.value)}
+              />
+            </div>
+          )}
+
           {imageUrl && (
             <div className="relative aspect-[16/9] overflow-hidden rounded-md border bg-muted">
               <img src={imageUrl} alt="Preview" className="object-cover w-full h-full" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/640x360?text=Invalid+URL'; }} />
@@ -173,7 +252,7 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
             <Switch id="notif_active" checked={isActive} onCheckedChange={setIsActive} />
           </div>
 
-          {isCreating && (
+          {isCreating && !isScheduled && (
             <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2">
               <div>
                 <Label htmlFor="send_push" className="text-sm font-medium">Send push immediately</Label>
@@ -187,7 +266,7 @@ const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpe
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
             <Button type="submit" disabled={saveMutation.isPending || !title.trim() || !message.trim()}>
               {saveMutation.isPending
-                ? (isCreating && sendPushOnCreate ? 'Creating & Sending…' : 'Saving…')
+                ? (isCreating && sendPushOnCreate && !isScheduled ? 'Creating & Sending...' : 'Saving...')
                 : (notification ? 'Update' : 'Create')}
             </Button>
           </DialogFooter>
