@@ -11,6 +11,12 @@ type ServiceAccount = {
   private_key: string;
 };
 
+type FcmSendResult = {
+  success: boolean;
+  usedImage: boolean;
+  error?: string;
+};
+
 function isServiceAccount(value: unknown): value is ServiceAccount {
   if (!value || typeof value !== "object") {
     return false;
@@ -47,8 +53,27 @@ function parseServiceAccountJson(raw: string): ServiceAccount | null {
   return null;
 }
 
+function getFirstNonEmptyEnv(names: string[]): string {
+  for (const name of names) {
+    const value = Deno.env.get(name)?.trim();
+    if (value) {
+      return value;
+    }
+  }
+  return "";
+}
+
+function looksLikePemPrivateKey(value: string): boolean {
+  return value.includes("BEGIN PRIVATE KEY") || value.startsWith("MII");
+}
+
 function getServiceAccountFromEnv(): ServiceAccount {
-  const serviceAccountJson = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON")?.trim();
+  const serviceAccountJson = getFirstNonEmptyEnv([
+    "FCM_SERVICE_ACCOUNT_JSON",
+    "FIREBASE_SERVICE_ACCOUNT_JSON",
+    "GOOGLE_SERVICE_ACCOUNT_JSON",
+  ]);
+
   if (serviceAccountJson) {
     const parsed = parseServiceAccountJson(serviceAccountJson);
     if (parsed) {
@@ -56,16 +81,39 @@ function getServiceAccountFromEnv(): ServiceAccount {
     }
   }
 
-  const project_id = Deno.env.get("FCM_PROJECT_ID")?.trim() ?? "";
-  const client_email = Deno.env.get("FCM_CLIENT_EMAIL")?.trim() ?? "";
-  const private_key = (Deno.env.get("FCM_PRIVATE_KEY") ?? "").replace(/\\n/g, "\n").trim();
+  const project_id = getFirstNonEmptyEnv([
+    "FCM_PROJECT_ID",
+    "FIREBASE_PROJECT_ID",
+    "GOOGLE_CLOUD_PROJECT",
+    "GCLOUD_PROJECT",
+    "VITE_FIREBASE_PROJECT_ID",
+  ]);
+  const client_email = getFirstNonEmptyEnv([
+    "FCM_CLIENT_EMAIL",
+    "FIREBASE_CLIENT_EMAIL",
+    "GOOGLE_CLIENT_EMAIL",
+  ]);
+  const privateKeyFromVars = getFirstNonEmptyEnv([
+    "FCM_PRIVATE_KEY",
+    "FIREBASE_PRIVATE_KEY",
+    "GOOGLE_PRIVATE_KEY",
+  ]);
+  const privateKeyCandidate = privateKeyFromVars || serviceAccountJson;
+  const private_key = privateKeyCandidate.replace(/\\n/g, "\n").trim();
 
-  if (project_id && client_email && private_key) {
+  if (project_id && client_email && private_key && looksLikePemPrivateKey(private_key)) {
     return { project_id, client_email, private_key };
   }
 
+  const detected = {
+    has_service_account_json: Boolean(serviceAccountJson),
+    has_project_id: Boolean(project_id),
+    has_client_email: Boolean(client_email),
+    has_private_key: Boolean(private_key),
+  };
+
   throw new Error(
-    "Missing Firebase service account credentials. Set FCM_SERVICE_ACCOUNT_JSON (raw JSON or base64 JSON) or set FCM_PROJECT_ID, FCM_CLIENT_EMAIL, and FCM_PRIVATE_KEY."
+    `Missing Firebase service account credentials. Set FCM_SERVICE_ACCOUNT_JSON (raw JSON or base64 JSON) or set FCM_PROJECT_ID, FCM_CLIENT_EMAIL, and FCM_PRIVATE_KEY. Detected: ${JSON.stringify(detected)}`
   );
 }
 
@@ -142,58 +190,111 @@ async function sendFcmToToken(
   body: string,
   imageUrl?: string | null,
   notificationId?: string
-): Promise<{ success: boolean; error?: string }> {
-  const message: Record<string, unknown> = {
-    token: fcmToken,
-    notification: {
-      title,
-      body,
-      ...(imageUrl ? { image: imageUrl } : {}),
-    },
-    data: {
-      type: "promotion",
-      ...(notificationId ? { notification_id: notificationId } : {}),
-    },
-    android: {
+): Promise<FcmSendResult> {
+  const sendMessage = async (messageImageUrl?: string | null) => {
+    const message: Record<string, unknown> = {
+      token: fcmToken,
       notification: {
-        ...(imageUrl ? { image_url: imageUrl } : {}),
-        click_action: "FLUTTER_NOTIFICATION_CLICK",
+        title,
+        body,
+        ...(messageImageUrl ? { image: messageImageUrl } : {}),
       },
-    },
-    apns: {
-      payload: {
-        aps: { "mutable-content": 1 },
+      data: {
+        type: "promotion",
+        ...(notificationId ? { notification_id: notificationId } : {}),
       },
-      ...(imageUrl
-        ? {
-            fcm_options: { image: imageUrl },
-          }
-        : {}),
-    },
-    webpush: {
-      notification: {
-        ...(imageUrl ? { image: imageUrl } : {}),
+      android: {
+        notification: {
+          ...(messageImageUrl ? { image_url: messageImageUrl } : {}),
+          click_action: "FLUTTER_NOTIFICATION_CLICK",
+        },
       },
-    },
+      apns: {
+        payload: {
+          aps: { "mutable-content": 1 },
+        },
+        ...(messageImageUrl
+          ? {
+              fcm_options: { image: messageImageUrl },
+            }
+          : {}),
+      },
+      webpush: {
+        notification: {
+          ...(messageImageUrl ? { image: messageImageUrl } : {}),
+        },
+      },
+    };
+
+    const res = await fetch(
+      `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
+      }
+    );
+
+    if (res.ok) {
+      return { ok: true as const };
+    }
+
+    const errorData = await res.json();
+    return { ok: false as const, errorData };
   };
 
-  const res = await fetch(
-    `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message }),
-    }
+  const firstAttempt = await sendMessage(imageUrl ?? null);
+  if (firstAttempt.ok) {
+    return { success: true, usedImage: Boolean(imageUrl) };
+  }
+
+  const firstError = JSON.stringify(firstAttempt.errorData).toLowerCase();
+  const shouldRetryWithoutImage = Boolean(
+    imageUrl && (firstError.includes("image") || firstError.includes("invalid argument"))
   );
 
-  if (!res.ok) {
-    const errorData = await res.json();
-    return { success: false, error: JSON.stringify(errorData) };
+  if (shouldRetryWithoutImage) {
+    const retryWithoutImage = await sendMessage(null);
+    if (retryWithoutImage.ok) {
+      return { success: true, usedImage: false };
+    }
   }
-  return { success: true };
+
+  return {
+    success: false,
+    usedImage: Boolean(imageUrl),
+    error: JSON.stringify(firstAttempt.errorData),
+  };
+}
+
+function sanitizeImageUrl(rawImageUrl: unknown): { imageUrl: string | null; warning?: string } {
+  if (typeof rawImageUrl !== "string") {
+    return { imageUrl: null };
+  }
+
+  const trimmed = rawImageUrl.trim();
+  if (!trimmed) {
+    return { imageUrl: null };
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const protocol = parsed.protocol.toLowerCase();
+    if (protocol !== "https:" && protocol !== "http:") {
+      return { imageUrl: null, warning: "Image URL must use http or https. Image was ignored." };
+    }
+
+    if (parsed.hostname === "localhost" || parsed.hostname.endsWith(".local")) {
+      return { imageUrl: null, warning: "Localhost/local image URLs are not reachable by FCM. Image was ignored." };
+    }
+
+    return { imageUrl: parsed.toString() };
+  } catch {
+    return { imageUrl: null, warning: "Image URL is invalid. Image was ignored." };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -225,6 +326,8 @@ Deno.serve(async (req) => {
       );
     }
 
+    const { imageUrl: safeImageUrl, warning: imageWarning } = sanitizeImageUrl(image_url);
+
     // Use service role to fetch all FCM tokens
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { data: tokens, error: tokensError } = await supabase
@@ -250,6 +353,7 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     let failed = 0;
+    let sentWithoutImage = 0;
     const errors: string[] = [];
 
     // Send to all tokens in parallel (batch of 20 at a time)
@@ -258,11 +362,16 @@ Deno.serve(async (req) => {
       const batch = tokens.slice(i, i + batchSize);
       const results = await Promise.all(
         batch.map((t) =>
-          sendFcmToToken(accessToken, projectId, t.token, title, message, image_url, notification_id)
+          sendFcmToToken(accessToken, projectId, t.token, title, message, safeImageUrl, notification_id)
         )
       );
       results.forEach((r) => {
-        if (r.success) sent++;
+        if (r.success) {
+          sent++;
+          if (safeImageUrl && !r.usedImage) {
+            sentWithoutImage++;
+          }
+        }
         else {
           failed++;
           if (r.error) errors.push(r.error);
@@ -273,7 +382,13 @@ Deno.serve(async (req) => {
     console.log(`Push notification sent: ${sent} success, ${failed} failed`);
 
     return new Response(
-      JSON.stringify({ sent, failed, errors: errors.length > 0 ? errors : undefined }),
+      JSON.stringify({
+        sent,
+        failed,
+        image_warning: imageWarning,
+        image_dropped_for: sentWithoutImage > 0 ? sentWithoutImage : undefined,
+        errors: errors.length > 0 ? errors : undefined,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

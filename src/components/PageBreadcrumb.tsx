@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,10 +27,11 @@ const PageBreadcrumb: React.FC<PageBreadcrumbProps> = ({ pageName, items }) => {
     <div className="mb-6">
       <Breadcrumb>
         <BreadcrumbList>
-          {breadcrumbItems.map((item, index) => (
-            <React.Fragment key={index}>
-              <BreadcrumbItem>
-                {index === breadcrumbItems.length - 1 ? (
+          {breadcrumbItems.flatMap((item, index) => {
+            const isLastItem = index === breadcrumbItems.length - 1;
+            const elements = [
+              <BreadcrumbItem key={`item-${index}`}>
+                {isLastItem ? (
                   <BreadcrumbPage>{item.label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
@@ -41,11 +42,14 @@ const PageBreadcrumb: React.FC<PageBreadcrumbProps> = ({ pageName, items }) => {
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
-              {index < breadcrumbItems.length - 1 && (
-                <BreadcrumbSeparator />
-              )}
-            </React.Fragment>
-          ))}
+            ];
+
+            if (!isLastItem) {
+              elements.push(<BreadcrumbSeparator key={`sep-${index}`} />);
+            }
+
+            return elements;
+          })}
         </BreadcrumbList>
       </Breadcrumb>
     </div>

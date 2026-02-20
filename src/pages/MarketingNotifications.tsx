@@ -31,7 +31,13 @@ const sendPushNotification = async (notification: MarketingNotification) => {
     },
   });
   if (error) throw error;
-  return data as { sent: number; failed: number };
+  return data as {
+    sent: number;
+    failed: number;
+    image_warning?: string;
+    image_dropped_for?: number;
+    errors?: string[];
+  };
 };
 
 const MarketingNotifications = () => {
@@ -98,15 +104,26 @@ const MarketingNotifications = () => {
     setSendingId(n.id);
     try {
       const result = await sendPushNotification(n);
+      const warningDetails = [
+        result.image_warning,
+        result.image_dropped_for
+          ? `Image was removed for ${result.image_dropped_for} device${result.image_dropped_for !== 1 ? 's' : ''} due to provider validation.`
+          : null,
+      ].filter(Boolean).join(' ');
+
       toast({
         title: "Push notification sent!",
-        description: `Delivered to ${result.sent} device${result.sent !== 1 ? 's' : ''}${result.failed > 0 ? `, ${result.failed} failed` : ''}.`,
+        description: `Delivered to ${result.sent} device${result.sent !== 1 ? 's' : ''}${result.failed > 0 ? `, ${result.failed} failed` : ''}.${warningDetails ? ` ${warningDetails}` : ''}`,
       });
     } catch (err) {
       console.error("Push send error:", err);
+      const message =
+        err && typeof err === 'object' && 'message' in err && typeof (err as { message?: string }).message === 'string'
+          ? (err as { message: string }).message
+          : "Could not send the push notification. Check edge function logs.";
       toast({
         title: "Failed to send push",
-        description: "Could not send the push notification. Check edge function logs.",
+        description: message,
         variant: "destructive",
       });
     } finally {

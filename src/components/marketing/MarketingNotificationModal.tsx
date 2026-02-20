@@ -30,7 +30,13 @@ interface MarketingNotificationModalProps {
     image_url: string | null;
     is_active: boolean | null;
   } | null;
-  onPushSent?: (notification: MarketingNotification) => Promise<{ sent: number; failed: number }>;
+  onPushSent?: (notification: MarketingNotification) => Promise<{
+    sent: number;
+    failed: number;
+    image_warning?: string;
+    image_dropped_for?: number;
+    errors?: string[];
+  }>;
 }
 
 const MarketingNotificationModal: FC<MarketingNotificationModalProps> = ({ isOpen, onClose, notification, onPushSent }) => {
