@@ -5,9 +5,72 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+type ServiceAccount = {
+  project_id: string;
+  client_email: string;
+  private_key: string;
+};
+
+function isServiceAccount(value: unknown): value is ServiceAccount {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.project_id === "string" &&
+    typeof record.client_email === "string" &&
+    typeof record.private_key === "string"
+  );
+}
+
+function parseServiceAccountJson(raw: string): ServiceAccount | null {
+  try {
+    const parsed = JSON.parse(raw);
+    if (isServiceAccount(parsed)) {
+      return parsed;
+    }
+  } catch {
+    // Try base64-decoded JSON next.
+  }
+
+  try {
+    const decoded = atob(raw);
+    const parsed = JSON.parse(decoded);
+    if (isServiceAccount(parsed)) {
+      return parsed;
+    }
+  } catch {
+    // Ignore and fallback to split env vars.
+  }
+
+  return null;
+}
+
+function getServiceAccountFromEnv(): ServiceAccount {
+  const serviceAccountJson = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON")?.trim();
+  if (serviceAccountJson) {
+    const parsed = parseServiceAccountJson(serviceAccountJson);
+    if (parsed) {
+      return { ...parsed, private_key: parsed.private_key.replace(/\\n/g, "\n") };
+    }
+  }
+
+  const project_id = Deno.env.get("FCM_PROJECT_ID")?.trim() ?? "";
+  const client_email = Deno.env.get("FCM_CLIENT_EMAIL")?.trim() ?? "";
+  const private_key = (Deno.env.get("FCM_PRIVATE_KEY") ?? "").replace(/\\n/g, "\n").trim();
+
+  if (project_id && client_email && private_key) {
+    return { project_id, client_email, private_key };
+  }
+
+  throw new Error(
+    "Missing Firebase service account credentials. Set FCM_SERVICE_ACCOUNT_JSON (raw JSON or base64 JSON) or set FCM_PROJECT_ID, FCM_CLIENT_EMAIL, and FCM_PRIVATE_KEY."
+  );
+}
+
 // Get a Google OAuth2 access token from a service account JSON using RS256 JWT
-async function getAccessToken(serviceAccountJson: string): Promise<string> {
-  const sa = JSON.parse(serviceAccountJson);
+async function getAccessToken(sa: ServiceAccount): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
 
   const header = { alg: "RS256", typ: "JWT" };
@@ -139,19 +202,18 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const serviceAccountJson = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const serviceAccount = getServiceAccountFromEnv();
 
-    if (!serviceAccountJson || !supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
         JSON.stringify({ error: "Missing required environment variables" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const sa = JSON.parse(serviceAccountJson);
-    const projectId = sa.project_id;
+    const projectId = serviceAccount.project_id;
 
     const body = await req.json();
     const { title, message, image_url, notification_id } = body;
@@ -184,7 +246,7 @@ Deno.serve(async (req) => {
     }
 
     // Get access token once and reuse for all sends
-    const accessToken = await getAccessToken(serviceAccountJson);
+    const accessToken = await getAccessToken(serviceAccount);
 
     let sent = 0;
     let failed = 0;
