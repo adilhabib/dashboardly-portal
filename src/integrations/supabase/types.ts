@@ -1020,6 +1020,14 @@ export type Database = {
         Args: { p_amount: number; p_description: string; p_type: string }
         Returns: string
       }
+      update_order_payment_status: {
+        Args: { p_order_id: string; p_payment_status: string }
+        Returns: Database["public"]["Tables"]["orders"]["Row"]
+      }
+      update_order_status: {
+        Args: { p_order_id: string; p_status: string }
+        Returns: Database["public"]["Tables"]["orders"]["Row"]
+      }
       update_user_fcm_token: {
         Args: { p_device_type: string; p_token: string; p_user_id: string }
         Returns: undefined

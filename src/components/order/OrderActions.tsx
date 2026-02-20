@@ -68,9 +68,13 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
     } catch (error) {
       console.error('Error updating order status:', error);
+      const errorMessage =
+        error && typeof error === 'object' && 'message' in error && typeof (error as { message?: string }).message === 'string'
+          ? (error as { message: string }).message
+          : 'Failed to update order status.';
       toast({
         title: "Error Updating Order",
-        description: "Failed to update order status. Check console for details.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

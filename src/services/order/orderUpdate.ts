@@ -10,11 +10,10 @@ export const updateOrderStatus = async (orderId: string, status: OrderStatus) =>
     console.log(`Updating order ${orderId} status to ${status}`);
     
     const { data, error } = await supabase
-      .from('orders')
-      .update({ status })
-      .eq('id', orderId)
-      .select()
-      .single();
+      .rpc('update_order_status', {
+        p_order_id: orderId,
+        p_status: status,
+      });
     
     if (error) {
       console.error('Error updating order status:', error);
@@ -36,11 +35,10 @@ export const updatePaymentStatus = async (orderId: string, paymentStatus: string
     console.log(`Updating order ${orderId} payment status to ${paymentStatus}`);
     
     const { data, error } = await supabase
-      .from('orders')
-      .update({ payment_status: paymentStatus })
-      .eq('id', orderId)
-      .select()
-      .single();
+      .rpc('update_order_payment_status', {
+        p_order_id: orderId,
+        p_payment_status: paymentStatus,
+      });
     
     if (error) {
       console.error('Error updating payment status:', error);
