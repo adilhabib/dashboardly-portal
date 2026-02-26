@@ -2,6 +2,7 @@ import { getToken, onMessage, Messaging } from "firebase/messaging";
 import { messaging, VAPID_KEY } from "@/lib/firebase";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import AIService from "@/services/aiService";
 
 export const requestNotificationPermission = async (userId?: string) => {
     if (!messaging) return null;
@@ -52,23 +53,24 @@ const saveTokenToSupabase = async (userId: string, token: string) => {
 export const onMessageListener = (addNotification: (notif: any) => void) => {
     if (!messaging) return;
 
-    return onMessage(messaging as Messaging, (payload) => {
+    return onMessage(messaging as Messaging, async (payload) => {
         console.log("Foreground message received:", payload);
 
         const title = payload.notification?.title || "New Message";
         const body = payload.notification?.body || "";
+        const rewritten = await AIService.rewriteNotification(title, body);
 
         // Show toast notification
         toast({
-            title: title,
-            description: body,
+            title: rewritten.title,
+            description: rewritten.body,
             duration: 5000,
         });
 
         // Add to local notification state
         addNotification({
-            title: title,
-            description: body,
+            title: rewritten.title,
+            description: rewritten.body,
             type: 'system',
             link: payload.data?.link
         });

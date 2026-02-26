@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { useLocation } from 'react-router-dom';
 import PageBreadcrumb from './PageBreadcrumb';
 import CategoryFilter from './CategoryFilter';
+import HandpickedFoods from './HandpickedFoods';
+import PopularFoods from './PopularFoods';
 
 const FoodList: React.FC = () => {
   const location = useLocation();
@@ -73,11 +75,6 @@ const FoodList: React.FC = () => {
     selectedCategory ? food.category === selectedCategory : true
   );
 
-  // Add console log to debug filtering
-  console.log('Selected category:', selectedCategory);
-  console.log('Available foods:', foods);
-  console.log('Filtered foods:', filteredFoods);
-
   if (isLoading) {
     return <div className="text-center py-10">Loading food items...</div>;
   }
@@ -102,6 +99,10 @@ const FoodList: React.FC = () => {
         selectedCategory={selectedCategory} 
         onSelectCategory={handleCategoryChange} 
       />
+
+      <HandpickedFoods />
+
+      <PopularFoods />
 
       {filteredFoods && filteredFoods.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
