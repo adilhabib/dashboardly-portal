@@ -752,6 +752,89 @@ export type Database = {
           },
         ]
       }
+      order_logs: {
+        Row: {
+          action: string | null
+          changed_at: string
+          changed_by: string | null
+          changed_field: string | null
+          created_at: string
+          customer_id: string | null
+          details: Json | null
+          event_type: string | null
+          id: string
+          message: string | null
+          metadata: Json | null
+          new_payment_status: string | null
+          new_status: string | null
+          new_value: string | null
+          old_payment_status: string | null
+          old_status: string | null
+          old_value: string | null
+          order_id: string | null
+          payment_status: string | null
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          changed_field?: string | null
+          created_at?: string
+          customer_id?: string | null
+          details?: Json | null
+          event_type?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          new_payment_status?: string | null
+          new_status?: string | null
+          new_value?: string | null
+          old_payment_status?: string | null
+          old_status?: string | null
+          old_value?: string | null
+          order_id?: string | null
+          payment_status?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          changed_field?: string | null
+          created_at?: string
+          customer_id?: string | null
+          details?: Json | null
+          event_type?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          new_payment_status?: string | null
+          new_status?: string | null
+          new_value?: string | null
+          old_payment_status?: string | null
+          old_status?: string | null
+          old_value?: string | null
+          order_id?: string | null
+          payment_status?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_logs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_status_updates: {
         Row: {
           created_at: string
@@ -852,6 +935,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          gateway: string
+          gateway_payment_id: string | null
+          id: string
+          order_id: string
+          raw_response: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          gateway: string
+          gateway_payment_id?: string | null
+          id?: string
+          order_id: string
+          raw_response?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          gateway?: string
+          gateway_payment_id?: string | null
+          id?: string
+          order_id?: string
+          raw_response?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -1022,11 +1152,65 @@ export type Database = {
       }
       update_order_payment_status: {
         Args: { p_order_id: string; p_payment_status: string }
-        Returns: Database["public"]["Tables"]["orders"]["Row"]
+        Returns: {
+          created_at: string
+          customer_id: string
+          delivery_address: Json | null
+          delivery_fee: number | null
+          discount: number | null
+          driver_details: Json | null
+          driver_id: string | null
+          estimated_delivery_time: string | null
+          id: string
+          order_type: string
+          payment_method: string
+          payment_status: string
+          promo_code: string | null
+          promo_details: Json | null
+          special_instructions: string | null
+          status: string
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_order_status: {
         Args: { p_order_id: string; p_status: string }
-        Returns: Database["public"]["Tables"]["orders"]["Row"]
+        Returns: {
+          created_at: string
+          customer_id: string
+          delivery_address: Json | null
+          delivery_fee: number | null
+          discount: number | null
+          driver_details: Json | null
+          driver_id: string | null
+          estimated_delivery_time: string | null
+          id: string
+          order_type: string
+          payment_method: string
+          payment_status: string
+          promo_code: string | null
+          promo_details: Json | null
+          special_instructions: string | null
+          status: string
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_user_fcm_token: {
         Args: { p_device_type: string; p_token: string; p_user_id: string }
