@@ -10,6 +10,7 @@ import { Check, X, Utensils, Package, Truck } from 'lucide-react';
 interface OrderActionsProps {
   orderId: string;
   currentStatus: OrderStatus;
+  paymentMethod?: string;
 }
 
 const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) => {
