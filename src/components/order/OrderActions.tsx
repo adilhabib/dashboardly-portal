@@ -13,7 +13,7 @@ interface OrderActionsProps {
   paymentMethod?: string;
 }
 
-const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) => {
+const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus, paymentMethod }) => {
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = React.useState(false);
 
