@@ -61,7 +61,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, getStatusColor, formatDate
                 View
               </Button>
             </Link>
-            <OrderActions orderId={order.id} currentStatus={order.status} />
+            <OrderActions orderId={order.id} currentStatus={order.status} paymentMethod={order.payment_method} />
           </div>
         </div>
       </CardContent>
