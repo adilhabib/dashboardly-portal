@@ -96,7 +96,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, getStatusColor, formatD
                         <Eye size={16} />
                       </Button>
                     </Link>
-                    <OrderActions orderId={order.id} currentStatus={order.status} />
+                    <OrderActions orderId={order.id} currentStatus={order.status} paymentMethod={order.payment_method} />
                   </div>
                 </TableCell>
               </TableRow>

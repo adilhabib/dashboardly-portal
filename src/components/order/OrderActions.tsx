@@ -10,9 +10,10 @@ import { Check, X, Utensils, Package, Truck } from 'lucide-react';
 interface OrderActionsProps {
   orderId: string;
   currentStatus: OrderStatus;
+  paymentMethod?: string;
 }
 
-const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) => {
+const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus, paymentMethod }) => {
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = React.useState(false);
 
@@ -31,13 +32,19 @@ const OrderActions: React.FC<OrderActionsProps> = ({ orderId, currentStatus }) =
       await updateOrderStatus(orderId, newStatus);
 
       // If status is set to completed, also set payment_status to 'paid'
-      if (newStatus === 'completed') {
+      // Also auto-pay when confirming a safepay order
+      if (newStatus === 'completed' || (newStatus === 'confirmed' && paymentMethod?.toLowerCase() === 'safepay')) {
         try {
           await updatePaymentStatus(orderId, 'paid');
+          if (newStatus === 'confirmed') {
+            console.log('Safepay order auto-accepted payment on confirmation');
+          }
         } catch (err) {
           toast({
             title: "Payment Update Failed",
-            description: "Order completed, but failed to update payment status. Please check manually.",
+            description: newStatus === 'confirmed' 
+              ? "Order confirmed, but failed to auto-accept Safepay payment. Please check manually."
+              : "Order completed, but failed to update payment status. Please check manually.",
             variant: "destructive"
           });
           console.error('Error setting payment status to paid:', err);
